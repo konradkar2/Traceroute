@@ -12,9 +12,9 @@ namespace Traceroute
         TcpDataSender(int family, const SocketAddress & sourceAddr,int delayMs); //e.g IPPROTO_ICMP           
         ~TcpDataSender(){};
     protected:
-        int GetSendingSocket() override;
-        int GetReceivingSocket() override;       
-        int GetCurrentProtocol() override;
+        int getSendingSocket() override;
+        int getReceivingSocket() override;       
+        int getCurrentProtocol() override;
     private:      
         void nextSocket();
         int _sfd_tcp;

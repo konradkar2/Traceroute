@@ -26,9 +26,9 @@ namespace Traceroute
         //sets delay on socket (nonblocking)
         //sets protocol to transport layer of received packet(or icmp)
         NBlockDataSenderBase(int family, const SocketAddress & sourceAddr, int delayMs);
-        virtual int GetSendingSocket()=0;
-        virtual int GetReceivingSocket()=0;     
-        virtual int GetCurrentProtocol()=0;           
+        virtual int getSendingSocket()=0;
+        virtual int getReceivingSocket()=0;     
+        virtual int getCurrentProtocol()=0;           
         int _sock_family;        
         int _sfd_icmp;
         int _delayMs;

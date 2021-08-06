@@ -12,9 +12,9 @@ namespace Traceroute
         UdpDataSender(int family, const SocketAddress & sourceAddr, int delayMs); //e.g IPPROTO_ICMP       
         ~UdpDataSender(){};
     protected:
-        int GetSendingSocket() override;
-        int GetReceivingSocket() override;  
-        int GetCurrentProtocol() override;     
+        int getSendingSocket() override;
+        int getReceivingSocket() override;  
+        int getCurrentProtocol() override;     
     private:      
         int _sfd_udp;    
     

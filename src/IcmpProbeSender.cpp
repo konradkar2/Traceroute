@@ -18,7 +18,7 @@ namespace Traceroute
     {
         bool isResponseValid = false;
         char * ptr = GetReceiveBuf();       
-        int family  = client.GetFamily();
+        int family  = client.getFamily();
         
         if(family == AF_INET)
         {
@@ -36,7 +36,7 @@ namespace Traceroute
                 //we propably hit the target
                 if(icmp_hdr->type == ICMP_ECHOREPLY) 
                 {
-                    if(client.IsSameAs(_packet->GetDestinationAddress()) && 
+                    if(client == _packet->GetDestinationAddress() && 
                     (icmp_hdr->sequence == _packet->GetIcmpHeader().sequence))
                     {
                         isResponseValid = true;
@@ -71,9 +71,8 @@ namespace Traceroute
                     }
                 }
                 else if((header->type == ICMP6_ECHO_REPLY) &&
-                    header->sequence == _packet->GetIcmpHeader().sequence && //check sequence
-                    _packet->GetDestinationAddress().IsSameAs(client) //check ip    
-                    //check sequence
+                    header->sequence == _packet->GetIcmpHeader().sequence && 
+                    _packet->GetDestinationAddress() == client    
                 )
                 {
                     isResponseValid = true;

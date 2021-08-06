@@ -14,11 +14,11 @@ namespace Traceroute
     {
         _responseAddr = responseAddr;
     }
-    string ProbeResultContainer::GetResponseAddr()
+    const std::string & ProbeResultContainer::GetResponseAddr() const 
     {
         return _responseAddr;
     }
-    const vector<ProbeResult> & ProbeResultContainer::GetResults()
+    const vector<ProbeResult> & ProbeResultContainer::GetResults() const
     {
         return _probeResults;
     }

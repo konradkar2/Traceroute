@@ -8,18 +8,18 @@ namespace Traceroute
     {
         
     }
-    int IcmpDataSender::GetCurrentProtocol()
+    int IcmpDataSender::getCurrentProtocol()
     {
         int temp = -1;
         temp = _sock_family == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6;
         return temp;       
     }
     
-    int IcmpDataSender::GetSendingSocket()
+    int IcmpDataSender::getSendingSocket()
     {
         return _sfd_icmp;
     }
-    int IcmpDataSender::GetReceivingSocket()
+    int IcmpDataSender::getReceivingSocket()
     {
         return _sfd_icmp;
     }

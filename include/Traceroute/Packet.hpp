@@ -12,7 +12,7 @@ namespace Traceroute
         Packet(const SocketAddress & source, const SocketAddress & destination);
         const SocketAddress & GetSourceAddress() const;
         const SocketAddress & GetDestinationAddress() const;
-        const int & GetFamily() const;
+        const int & getFamily() const;
         virtual std::size_t Serialize_size() const = 0;
         virtual void Serialize(char* dataOut) const = 0;   
         virtual ~Packet(){}

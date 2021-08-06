@@ -13,14 +13,14 @@ TEST(SocketAddressTests, TextCtorFamily)
     std::string adressV4 = "1.1.1.1";
 
     Traceroute::SocketAddress socketAddress4{adressV4};
-    auto family = socketAddress4.GetFamily();
+    auto family = socketAddress4.getFamily();
 
     EXPECT_EQ(family,AF_INET);
 
     std::string adressV6 = "2001:0db8:0000:0000:0000:0000:1428:57ab";
 
     Traceroute::SocketAddress socketAddress6{adressV6};
-    family = socketAddress6.GetFamily();
+    family = socketAddress6.getFamily();
 
     EXPECT_EQ(family,AF_INET6);
 }

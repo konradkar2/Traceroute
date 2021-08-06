@@ -21,7 +21,7 @@ namespace Traceroute
     {
         bool isResponseValid = false;
         char * ptr = GetReceiveBuf();
-        int family = client.GetFamily();
+        int family = client.getFamily();
 
         //skip ipv4 header 
         if(family == AF_INET)
@@ -42,8 +42,7 @@ namespace Traceroute
                 icmp_hdr->type == ICMP_TIME_EXCEEDED ||
                 (icmp_hdr->type == ICMP_UNREACH_PORT ||
                 icmp_hdr->type == ICMP_UNREACH_PROTOCOL) &&
-                _packet->GetDestinationAddress().IsSameAs(client)
-                )
+                _packet->GetDestinationAddress() == client)
                 {                                                   
                     ptr += sizeof(IcmpHeader); 
                     ptr += sizeof(Ipv4Header);
@@ -60,7 +59,7 @@ namespace Traceroute
                 const IcmpHeader * header = reinterpret_cast<const IcmpHeader *>(ptr);
                 if(header->type == ICMP6_TIME_EXCEEDED ||
                 (header->type == ICMP6_DST_UNREACH && 
-                _packet->GetDestinationAddress().IsSameAs(client))
+                _packet->GetDestinationAddress() == client)
                 )
                 {
                     ptr += sizeof(IcmpHeader); 
@@ -74,7 +73,7 @@ namespace Traceroute
             }
             case IPPROTO_TCP:
             {
-                if(_packet->GetDestinationAddress().IsSameAs(client))
+                if(_packet->GetDestinationAddress() == client)
                 {            
                     const TcpHeader * tcp_hdr = reinterpret_cast<const TcpHeader *>(ptr);
                     unsigned int seq = ntohl(_packet->GetTcpHeader().seq);

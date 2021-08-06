@@ -35,7 +35,7 @@ namespace Traceroute
                 receivedn = _dataSender->ReceiveFrom(_receiveBuf,BUFLEN,client,receivedProto);
                 if(receivedn >0 && IsResponseValid(client,receivedProto))
                 {
-                    string responseAddr = client.ToString();                                        
+                    string responseAddr = client.toString();                                        
                     resultContainer.SetResponseAddr(responseAddr);
                     auto now = chrono::steady_clock::now();
                     int uspassed = chrono::duration_cast<chrono::microseconds>(now - start).count();

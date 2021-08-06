@@ -11,15 +11,15 @@ namespace Traceroute
         /*
         // all of these methods operate on network byte order !//
         */
-        static unsigned short ComputeICMPHeaderChecksum(IcmpHeader header);
-        static unsigned short ComputeTCPHeaderChecksum(
+        static unsigned short computeICMPHeaderChecksum(IcmpHeader header);
+        static unsigned short computeTCPHeaderChecksum(
            TcpHeader tcpheader, const SocketAddress & source, const SocketAddress & destination );
-        static unsigned short ComputeUdpHeaderChecksum(
+        static unsigned short computeUdpHeaderChecksum(
            UdpHeader UdpHeader, const SocketAddress & source, const SocketAddress & destination);      
     private:
-        static unsigned long ComputeChecksum(const unsigned short *addr, unsigned int count,
+        static unsigned long computeChecksum(const unsigned short *addr, unsigned int count,
             unsigned long prevSum = 0);     
-        static unsigned long ComputePseudoheaderChecksum(short protocol,
+        static unsigned long computePseudoheaderChecksum(short protocol,
             short headerlen, const SocketAddress & source, const SocketAddress & destination);   
     };
 }

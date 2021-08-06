@@ -16,10 +16,10 @@ namespace Traceroute
         ProbeResultContainer(int ttl);
         void Add(ProbeResult result);
         void SetResponseAddr(string responseAddr);
-        string GetResponseAddr();
+        const std::string & GetResponseAddr() const;
         
         string ToString();     
-        const vector<ProbeResult> & GetResults();
+        const vector<ProbeResult> & GetResults() const;
     private:
         vector<ProbeResult> _probeResults;  
         string _responseAddr;   

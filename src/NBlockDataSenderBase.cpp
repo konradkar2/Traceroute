@@ -5,7 +5,7 @@ namespace Traceroute
     NBlockDataSenderBase::NBlockDataSenderBase(int family, const SocketAddress & sourceAddr, int delayMs)
     {
         _sock_family = family;
-        if(_sock_family != sourceAddr.GetFamily())
+        if(_sock_family != sourceAddr.getFamily())
         {
             throw std::invalid_argument("Sock family does not match SocketAddress family");
         }
@@ -14,7 +14,7 @@ namespace Traceroute
         int proto = (_sock_family == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6;
         _sfd_icmp = socket(_sock_family,SOCK_RAW | SOCK_NONBLOCK, proto);
 
-        if((bind(_sfd_icmp,SA sourceAddr.GetAddress(),sourceAddr.GetSize())) < 0)
+        if((bind(_sfd_icmp,sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
         {
             throw std::runtime_error("Could not bind address: " + std::string(strerror(errno)));
         }
@@ -36,8 +36,8 @@ namespace Traceroute
     {
         sockaddr_storage temp;        
         socklen_t len = sizeof(temp);
-        protocol = GetCurrentProtocol();
-        int n = recvfrom (GetReceivingSocket(), buffer, size, 0, SA & temp, &len);
+        protocol = getCurrentProtocol();
+        int n = recvfrom (getReceivingSocket(), buffer, size, 0, SA & temp, &len);
         if(n < 0 && errno != EAGAIN)
         {
              throw std::runtime_error("Error occured while reading data: " + std::string(strerror(errno)));
@@ -48,7 +48,7 @@ namespace Traceroute
         }
         else
         {
-            address.SetAddress(&temp);
+            address = SocketAddress{temp};
         }
         return n;
     }
@@ -58,7 +58,7 @@ namespace Traceroute
         {
             case AF_INET:
             {
-               if(setsockopt(GetSendingSocket(), IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl))< 0 )
+               if(setsockopt(getSendingSocket(), IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl))< 0 )
                {
                    throw std::runtime_error("Could not set ttl:"  + std::string(strerror(errno)));
                }
@@ -66,7 +66,7 @@ namespace Traceroute
             }
             case AF_INET6:
             {
-                if(setsockopt(GetSendingSocket(), IPPROTO_IPV6, IPV6_UNICAST_HOPS, &ttl, sizeof(ttl)) < 0)
+                if(setsockopt(getSendingSocket(), IPPROTO_IPV6, IPV6_UNICAST_HOPS, &ttl, sizeof(ttl)) < 0)
                {
                    throw std::runtime_error("Could not set ttl:"  + std::string(strerror(errno)));
                }
@@ -77,12 +77,12 @@ namespace Traceroute
     }
     int NBlockDataSenderBase::SendTo(const char * buffer, size_t size, const SocketAddress & address)
     {
-        if(_sock_family != address.GetFamily())
+        if(_sock_family != address.getFamily())
         {
             throw std::invalid_argument("Provided address is invalid");
         }
 
-        int result = sendto (GetSendingSocket(), buffer, size, 0, SA address.GetAddress(), address.GetSize());
+        int result = sendto (getSendingSocket(), buffer, size, 0, address.getSockaddrP(), address.getSize());
         if(result < 0)
         {
             throw std::runtime_error("Error occured while sending data " + std::string(strerror(errno)));

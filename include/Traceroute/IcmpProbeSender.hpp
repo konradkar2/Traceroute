@@ -11,14 +11,11 @@ namespace Traceroute
     {
     public:    
         IcmpProbeSender(IDataSender * dataSender);   
-        ~IcmpProbeSender(){}; // TODO: Implement destructor
         ProbeResultContainer SendProbe(const IcmpPacket * packet,
             int ttl, const int retries, const int timeoutms );        
     protected:         
         bool IsResponseValid(const SocketAddress & client, const int & protocol) override;
     private:        
         const IcmpPacket * _packet;
-        IcmpProbeSender(); 
-          
     };
 }

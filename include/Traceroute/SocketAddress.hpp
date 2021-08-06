@@ -11,15 +11,15 @@ namespace Traceroute
     class SocketAddress 
     {
     public:
-        SocketAddress(){};
-        SocketAddress(const std::string & address, short dport = 32424);     
-        void SetAddress(const sockaddr_storage * addr);
-        int GetFamily() const;
-        const sockaddr_storage * GetAddress() const;       
-        size_t GetSize() const;       
-        bool IsSameAs(const SocketAddress & addr) const;
-        std::string ToString() const;
+        SocketAddress(){}
+        explicit SocketAddress(const sockaddr_storage & address);
+        explicit SocketAddress(const std::string & address, short dport = 32424);     
+        int getFamily() const;
+        const sockaddr* getSockaddrP() const;       
+        size_t getSize() const;      
+        std::string toString() const;
+        bool operator==(const SocketAddress & rhs) const;
     private:
-        struct sockaddr_storage _address;       
+        struct sockaddr_storage mAddress;       
     };
 }

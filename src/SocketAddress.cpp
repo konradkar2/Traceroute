@@ -2,6 +2,10 @@
 
 namespace Traceroute
 {
+    SocketAddress::SocketAddress(const sockaddr_storage & address)
+    {
+        mAddress = address;
+    }
     SocketAddress::SocketAddress(const std::string & address, short dport)
     {
         struct addrinfo hint, *res = NULL;
@@ -25,9 +29,9 @@ namespace Traceroute
                 throw std::runtime_error("Error occurred while converting ipv4 adress.");
             }
 
-            _address.ss_family = AF_INET; 
-            ((sockaddr_in *)&_address )->sin_addr = temp;
-            ((sockaddr_in *)&_address )->sin_port = htons(dport);
+            mAddress.ss_family = AF_INET; 
+            ((sockaddr_in *)&mAddress )->sin_addr = temp;
+            ((sockaddr_in *)&mAddress )->sin_port = htons(dport);
             
             
         } else if (res->ai_family == AF_INET6) 
@@ -37,48 +41,44 @@ namespace Traceroute
             {
                 throw std::runtime_error("Error occurred while converting ipv6 adress.");
             }
-            _address.ss_family = AF_INET6; 
-            ((sockaddr_in6 *)&_address )->sin6_addr = temp;
-            ((sockaddr_in6 *)&_address )->sin6_port = htons(dport);
+            mAddress.ss_family = AF_INET6; 
+            ((sockaddr_in6 *)&mAddress )->sin6_addr = temp;
+            ((sockaddr_in6 *)&mAddress )->sin6_port = htons(dport);
             
         } 
         freeaddrinfo(res);
     }
-    int SocketAddress::GetFamily() const
+    int SocketAddress::getFamily() const
     {
-        return (int)_address.ss_family;
+        return (int)mAddress.ss_family;
     }
-    size_t SocketAddress::GetSize() const
+    size_t SocketAddress::getSize() const
     {
-        if(GetFamily() == AF_INET)
+        if(getFamily() == AF_INET)
             return sizeof(sockaddr_in);
         else 
             return sizeof(sockaddr_in6);
         
 
     }
-    const sockaddr_storage * SocketAddress::GetAddress() const
+    const sockaddr* SocketAddress::getSockaddrP() const
     {
-        return &_address;
+        return reinterpret_cast<const sockaddr*>(&mAddress);
     }
-
-    void SocketAddress::SetAddress(const sockaddr_storage * addr)
+    
+    bool SocketAddress::operator==(const SocketAddress & rhs) const
     {
-        memcpy(&_address, addr, sizeof(sockaddr_storage));
-    }
-    bool SocketAddress::IsSameAs(const SocketAddress & addr) const
-    {
-        switch(GetFamily())
+        switch(getFamily())
         {
             case AF_INET:
-                return ((sockaddr_in *)addr.GetAddress())->sin_addr.s_addr ==
-                    ((sockaddr_in *)GetAddress())->sin_addr.s_addr;
+                return ((sockaddr_in *)getSockaddrP())->sin_addr.s_addr ==
+                    ((sockaddr_in *)getSockaddrP())->sin_addr.s_addr;
             case AF_INET6:          
             {
                 for(int i = 0; i<4 ;i++)
                 {
-                    uint32_t * tempA = &((sockaddr_in6 *)addr.GetAddress())->sin6_addr.__in6_u.__u6_addr32[i];
-                    uint32_t * tempB = &((sockaddr_in6 *)GetAddress())->sin6_addr.__in6_u.__u6_addr32[i];                 
+                    uint32_t * tempA = &((sockaddr_in6 *)getSockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];
+                    uint32_t * tempB = &((sockaddr_in6 *)getSockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];                 
                     if(*tempA != *tempB)
                     {
                         return false;
@@ -91,20 +91,20 @@ namespace Traceroute
         }
         return false;
     }
-    std::string SocketAddress::ToString() const
+    std::string SocketAddress::toString() const
     {
         const int bufflen = INET6_ADDRSTRLEN;
         char buffer[bufflen];
-        switch(GetFamily())
+        switch(getFamily())
         {
             case AF_INET:
             {
-               inet_ntop(AF_INET,&((sockaddr_in*)&_address)->sin_addr,buffer,bufflen);
+               inet_ntop(AF_INET,&((sockaddr_in*)&mAddress)->sin_addr,buffer,bufflen);
                break;
             }
             case AF_INET6:
             {               
-               inet_ntop(AF_INET6,&((sockaddr_in6*)&_address)->sin6_addr,buffer,bufflen);
+               inet_ntop(AF_INET6,&((sockaddr_in6*)&mAddress)->sin6_addr,buffer,bufflen);
                break;
             }
         }

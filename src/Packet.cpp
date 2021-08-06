@@ -5,7 +5,7 @@ namespace Traceroute{
     Packet::Packet(const SocketAddress & source,
      const SocketAddress & destination) : _saddress(source), _daddress(destination)
      {
-        if(destination.GetFamily() != source.GetFamily())
+        if(destination.getFamily() != source.getFamily())
         {
             throw runtime_error("source address family doesnt match destination");
         }
@@ -19,9 +19,9 @@ namespace Traceroute{
     {
         return _daddress;
     }
-    const int & Packet::GetFamily() const
+    const int & Packet::getFamily() const
     {
-        return _saddress.GetFamily();
+        return _saddress.getFamily();
     }
     
     void TcpPacket::Serialize(char * dataOut) const

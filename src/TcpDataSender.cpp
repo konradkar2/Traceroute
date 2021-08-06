@@ -8,7 +8,7 @@ namespace Traceroute
     {
         _sfd_tcp = socket(_sock_family, SOCK_RAW | SOCK_NONBLOCK, IPPROTO_TCP);        
         
-        if((bind(_sfd_tcp,SA sourceAddr.GetAddress(),sourceAddr.GetSize())) < 0)
+        if((bind(_sfd_tcp,SA sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
         {
             throw std::runtime_error("Could not bind address");
         }
@@ -25,7 +25,7 @@ namespace Traceroute
         _sfd_current = _sfd_icmp;
     }
     
-    int TcpDataSender::GetCurrentProtocol()
+    int TcpDataSender::getCurrentProtocol()
     {
         if(_sfd_current == _sfd_tcp)
             return IPPROTO_TCP;
@@ -36,12 +36,12 @@ namespace Traceroute
         }
         return -1;
     }
-    int TcpDataSender::GetSendingSocket()
+    int TcpDataSender::getSendingSocket()
     {
        return _sfd_tcp;
     }
 
-    int TcpDataSender::GetReceivingSocket()
+    int TcpDataSender::getReceivingSocket()
     {
         int temp = _sfd_current;
 

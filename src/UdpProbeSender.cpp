@@ -21,7 +21,7 @@ namespace Traceroute
            
         bool isResponseValid = false;
         char * ptr = GetReceiveBuf();
-        const int family = client.GetFamily();
+        const int family = client.getFamily();
 
         //skip ipv4 header
         if(family == AF_INET)
@@ -43,7 +43,7 @@ namespace Traceroute
                 (header->type == ICMP_UNREACH_PORT ||
                 header->type == ICMP_UNREACH_PROTOCOL) &&
                 _packet->GetDestinationAddress()
-                        .IsSameAs(client))//we hit target
+                        == client)//we hit target
                 {                                                   
                     //cant really check anything, lets assume its proper
                     isResponseValid = true;
@@ -56,7 +56,7 @@ namespace Traceroute
                 if(header->type == ICMP6_TIME_EXCEEDED ||
                 (header->type == ICMP6_DST_UNREACH && 
                 _packet->GetDestinationAddress()
-                        .IsSameAs(client)))
+                         == client))
                 {
                     isResponseValid = true;
                 }

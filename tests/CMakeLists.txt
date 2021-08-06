@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.8)
 set(This TracerouteTests)
 
 set(Sources
-    src/TracerouteTests.cpp
+    src/SocketAddressTests.cpp
+    src/LiveIcmpTest.cpp
 )
 
 add_executable(${This} ${Sources})

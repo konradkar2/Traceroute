@@ -5,7 +5,7 @@
 namespace Traceroute{
     IcmpPacket PacketBuilder::CreateIcmpPacket(const SocketAddress & source, const SocketAddress & destination)
     {
-        int family = source.GetFamily();
+        int family = source.getFamily();
         switch(family)
         {
             case AF_INET:
@@ -26,7 +26,7 @@ namespace Traceroute{
         icmp_hdr.id = htons(rand() % 65536);  // random id
         icmp_hdr.sequence = 0;
         icmp_hdr.code = 0;        
-        icmp_hdr.checksum = HeaderManager::ComputeICMPHeaderChecksum(icmp_hdr);
+        icmp_hdr.checksum = HeaderManager::computeICMPHeaderChecksum(icmp_hdr);
         IcmpPacket packet(source,destination, icmp_hdr);
         return packet;
     }
@@ -56,9 +56,9 @@ namespace Traceroute{
         tcp_hdr.th_off = 5;
         tcp_hdr.th_flags = 0x02;   
         tcp_hdr.check = 0;  
-        if(source.GetFamily() == AF_INET)
+        if(source.getFamily() == AF_INET)
         {
-            tcp_hdr.check = HeaderManager::ComputeTCPHeaderChecksum(tcp_hdr,source,destination);
+            tcp_hdr.check = HeaderManager::computeTCPHeaderChecksum(tcp_hdr,source,destination);
             //leave it to kernel if AF_INET6
         }
             
@@ -75,9 +75,9 @@ namespace Traceroute{
         udp_hdr.dest = htons(dport);
         udp_hdr.len = htons(sizeof(udp_hdr));
         udp_hdr.check = 0;
-        if(source.GetFamily() == AF_INET)
+        if(source.getFamily() == AF_INET)
         {
-            udp_hdr.check = HeaderManager::ComputeUdpHeaderChecksum(udp_hdr,source,destination);
+            udp_hdr.check = HeaderManager::computeUdpHeaderChecksum(udp_hdr,source,destination);
             //leave it to kernel if AF_INET6
         }            
         

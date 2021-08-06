@@ -7,7 +7,7 @@ namespace Traceroute
     : NBlockDataSenderBase(family, sourceAddr,delayMs)
     {
         _sfd_udp = socket(_sock_family,SOCK_RAW | SOCK_NONBLOCK, IPPROTO_UDP);    
-        if((bind(_sfd_udp,SA sourceAddr.GetAddress(),sourceAddr.GetSize())) < 0)
+        if((bind(_sfd_udp,SA sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
         {
             throw std::runtime_error("Could not bind address");
         }
@@ -21,17 +21,17 @@ namespace Traceroute
             }
         }
     }   
-     int UdpDataSender::GetCurrentProtocol()
+     int UdpDataSender::getCurrentProtocol()
     {
         int temp = -1;
         temp = _sock_family == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6;
         return temp;       
     }
-    int UdpDataSender::GetSendingSocket()
+    int UdpDataSender::getSendingSocket()
     {
        return _sfd_udp;
     }
-    int UdpDataSender::GetReceivingSocket()
+    int UdpDataSender::getReceivingSocket()
     {
         return _sfd_icmp;
     }
