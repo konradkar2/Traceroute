@@ -1,8 +1,7 @@
 #pragma once
 #include "Packet.hpp"
-#include "ChecksumCalculator.hpp"
 
-using namespace std;
+
 namespace Traceroute
 {
     class PacketBuilder

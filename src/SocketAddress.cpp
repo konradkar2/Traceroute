@@ -76,13 +76,13 @@ namespace Traceroute
         {
             case AF_INET:
                 return ((sockaddr_in *)getSockaddrP())->sin_addr.s_addr ==
-                    ((sockaddr_in *)getSockaddrP())->sin_addr.s_addr;
+                    ((sockaddr_in *)rhs.getSockaddrP())->sin_addr.s_addr;
             case AF_INET6:          
             {
                 for(int i = 0; i<4 ;i++)
                 {
                     uint32_t * tempA = &((sockaddr_in6 *)getSockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];
-                    uint32_t * tempB = &((sockaddr_in6 *)getSockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];                 
+                    uint32_t * tempB = &((sockaddr_in6 *)rhs.getSockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];                 
                     if(*tempA != *tempB)
                     {
                         return false;

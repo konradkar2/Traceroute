@@ -26,7 +26,7 @@ namespace Traceroute
     {
         std::string result;
         result = std::to_string(mTtl) + "  " + MresponseAddr;
-        for(int i = 0; i< mProbeResults.size(); i++)
+        for(size_t i = 0; i< mProbeResults.size(); i++)
         {
             ProbeResult pr = mProbeResults[i];
             if(pr.success)

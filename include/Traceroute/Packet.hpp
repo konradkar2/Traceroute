@@ -1,7 +1,5 @@
 #pragma once
 #include "HeaderTypes.hpp"
-#include "Serializable.hpp"
-#include "ChecksumCalculator.hpp"
 #include "SocketAddress.hpp"
 
 namespace Traceroute

@@ -5,22 +5,24 @@ namespace Traceroute
 {    
    
     template <typename POD>
-    class  Serializer
+    class  PodSerializer
     {
     public:
-        static size_t getSize(POD value)
+        static size_t getSize()
         {
             return sizeof(POD);
         }
         static char* serialize( char* target, POD value )
         {
-            std::memcpy( target, &value, getSize(value) );
-            return target + getSize(value);
+            auto podSize = sizeof(value);
+            std::memcpy( target, &value, podSize);
+            return target + podSize;
         }
         static const char* deserialize( const char* source, POD& target )
         {
-            std::memcpy( &target, source, getSize(target) );
-            return source + getSize(target);
+            auto podSize = sizeof(target);
+            std::memcpy( &target, source, podSize );
+            return source + podSize;
         }
     };
 

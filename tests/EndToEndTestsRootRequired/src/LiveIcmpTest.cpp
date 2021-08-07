@@ -1,7 +1,8 @@
 #include <Traceroute/SocketAddress.hpp>
 #include <Traceroute/PacketBuilder.hpp>
-#include <Traceroute/IcmpProbeSender.hpp>
-#include <Traceroute/IcmpDataSender.hpp>
+#include <Traceroute/Icmp/IcmpDataSender.hpp>
+#include <Traceroute/Icmp/IcmpResponseValidator.hpp>
+#include <Traceroute/ProbeSender.hpp>
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <string>
@@ -15,31 +16,38 @@ struct LiveIcmpTest_8888 : public ::testing::Test
     Traceroute::SocketAddress mSource;
 
     int mFamily;
-    int mRetries = 3;
-    std::chrono::milliseconds mTimeout {200};
-    Traceroute::IcmpProbeSender *  mIcmpProbeSender;
+    int mRetries = 2;
+    int mSockDelay = 5;
+    std::chrono::milliseconds mTimeout {100};
+    Traceroute::ProbeSender * mProbeSender;
+    Traceroute::Icmp::IcmpDataSender * mDataSender;
+    Traceroute::Icmp::IcmpResponseValidator * mResponseValidator;
     void SetUp() override
     {
         mDestinationText = "8.8.8.8";
         mDestinationAddr = Traceroute::SocketAddress{mDestinationText};
-        mSource = Traceroute::SocketAddress("192.168.242.129");
+        mSource = Traceroute::SocketAddress("192.168.132.129");
         mFamily = mDestinationAddr.getFamily();       
-        mIcmpProbeSender = new Traceroute::IcmpProbeSender(new Traceroute::IcmpDataSender(mFamily, mSource, mRetries));
+        mDataSender = new Traceroute::Icmp::IcmpDataSender(mFamily, mSource, mSockDelay);
+        mResponseValidator = new Traceroute::Icmp::IcmpResponseValidator;
+        mProbeSender = new Traceroute::ProbeSender(mDataSender,mResponseValidator);
     }
     void TearDown() override
     {
-        delete mIcmpProbeSender;
+        delete mDataSender;
+        delete mResponseValidator;
+        delete mProbeSender;
     }
     
 };
 
-TEST_F(LiveIcmpTest_8888, GotResponseFrom8888)
+TEST_F(LiveIcmpTest_8888, GotResponse)
 {
     std::vector<Traceroute::ProbeResultContainer> probes;
     for (int ttl = 1; ttl < 32; ++ttl)
     {
         auto packet = Traceroute::PacketBuilder::CreateIcmpPacket(mSource, mDestinationAddr);
-        auto result = mIcmpProbeSender->SendProbe(&packet, ttl, mRetries, mTimeout);
+        auto result = mProbeSender->beginProbing(&packet, ttl, mRetries, mTimeout);
         probes.push_back(result);
         if (result.GetResponseAddr() == mDestinationText)
         {

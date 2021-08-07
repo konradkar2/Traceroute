@@ -1,17 +1,21 @@
-#include <Traceroute/ProbeSenderBase.hpp>
+#include "ProbeSender.hpp"
 #include <stdexcept>
 namespace Traceroute
 {
-    
-    ProbeResultContainer ProbeSenderBase::BeginProbing(const Packet * packet,
+    ProbeSender::ProbeSender(IDataSender * dataSender,IValidateResponse * responseValidator)
+    {
+        mDataSender = dataSender;     
+        mResponseValidator = responseValidator; 
+    }
+    ProbeResultContainer ProbeSender::beginProbing(const Packet * packet,
             int ttl,int retries, std::chrono::microseconds timeout)
     {       
+        mPacket = packet;
         mReceivingBuffer[BUFLEN] = {0};
-        mSendingBuffer[BUFLEN] = {0};
-        mPPacket = packet;
+        mSendingBuffer[BUFLEN] = {0};       
         setTtl(ttl);
 
-        ProbeResultContainer resultContainer(getTtl());
+        ProbeResultContainer resultContainer(mTtl);
         for(int i = 0 ;i< retries ; i++)
         {
             
@@ -30,11 +34,14 @@ namespace Traceroute
                     break;
                 }
 
-                int receivedn;
+                
                 SocketAddress client;                 
-                int receivedProto; 
-                receivedn = mPDataSender->receiveFrom(mReceivingBuffer,BUFLEN,client,receivedProto);
-                if(receivedn >0 && isResponseValid(client,receivedProto))
+                int responseProtocol; 
+                int responseSize = mDataSender->receiveFrom(mReceivingBuffer,BUFLEN,client,responseProtocol);
+
+                
+                auto isResponseValid = mResponseValidator->isResponseValid(*packet,client,responseProtocol,mReceivingBuffer,responseSize);
+                if(isResponseValid)
                 {
                     string responseAddr = client.toString();                                        
                     resultContainer.setResponseAddr(responseAddr);
@@ -51,33 +58,18 @@ namespace Traceroute
         }  
         return resultContainer;
     }
-    ProbeSenderBase::ProbeSenderBase(IDataSender * dataSender)
+    
+    void ProbeSender::sendPacket()
     {
-        if(dataSender == nullptr)
-        {
-            throw std::invalid_argument("RawDataSender cannot be null");
-        }
-        mPDataSender = dataSender;      
+        mPacket->serialize(mSendingBuffer);
+        size_t packetSize = mPacket->getSerializeSize();
+        mDataSender->sendTo(mSendingBuffer,packetSize,mPacket->getDestinationAddress());
     }
-    void ProbeSenderBase::sendPacket()
-    {
-        mPPacket->serialize(mSendingBuffer);
-        size_t packet_size = mPPacket->getSerializeSize();
-        int sentn;
-        sentn = mPDataSender->sendTo(mSendingBuffer,packet_size,mPPacket->getDestinationAddress());
-    }
-    char * ProbeSenderBase::getReceiveBuf()
-    {
-        return mReceivingBuffer;
-    }
-    int ProbeSenderBase::getTtl() const
-    {
-        return mTtl;
-    }
-    void ProbeSenderBase::setTtl(int ttl) 
+   
+    void ProbeSender::setTtl(int ttl) 
     {
         mTtl = ttl;
-        mPDataSender->setTtl(ttl);
+        mDataSender->setTtl(ttl);
     }    
     
 }

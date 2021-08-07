@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <netinet/icmp6.h>
 #include <netinet/ip_icmp.h>
+#include "ChecksumCalculator.hpp"
 
 namespace Traceroute{
     IcmpPacket PacketBuilder::CreateIcmpPacket(const SocketAddress & source, const SocketAddress & destination)
@@ -48,7 +49,6 @@ namespace Traceroute{
     {
         TcpHeader tcp_hdr;
         tcp_hdr.source= htons(50000 + rand() % 15001);
-        int temp = ntohs(tcp_hdr.source);
         tcp_hdr.dest = htons(dport);
         tcp_hdr.seq = htonl(rand() % 65001); // generate random sequence number
         tcp_hdr.ack_seq = 0; // ack sequence should be 0

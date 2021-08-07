@@ -1,5 +1,7 @@
 #include <Traceroute/Packet.hpp>
 #include <stdexcept>
+#include "PodSerializer.hh"
+#include "ChecksumCalculator.hpp"
 namespace Traceroute{
 
     Packet::Packet(const SocketAddress & source,
@@ -26,31 +28,31 @@ namespace Traceroute{
     
     void TcpPacket::serialize(char * dataOut) const
     {
-        //dataOut = Serializer<Ipv4Header>::Serialize(dataOut, _ipv4Header);
-        dataOut = Serializer<TcpHeader>::serialize(dataOut, mTcpHeader);       
+        //dataOut = PodSerializer<Ipv4Header>::Serialize(dataOut, _ipv4Header);
+        dataOut = PodSerializer<TcpHeader>::serialize(dataOut, mTcpHeader);       
     }   
     size_t TcpPacket::getSerializeSize() const
     {
-        return Serializer<TcpHeader>::getSize(mTcpHeader);      
+        return PodSerializer<TcpHeader>::getSize();      
     }
     void UdpPacket::serialize(char * dataOut) const
     {
-        dataOut = Serializer<UdpHeader>::serialize(dataOut, mUdpHeader);       
+        dataOut = PodSerializer<UdpHeader>::serialize(dataOut, mUdpHeader);       
     }
    
     size_t UdpPacket::getSerializeSize() const
     {
-        return Serializer<UdpHeader>::getSize(mUdpHeader);
+        return PodSerializer<UdpHeader>::getSize();
                
     }
 
     void IcmpPacket::serialize(char * dataOut) const
     {
-        dataOut = Serializer<IcmpHeader>::serialize(dataOut, mIcmpHeader);       
+        dataOut = PodSerializer<IcmpHeader>::serialize(dataOut, mIcmpHeader);       
     }   
     size_t IcmpPacket::getSerializeSize() const
     {
-        return Serializer<IcmpHeader>::getSize(mIcmpHeader);               
+        return PodSerializer<IcmpHeader>::getSize();               
     }  
     const IcmpHeader & IcmpPacket::GetIcmpHeader() const
     {

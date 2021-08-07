@@ -19,7 +19,7 @@ namespace Traceroute
         }
         mDelayMs = delayMs;
         
-        int proto = (mFamily == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6;
+        int proto = (mFamily == AF_INET) ? (int)IPPROTO_ICMP : (int)IPPROTO_ICMPV6;
         mSfdIcmp = socket(mFamily,SOCK_RAW | SOCK_NONBLOCK, proto);
 
         if((bind(mSfdIcmp,sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
