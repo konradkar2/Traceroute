@@ -1,6 +1,6 @@
 #pragma once
 #include "Packet.hpp"
-#include "HeaderManager.hpp"
+#include "ChecksumCalculator.hpp"
 
 using namespace std;
 namespace Traceroute

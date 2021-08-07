@@ -11,9 +11,9 @@ namespace Traceroute
     public:    
         IcmpProbeSender(IDataSender * dataSender);   
         ProbeResultContainer SendProbe(const IcmpPacket * packet,
-            int ttl, const int retries, const int timeoutms );        
+            int ttl, const int retries, std::chrono::microseconds timeout );        
     protected:         
-        bool IsResponseValid(const SocketAddress & client, const int & protocol) override;
+        bool isResponseValid(const SocketAddress & client, const int & protocol) override;
     private:        
         const IcmpPacket * mPacket;
     };

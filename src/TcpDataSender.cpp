@@ -1,52 +1,56 @@
 #include <Traceroute/TcpDataSender.hpp>
+#include<netinet/in.h>
+#include<stdexcept>
+#include<sys/socket.h>
 
+#define SA (struct sockaddr*)
 
 namespace Traceroute
 {
     TcpDataSender::TcpDataSender(int family, const SocketAddress & sourceAddr,int delayMs)
         : NBlockDataSenderBase(family,sourceAddr,delayMs)
     {
-        _sfd_tcp = socket(mSock_family, SOCK_RAW | SOCK_NONBLOCK, IPPROTO_TCP);        
+        mSfdTcp = socket(mFamily, SOCK_RAW | SOCK_NONBLOCK, IPPROTO_TCP);        
         
-        if((bind(_sfd_tcp,SA sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
+        if((bind(mSfdTcp,SA sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
         {
             throw std::runtime_error("Could not bind address");
         }
-        if(mSock_family == AF_INET6)
+        if(mFamily == AF_INET6)
         {
             int offset = 16;
-            if((setsockopt(_sfd_tcp, IPPROTO_IPV6, IPV6_CHECKSUM,
+            if((setsockopt(mSfdTcp, IPPROTO_IPV6, IPV6_CHECKSUM,
                 &offset, sizeof(offset))) < 0)
             {
                 throw std::runtime_error("Could not set IPV6_CHECKSUM flag");
             }
 
         }
-        _sfd_current = mSfd_icmp;
+        mCurrentSfd = mSfdIcmp;
     }
     
     int TcpDataSender::getCurrentProtocol()
     {
-        if(_sfd_current == _sfd_tcp)
+        if(mCurrentSfd == mSfdTcp)
             return IPPROTO_TCP;
         else
         {
-            int temp = mSock_family == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6;
+            int temp = mFamily == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6;
             return temp;
         }
         return -1;
     }
     int TcpDataSender::getSendingSocket()
     {
-       return _sfd_tcp;
+       return mSfdTcp;
     }
 
     int TcpDataSender::getReceivingSocket()
     {
-        int temp = _sfd_current;
+        int temp = mCurrentSfd;
 
         //swap current receiving socket 
-        _sfd_current = (_sfd_current == mSfd_icmp ) ? _sfd_tcp : mSfd_icmp;
+        mCurrentSfd = (mCurrentSfd == mSfdIcmp ) ? mSfdTcp : mSfdIcmp;
 
         return temp;
     }

@@ -31,7 +31,7 @@ namespace Traceroute
             ProbeResult pr = mProbeResults[i];
             if(pr.success)
             {
-                std::string time = std::to_string(pr.timevalms);
+                std::string time =  std::to_string(pr.receivedAfterTimeout.count() / 1000.0);
                 time.erase ( time.find_last_not_of('0') + 1, std::string::npos ); //remove trailing zeroes
                 result += "  " + time + " " + "ms";
             }

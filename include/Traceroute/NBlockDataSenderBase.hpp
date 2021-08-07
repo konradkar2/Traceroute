@@ -23,8 +23,8 @@ namespace Traceroute
         virtual int getSendingSocket()=0;
         virtual int getReceivingSocket()=0;     
         virtual int getCurrentProtocol()=0;           
-        int mSock_family;        
-        int mSfd_icmp;
+        int mFamily;        
+        int mSfdIcmp;
         int mDelayMs;
     private:
         NBlockDataSenderBase();

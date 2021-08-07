@@ -12,21 +12,21 @@ namespace Traceroute
 {
     NBlockDataSenderBase::NBlockDataSenderBase(int family, const SocketAddress & sourceAddr, int delayMs)
     {
-        mSock_family = family;
-        if(mSock_family != sourceAddr.getFamily())
+        mFamily = family;
+        if(mFamily != sourceAddr.getFamily())
         {
             throw std::invalid_argument("Sock family does not match SocketAddress family");
         }
         mDelayMs = delayMs;
         
-        int proto = (mSock_family == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6;
-        mSfd_icmp = socket(mSock_family,SOCK_RAW | SOCK_NONBLOCK, proto);
+        int proto = (mFamily == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6;
+        mSfdIcmp = socket(mFamily,SOCK_RAW | SOCK_NONBLOCK, proto);
 
-        if((bind(mSfd_icmp,sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
+        if((bind(mSfdIcmp,sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
         {
             throw std::runtime_error("Could not bind address: " + std::string(strerror(errno)));
         }
-        if(mSock_family == AF_INET6)
+        if(mFamily == AF_INET6)
         {
             struct icmp6_filter myfilt;
             ICMP6_FILTER_SETBLOCKALL (&myfilt);
@@ -34,7 +34,7 @@ namespace Traceroute
             ICMP6_FILTER_SETPASS (ICMP6_ECHO_REPLY, &myfilt);
             ICMP6_FILTER_SETPASS (ICMP6_TIME_EXCEEDED, &myfilt);
             ICMP6_FILTER_SETPASS (ICMP6_DST_UNREACH, &myfilt);
-            if(setsockopt(mSfd_icmp,IPPROTO_ICMPV6,ICMP6_FILTER,&myfilt,sizeof(myfilt)) < 0)
+            if(setsockopt(mSfdIcmp,IPPROTO_ICMPV6,ICMP6_FILTER,&myfilt,sizeof(myfilt)) < 0)
             {
                 throw std::runtime_error("Error occured while setting icmpv6 filter: "+ std::string(strerror(errno)));
             }
@@ -62,7 +62,7 @@ namespace Traceroute
     }
     void NBlockDataSenderBase::setTtl(int ttl)
     {
-        switch(mSock_family)
+        switch(mFamily)
         {
             case AF_INET:
             {
@@ -85,7 +85,7 @@ namespace Traceroute
     }
     int NBlockDataSenderBase::sendTo(const char * buffer, size_t size, const SocketAddress & address)
     {
-        if(mSock_family != address.getFamily())
+        if(mFamily != address.getFamily())
         {
             throw std::invalid_argument("Provided address is invalid");
         }

@@ -1,13 +1,13 @@
 #pragma once
 #include <vector>
 #include <string>
-
+#include <chrono>
 namespace Traceroute
 {
     struct ProbeResult
-    {    
+    {   
         bool success;
-        double timevalms;
+        std::chrono::microseconds receivedAfterTimeout;
     };
 
     class ProbeResultContainer

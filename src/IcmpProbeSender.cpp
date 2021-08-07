@@ -10,15 +10,15 @@ namespace Traceroute
         
     }
     ProbeResultContainer IcmpProbeSender::SendProbe(
-            const IcmpPacket * packet,int ttl, const int retries, const int timeoutms )
+            const IcmpPacket * packet,int ttl, const int retries, std::chrono::microseconds timeout )
     {
         mPacket = packet;
-        return BeginProbing(packet,ttl,retries,timeoutms);           
+        return BeginProbing(packet,ttl,retries,timeout);           
     }    
-    bool IcmpProbeSender::IsResponseValid(const SocketAddress & client, const int & protocol) 
+    bool IcmpProbeSender::isResponseValid(const SocketAddress & client, const int & protocol) 
     {
         bool isResponseValid = false;
-        char * ptr = GetReceiveBuf();       
+        char * ptr = getReceiveBuf();       
         int family  = client.getFamily();
         
         if(family == AF_INET)

@@ -1,9 +1,5 @@
 #include "NBlockDataSenderBase.hpp"
-#include<netinet/in.h>
-#include<sys/socket.h>
-#include <chrono>
-#include <thread>
-#define SA (struct sockaddr*)
+
 namespace Traceroute
 {
     class TcpDataSender : public NBlockDataSenderBase
@@ -17,7 +13,7 @@ namespace Traceroute
         int getCurrentProtocol() override;
     private:      
         void nextSocket();
-        int _sfd_tcp;
-        int _sfd_current;
+        int mSfdTcp;
+        int mCurrentSfd;
     };
 }

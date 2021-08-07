@@ -1,15 +1,15 @@
-#include <Traceroute/HeaderManager.hpp>
+#include <Traceroute/ChecksumCalculator.hpp>
 #include <netinet/in.h>
 namespace Traceroute
 {
-    unsigned short HeaderManager::computeICMPHeaderChecksum(IcmpHeader header)
+    unsigned short ChecksumCalculator::computeICMPHeaderChecksum(IcmpHeader header)
     {
         header.checksum = 0;
         const unsigned short *addr = reinterpret_cast<const unsigned short *>(&header);       
         unsigned long check = computeChecksum(addr,sizeof(IcmpHeader));               
         return (unsigned short)check;
     }
-    unsigned long HeaderManager::computePseudoheaderChecksum(
+    unsigned long ChecksumCalculator::computePseudoheaderChecksum(
         short protocol, short headerlen,const SocketAddress & source, const SocketAddress & destination)
     {
         unsigned long sum = 0;
@@ -49,7 +49,7 @@ namespace Traceroute
 
         return sum;
     }
-    unsigned short HeaderManager::computeTCPHeaderChecksum(
+    unsigned short ChecksumCalculator::computeTCPHeaderChecksum(
         TcpHeader tcpheader, const SocketAddress & source, const SocketAddress & destination )
     {        
         unsigned long sum = 0;      
@@ -63,7 +63,7 @@ namespace Traceroute
         return sum;
     }
 
-    unsigned short HeaderManager::computeUdpHeaderChecksum(
+    unsigned short ChecksumCalculator::computeUdpHeaderChecksum(
         UdpHeader udpheader, const SocketAddress & source, const SocketAddress & destination )
     {
         unsigned long sum = 0;
@@ -75,7 +75,7 @@ namespace Traceroute
         //set computation result
         return sum;
     }
-    unsigned long HeaderManager::computeChecksum(const unsigned short *addr, unsigned int size, unsigned long prevSum)
+    unsigned long ChecksumCalculator::computeChecksum(const unsigned short *addr, unsigned int size, unsigned long prevSum)
     {
         unsigned long sum = prevSum;
         while (size > 1) {

@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.16)
 set(This Traceroute)
 
 set(Headers
-    include/Traceroute/HeaderManager.hpp
+    include/Traceroute/ChecksumCalculator.hpp
     include/Traceroute/HeaderTypes.hpp
     include/Traceroute/IcmpDataSender.hpp
     include/Traceroute/IcmpProbeSender.hpp
@@ -24,7 +24,7 @@ set(Headers
 )
 
 set(Sources
-    src/HeaderManager.cpp
+    src/ChecksumCalculator.cpp
     src/IcmpDataSender.cpp
     src/IcmpProbeSender.cpp
     src/NBlockDataSenderBase.cpp

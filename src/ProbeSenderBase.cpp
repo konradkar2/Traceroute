@@ -4,28 +4,28 @@ namespace Traceroute
 {
     
     ProbeResultContainer ProbeSenderBase::BeginProbing(const Packet * packet,
-            int ttl,const int retries, const int timeoutms)
+            int ttl,int retries, std::chrono::microseconds timeout)
     {       
-        _receiveBuf[BUFLEN] = {0};
-        _sendBuf[BUFLEN] = {0};
-        _packet = packet;
-        SetTtl(ttl);
+        mReceivingBuffer[BUFLEN] = {0};
+        mSendingBuffer[BUFLEN] = {0};
+        mPPacket = packet;
+        setTtl(ttl);
 
-        ProbeResultContainer resultContainer(GetTtl());
+        ProbeResultContainer resultContainer(getTtl());
         for(int i = 0 ;i< retries ; i++)
         {
             
-            SendPacket();            
-            auto start = chrono::steady_clock::now();
+            sendPacket();            
+            auto start = std::chrono::steady_clock::now();
             while(true)
             {
-                auto end = chrono::steady_clock::now();
-                int uspassed = chrono::duration_cast<chrono::microseconds>(end - start).count();
-                if(uspassed > (timeoutms * 1000)) //timeout
+                auto end = std::chrono::steady_clock::now();
+                auto uspassed = std::chrono::duration_cast<chrono::microseconds>(end - start);
+                if(uspassed > timeout) //timeout
                 {
                     ProbeResult r;
                     r.success = false;
-                    r.timevalms = timeoutms;
+                    r.receivedAfterTimeout = timeout;
                     resultContainer.add(r);
                     break;
                 }
@@ -33,17 +33,15 @@ namespace Traceroute
                 int receivedn;
                 SocketAddress client;                 
                 int receivedProto; 
-                receivedn = _dataSender->receiveFrom(_receiveBuf,BUFLEN,client,receivedProto);
-                if(receivedn >0 && IsResponseValid(client,receivedProto))
+                receivedn = mPDataSender->receiveFrom(mReceivingBuffer,BUFLEN,client,receivedProto);
+                if(receivedn >0 && isResponseValid(client,receivedProto))
                 {
                     string responseAddr = client.toString();                                        
                     resultContainer.setResponseAddr(responseAddr);
                     auto now = chrono::steady_clock::now();
-                    int uspassed = chrono::duration_cast<chrono::microseconds>(now - start).count();
-                    ProbeResult r;
-                    r.success = true;
-                    r.timevalms = (double)uspassed/1000.0;
-                    resultContainer.add(r);
+                    auto uspassed = chrono::duration_cast<chrono::microseconds>(now - start);
+                    ProbeResult probeResult{true,uspassed};
+                    resultContainer.add(probeResult);
                     break;
                 }
 
@@ -59,27 +57,27 @@ namespace Traceroute
         {
             throw std::invalid_argument("RawDataSender cannot be null");
         }
-        _dataSender = dataSender;      
+        mPDataSender = dataSender;      
     }
-    void ProbeSenderBase::SendPacket()
+    void ProbeSenderBase::sendPacket()
     {
-        _packet->serialize(_sendBuf);
-        size_t packet_size = _packet->getSerializeSize();
+        mPPacket->serialize(mSendingBuffer);
+        size_t packet_size = mPPacket->getSerializeSize();
         int sentn;
-        sentn = _dataSender->sendTo(_sendBuf,packet_size,_packet->getDestinationAddress());
+        sentn = mPDataSender->sendTo(mSendingBuffer,packet_size,mPPacket->getDestinationAddress());
     }
-    char * ProbeSenderBase::GetReceiveBuf()
+    char * ProbeSenderBase::getReceiveBuf()
     {
-        return _receiveBuf;
+        return mReceivingBuffer;
     }
-    int ProbeSenderBase::GetTtl() const
+    int ProbeSenderBase::getTtl() const
     {
-        return _ttl;
+        return mTtl;
     }
-    void ProbeSenderBase::SetTtl(int ttl) 
+    void ProbeSenderBase::setTtl(int ttl) 
     {
-        _ttl = ttl;
-        _dataSender->setTtl(ttl);
+        mTtl = ttl;
+        mPDataSender->setTtl(ttl);
     }    
     
 }

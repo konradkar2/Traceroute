@@ -16,7 +16,7 @@ struct LiveIcmpTest_8888 : public ::testing::Test
 
     int mFamily;
     int mRetries = 3;
-    int mTimeoutms = 200;
+    std::chrono::milliseconds mTimeout {200};
     Traceroute::IcmpProbeSender *  mIcmpProbeSender;
     void SetUp() override
     {
@@ -39,7 +39,7 @@ TEST_F(LiveIcmpTest_8888, GotResponseFrom8888)
     for (int ttl = 1; ttl < 32; ++ttl)
     {
         auto packet = Traceroute::PacketBuilder::CreateIcmpPacket(mSource, mDestinationAddr);
-        auto result = mIcmpProbeSender->SendProbe(&packet, ttl, mRetries, mTimeoutms);
+        auto result = mIcmpProbeSender->SendProbe(&packet, ttl, mRetries, mTimeout);
         probes.push_back(result);
         if (result.GetResponseAddr() == mDestinationText)
         {

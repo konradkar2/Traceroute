@@ -14,9 +14,9 @@ namespace Traceroute
         TcpProbeSender(IDataSender * dataSender);
         ~TcpProbeSender(){}; // TODO: Implement destructor       
         ProbeResultContainer SendProbe(
-            const TcpPacket * packet, int ttl, const int retries, const int timeoutms ) ;       
+            const TcpPacket * packet, int ttl, const int retries, std::chrono::microseconds timeout) ;       
     protected:        
-        bool IsResponseValid(const SocketAddress & client,const int & protocol) override;
+        bool isResponseValid(const SocketAddress & client,const int & protocol) override;
     private:
          TcpProbeSender();         
         const TcpPacket * _packet;       

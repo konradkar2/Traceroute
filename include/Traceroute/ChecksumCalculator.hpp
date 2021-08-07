@@ -3,7 +3,7 @@
 #include "SocketAddress.hpp"
 namespace Traceroute
 {
-    class HeaderManager
+    class ChecksumCalculator
     {
     public:
         /*

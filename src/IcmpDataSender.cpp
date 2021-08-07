@@ -11,17 +11,17 @@ namespace Traceroute
     int IcmpDataSender::getCurrentProtocol()
     {
         int temp = -1;
-        temp = mSock_family == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6;
+        temp = (mFamily == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6);
         return temp;       
     }
     
     int IcmpDataSender::getSendingSocket()
     {
-        return mSfd_icmp;
+        return mSfdIcmp;
     }
     int IcmpDataSender::getReceivingSocket()
     {
-        return mSfd_icmp;
+        return mSfdIcmp;
     }
     
     

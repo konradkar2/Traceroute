@@ -11,16 +11,16 @@ namespace Traceroute
         
     }    
     ProbeResultContainer TcpProbeSender::SendProbe(
-            const TcpPacket * packet, int ttl, const int retries, const int timeoutms )
+            const TcpPacket * packet, int ttl, const int retries, std::chrono::microseconds timeout )
     {
         _packet = packet;       
-        return BeginProbing(packet,ttl,retries,timeoutms);
+        return BeginProbing(packet,ttl,retries,timeout);
     }    
    
-    bool TcpProbeSender::IsResponseValid(const SocketAddress & client, const int & protocol) 
+    bool TcpProbeSender::isResponseValid(const SocketAddress & client, const int & protocol) 
     {
         bool isResponseValid = false;
-        char * ptr = GetReceiveBuf();
+        char * ptr = getReceiveBuf();
         int family = client.getFamily();
 
         //skip ipv4 header 

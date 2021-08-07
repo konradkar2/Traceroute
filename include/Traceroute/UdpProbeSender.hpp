@@ -15,9 +15,9 @@ namespace Traceroute
         UdpProbeSender(IDataSender * dataSender);
         ~UdpProbeSender(){}; // TODO: Implement destructor       
         ProbeResultContainer SendProbe(
-            const UdpPacket * packet, int ttl, const int retries, const int timeoutms ) ;       
+            const UdpPacket * packet, int ttl, const int retries, std::chrono::microseconds timeout ) ;       
     protected:                 
-        bool IsResponseValid(const SocketAddress & client,const int & protocol) override;
+        bool isResponseValid(const SocketAddress & client,const int & protocol) override;
     private:
         UdpProbeSender();  
         const UdpPacket * _packet;       

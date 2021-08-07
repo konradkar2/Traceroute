@@ -10,17 +10,17 @@ namespace Traceroute
                
     }    
     ProbeResultContainer UdpProbeSender::SendProbe(
-            const UdpPacket * packet, int ttl,const int retries, const int timeoutms )
+            const UdpPacket * packet, int ttl,const int retries, std::chrono::microseconds timeout)
     {
         _packet = packet;       
-        return BeginProbing(packet, ttl,retries,timeoutms);
+        return BeginProbing(packet, ttl,retries,timeout);
     }    
     
-    bool UdpProbeSender::IsResponseValid(const SocketAddress & client, const int & protocol) 
+    bool UdpProbeSender::isResponseValid(const SocketAddress & client, const int & protocol) 
     {
            
         bool isResponseValid = false;
-        char * ptr = GetReceiveBuf();
+        char * ptr = getReceiveBuf();
         const int family = client.getFamily();
 
         //skip ipv4 header
