@@ -4,15 +4,16 @@
 #include <chrono>
 namespace Traceroute
 {
-    struct ProbeResult
-    {   
-        bool success;
-        std::chrono::microseconds receivedAfterTimeout;
-    };
+    
 
     class ProbeResultContainer
     {
     public:   
+        struct ProbeResult
+        {   
+            bool success;
+            std::chrono::microseconds receivedAfterTimeout;
+        };
         ProbeResultContainer(int ttl);
         void add(ProbeResult result);
         void setResponseAddr(const std::string & responseAddr);

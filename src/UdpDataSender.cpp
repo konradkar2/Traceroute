@@ -1,20 +1,24 @@
 #include <Traceroute/UdpDataSender.hpp>
+#include<netinet/in.h>
+#include<sys/socket.h>
+#include <stdexcept>
 
+#define SA (struct sockaddr*)
 
 namespace Traceroute
 {
     UdpDataSender::UdpDataSender(int family, const SocketAddress & sourceAddr,int delayMs)
     : NBlockDataSenderBase(family, sourceAddr,delayMs)
     {
-        _sfd_udp = socket(mFamily,SOCK_RAW | SOCK_NONBLOCK, IPPROTO_UDP);    
-        if((bind(_sfd_udp,SA sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
+        SfdUdp = socket(mFamily,SOCK_RAW | SOCK_NONBLOCK, IPPROTO_UDP);    
+        if((bind(SfdUdp,SA sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
         {
             throw std::runtime_error("Could not bind address");
         }
         if(mFamily == AF_INET6)
         {
             int offset = 6;
-            if((setsockopt(_sfd_udp, IPPROTO_IPV6, IPV6_CHECKSUM,
+            if((setsockopt(SfdUdp, IPPROTO_IPV6, IPV6_CHECKSUM,
                 &offset, sizeof(offset))) < 0)
             {
                 throw std::runtime_error("Could not set IPV6_CHECKSUM flag");
@@ -24,12 +28,12 @@ namespace Traceroute
      int UdpDataSender::getCurrentProtocol()
     {
         int temp = -1;
-        temp = mFamily == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6;
+        temp = (mFamily == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6);
         return temp;       
     }
     int UdpDataSender::getSendingSocket()
     {
-       return _sfd_udp;
+       return SfdUdp;
     }
     int UdpDataSender::getReceivingSocket()
     {

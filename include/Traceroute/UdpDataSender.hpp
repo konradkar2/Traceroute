@@ -1,9 +1,6 @@
 #include "NBlockDataSenderBase.hpp"
-#include<netinet/in.h>
-#include<sys/socket.h>
-#include <chrono>
-#include <thread>
-#define SA (struct sockaddr*)
+#include "SocketAddress.hpp"
+
 namespace Traceroute
 {
     class UdpDataSender : public NBlockDataSenderBase
@@ -16,7 +13,7 @@ namespace Traceroute
         int getReceivingSocket() override;  
         int getCurrentProtocol() override;     
     private:      
-        int _sfd_udp;    
+        int SfdUdp;    
     
     };
 }

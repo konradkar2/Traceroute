@@ -50,6 +50,6 @@ TEST_F(LiveIcmpTest_8888, GotResponseFrom8888)
     auto found = std::find_if(probes.cbegin(),probes.cend(),[dText=mDestinationText](const Traceroute::ProbeResultContainer & probe){
         return probe.GetResponseAddr() == dText;
     });
-    EXPECT_TRUE(found != probes.end()) << "Didn't found " <<  mDestinationText;
+    EXPECT_TRUE(found != probes.end()) << "Didn't found ";
     
 }

@@ -39,7 +39,7 @@ TEST_F(LiveTcpTest_test_dot_com, GotResponseFrom8888)
     for (int ttl = 1; ttl < 32; ++ttl)
     {
         auto packet = Traceroute::PacketBuilder::CreateTcpPacket(mSource, mDestinationAddr,80);
-        auto result = mTcpProbSender->SendProbe(&packet, ttl, mRetries, mTimeout);
+        auto result = mTcpProbSender->sendProbe(&packet, ttl, mRetries, mTimeout);
         probes.push_back(result);
         if (result.GetResponseAddr() == mDestinationText)
         {

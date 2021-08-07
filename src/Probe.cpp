@@ -18,7 +18,7 @@ namespace Traceroute
     {
         return MresponseAddr;
     }
-    const std::vector<ProbeResult> & ProbeResultContainer::getResults() const
+    const std::vector<ProbeResultContainer::ProbeResult> & ProbeResultContainer::getResults() const
     {
         return mProbeResults;
     }

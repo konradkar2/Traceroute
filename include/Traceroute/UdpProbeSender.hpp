@@ -1,11 +1,12 @@
 #pragma once
 
+#include <chrono>
+#include "SocketAddress.hpp"
 #include "Probe.hpp"
 #include "Packet.hpp"
 #include "IDataSender.hpp"
 #include "ProbeSenderBase.hpp"
-#include <netinet/ip_icmp.h>
-#include <netinet/icmp6.h>
+
 
 namespace Traceroute
 {
@@ -20,6 +21,6 @@ namespace Traceroute
         bool isResponseValid(const SocketAddress & client,const int & protocol) override;
     private:
         UdpProbeSender();  
-        const UdpPacket * _packet;       
+        const UdpPacket * mPacket;       
     };
 }

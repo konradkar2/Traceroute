@@ -1,5 +1,6 @@
 #include <Traceroute/UdpProbeSender.hpp>
-
+#include <netinet/ip_icmp.h>
+#include <netinet/icmp6.h>
 
 
 namespace Traceroute
@@ -12,7 +13,7 @@ namespace Traceroute
     ProbeResultContainer UdpProbeSender::SendProbe(
             const UdpPacket * packet, int ttl,const int retries, std::chrono::microseconds timeout)
     {
-        _packet = packet;       
+        mPacket = packet;       
         return BeginProbing(packet, ttl,retries,timeout);
     }    
     
@@ -42,7 +43,7 @@ namespace Traceroute
                 header->type == ICMP_TIME_EXCEEDED ||
                 (header->type == ICMP_UNREACH_PORT ||
                 header->type == ICMP_UNREACH_PROTOCOL) &&
-                _packet->getDestinationAddress()
+                mPacket->getDestinationAddress()
                         == client)//we hit target
                 {                                                   
                     //cant really check anything, lets assume its proper
@@ -55,7 +56,7 @@ namespace Traceroute
                 const IcmpHeader * header = reinterpret_cast<const IcmpHeader *>(ptr);           
                 if(header->type == ICMP6_TIME_EXCEEDED ||
                 (header->type == ICMP6_DST_UNREACH && 
-                _packet->getDestinationAddress()
+                mPacket->getDestinationAddress()
                          == client))
                 {
                     isResponseValid = true;

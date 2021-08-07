@@ -23,7 +23,7 @@ namespace Traceroute
                 auto uspassed = std::chrono::duration_cast<chrono::microseconds>(end - start);
                 if(uspassed > timeout) //timeout
                 {
-                    ProbeResult r;
+                    ProbeResultContainer::ProbeResult r;
                     r.success = false;
                     r.receivedAfterTimeout = timeout;
                     resultContainer.add(r);
@@ -40,7 +40,7 @@ namespace Traceroute
                     resultContainer.setResponseAddr(responseAddr);
                     auto now = chrono::steady_clock::now();
                     auto uspassed = chrono::duration_cast<chrono::microseconds>(now - start);
-                    ProbeResult probeResult{true,uspassed};
+                    ProbeResultContainer::ProbeResult probeResult{true,uspassed};
                     resultContainer.add(probeResult);
                     break;
                 }
