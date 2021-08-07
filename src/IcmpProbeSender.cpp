@@ -1,5 +1,6 @@
 #include <Traceroute/IcmpProbeSender.hpp>
-
+#include <netinet/ip_icmp.h>
+#include <netinet/icmp6.h>
 namespace Traceroute
 {
     
@@ -11,7 +12,7 @@ namespace Traceroute
     ProbeResultContainer IcmpProbeSender::SendProbe(
             const IcmpPacket * packet,int ttl, const int retries, const int timeoutms )
     {
-        _packet = packet;
+        mPacket = packet;
         return BeginProbing(packet,ttl,retries,timeoutms);           
     }    
     bool IcmpProbeSender::IsResponseValid(const SocketAddress & client, const int & protocol) 
@@ -36,8 +37,8 @@ namespace Traceroute
                 //we propably hit the target
                 if(icmp_hdr->type == ICMP_ECHOREPLY) 
                 {
-                    if(client == _packet->GetDestinationAddress() && 
-                    (icmp_hdr->sequence == _packet->GetIcmpHeader().sequence))
+                    if(client == mPacket->getDestinationAddress() && 
+                    (icmp_hdr->sequence == mPacket->GetIcmpHeader().sequence))
                     {
                         isResponseValid = true;
                     }
@@ -49,7 +50,7 @@ namespace Traceroute
                     ptr += sizeof(Ipv4Header); //skip ip header
                     //look inside inner icmp header and check if it belongs to us
                     const IcmpHeader * inner_icmp_hdr =  reinterpret_cast<const IcmpHeader *>(ptr);
-                    if(inner_icmp_hdr->id == _packet->GetIcmpHeader().id)
+                    if(inner_icmp_hdr->id == mPacket->GetIcmpHeader().id)
                     {
                         isResponseValid = true;
                     }
@@ -65,14 +66,14 @@ namespace Traceroute
                     ptr += sizeof(IcmpHeader);
                     ptr += Ipv6HeaderSize; //skip ipv6 inner header
                     const IcmpHeader * inner_icmp_header = reinterpret_cast<const IcmpHeader *>(ptr);
-                    if(inner_icmp_header->id == _packet->GetIcmpHeader().id)
+                    if(inner_icmp_header->id == mPacket->GetIcmpHeader().id)
                     {
                         isResponseValid = true;
                     }
                 }
                 else if((header->type == ICMP6_ECHO_REPLY) &&
-                    header->sequence == _packet->GetIcmpHeader().sequence && 
-                    _packet->GetDestinationAddress() == client    
+                    header->sequence == mPacket->GetIcmpHeader().sequence && 
+                    mPacket->getDestinationAddress() == client    
                 )
                 {
                     isResponseValid = true;

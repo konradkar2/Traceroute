@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
-using namespace std;
+
 namespace Traceroute
 {
     struct ProbeResult
@@ -14,28 +14,29 @@ namespace Traceroute
     {
     public:   
         ProbeResultContainer(int ttl);
-        void Add(ProbeResult result);
-        void SetResponseAddr(string responseAddr);
+        void add(ProbeResult result);
+        void setResponseAddr(const std::string & responseAddr);
         const std::string & GetResponseAddr() const;
         
-        string ToString();     
-        const vector<ProbeResult> & GetResults() const;
+        std::string toString();     
+        const std::vector<ProbeResult> & getResults() const;
     private:
-        vector<ProbeResult> _probeResults;  
-        string _responseAddr;   
-        int _ttl;
+        std::vector<ProbeResult> mProbeResults;  
+        std::string MresponseAddr;   
+        int mTtl;
     };
        
-    typedef int ProtocolType;
+    
     class TracerouteResultCointainer
     {
     public:
-        TracerouteResultCointainer(const vector<ProbeResultContainer> & probeResults,
+        using ProtocolType = int;
+        TracerouteResultCointainer(const std::vector<ProbeResultContainer> & probeResults,
              ProtocolType protocol);
-        string ResultsToString();
+        std::string ResultsToString();
     private:
-        ProtocolType _protocol;
-        vector<ProbeResultContainer> & _probeResultsContainers;
+        ProtocolType mProtocol;
+        std::vector<ProbeResultContainer> & mProbeResultsContainers;
     };
 
 }

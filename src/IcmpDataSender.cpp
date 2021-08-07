@@ -1,5 +1,5 @@
 #include <Traceroute/IcmpDataSender.hpp>
-
+#include <netinet/in.h>
 
 namespace Traceroute
 {
@@ -11,17 +11,17 @@ namespace Traceroute
     int IcmpDataSender::getCurrentProtocol()
     {
         int temp = -1;
-        temp = _sock_family == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6;
+        temp = mSock_family == AF_INET ? IPPROTO_ICMP : IPPROTO_ICMPV6;
         return temp;       
     }
     
     int IcmpDataSender::getSendingSocket()
     {
-        return _sfd_icmp;
+        return mSfd_icmp;
     }
     int IcmpDataSender::getReceivingSocket()
     {
-        return _sfd_icmp;
+        return mSfd_icmp;
     }
     
     

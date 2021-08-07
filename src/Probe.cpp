@@ -3,35 +3,35 @@ namespace Traceroute
 {
     ProbeResultContainer::ProbeResultContainer(int ttl)
     {
-        _ttl = ttl;
-        _responseAddr = "";
+        mTtl = ttl;
+        MresponseAddr = "";
     }
-    void ProbeResultContainer::Add(ProbeResult result)
+    void ProbeResultContainer::add(ProbeResult result)
     {
-        _probeResults.push_back(result);
+        mProbeResults.push_back(result);
     }
-    void ProbeResultContainer::SetResponseAddr(string responseAddr)
+    void ProbeResultContainer::setResponseAddr(const std::string & responseAddr)
     {
-        _responseAddr = responseAddr;
+        MresponseAddr = responseAddr;
     }
     const std::string & ProbeResultContainer::GetResponseAddr() const 
     {
-        return _responseAddr;
+        return MresponseAddr;
     }
-    const vector<ProbeResult> & ProbeResultContainer::GetResults() const
+    const std::vector<ProbeResult> & ProbeResultContainer::getResults() const
     {
-        return _probeResults;
+        return mProbeResults;
     }
-    string ProbeResultContainer::ToString()
+    std::string ProbeResultContainer::toString()
     {
-        string result;
-        result = std::to_string(_ttl) + "  " + _responseAddr;
-        for(int i = 0; i< _probeResults.size(); i++)
+        std::string result;
+        result = std::to_string(mTtl) + "  " + MresponseAddr;
+        for(int i = 0; i< mProbeResults.size(); i++)
         {
-            ProbeResult pr = _probeResults[i];
+            ProbeResult pr = mProbeResults[i];
             if(pr.success)
             {
-                string time = std::to_string(pr.timevalms);
+                std::string time = std::to_string(pr.timevalms);
                 time.erase ( time.find_last_not_of('0') + 1, std::string::npos ); //remove trailing zeroes
                 result += "  " + time + " " + "ms";
             }

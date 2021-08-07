@@ -1,12 +1,16 @@
 #include <Traceroute/SocketAddress.hpp>
-
+#include <string>
+#include <netdb.h>
+#include <cstring>
+#include <arpa/inet.h>
+#include <stdexcept> 
 namespace Traceroute
 {
     SocketAddress::SocketAddress(const sockaddr_storage & address)
     {
         mAddress = address;
     }
-    SocketAddress::SocketAddress(const std::string & address, short dport)
+    SocketAddress::SocketAddress(const std::string & address)
     {
         struct addrinfo hint, *res = NULL;
         int ret;
@@ -31,7 +35,7 @@ namespace Traceroute
 
             mAddress.ss_family = AF_INET; 
             ((sockaddr_in *)&mAddress )->sin_addr = temp;
-            ((sockaddr_in *)&mAddress )->sin_port = htons(dport);
+            ((sockaddr_in *)&mAddress )->sin_port = 0;
             
             
         } else if (res->ai_family == AF_INET6) 
@@ -43,7 +47,7 @@ namespace Traceroute
             }
             mAddress.ss_family = AF_INET6; 
             ((sockaddr_in6 *)&mAddress )->sin6_addr = temp;
-            ((sockaddr_in6 *)&mAddress )->sin6_port = htons(dport);
+            ((sockaddr_in6 *)&mAddress )->sin6_port = 0;
             
         } 
         freeaddrinfo(res);

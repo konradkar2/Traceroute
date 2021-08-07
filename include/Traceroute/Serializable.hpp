@@ -8,34 +8,20 @@ namespace Traceroute
     class  Serializer
     {
     public:
-        static size_t Serialize_size(POD value)
+        static size_t getSize(POD value)
         {
             return sizeof(POD);
         }
-        static char* Serialize( char* target, POD value )
+        static char* serialize( char* target, POD value )
         {
-            std::memcpy( target, &value, Serialize_size(value) );
-            return target + Serialize_size(value);
+            std::memcpy( target, &value, getSize(value) );
+            return target + getSize(value);
         }
-        static const char* Deserialize( const char* source, POD& target )
+        static const char* deserialize( const char* source, POD& target )
         {
-            std::memcpy( &target, source, Serialize_size(target) );
-            return source + Serialize_size(target);
+            std::memcpy( &target, source, getSize(target) );
+            return source + getSize(target);
         }
     };
 
-    // template<>
-    // size_t Serializer<char*>::Serialize_size(char* str)
-    // {
-    //     return sizeof(size_t) + strlen(str);
-    // }
-
-    // template<>
-    // const char* Serializer<char*>::Deserialize( const char* source, char*& target )
-    // {
-    //     size_t length;
-    //     std::memcpy( &length, source, sizeof(size_t) );
-    //     std::memcpy( &target, source + sizeof(size_t), length );
-    //     return source + sizeof(size_t) + length;
-    // }
 }

@@ -1,24 +1,32 @@
 #include <Traceroute/NBlockDataSenderBase.hpp>
+#include <string>
+#include<netinet/in.h>
+#include<sys/socket.h>
+#include<chrono>
+#include<thread>
+#include<netinet/icmp6.h>
+#include <cstdint>
+
 
 namespace Traceroute
 {
     NBlockDataSenderBase::NBlockDataSenderBase(int family, const SocketAddress & sourceAddr, int delayMs)
     {
-        _sock_family = family;
-        if(_sock_family != sourceAddr.getFamily())
+        mSock_family = family;
+        if(mSock_family != sourceAddr.getFamily())
         {
             throw std::invalid_argument("Sock family does not match SocketAddress family");
         }
-        _delayMs = delayMs;
+        mDelayMs = delayMs;
         
-        int proto = (_sock_family == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6;
-        _sfd_icmp = socket(_sock_family,SOCK_RAW | SOCK_NONBLOCK, proto);
+        int proto = (mSock_family == AF_INET) ? IPPROTO_ICMP : IPPROTO_ICMPV6;
+        mSfd_icmp = socket(mSock_family,SOCK_RAW | SOCK_NONBLOCK, proto);
 
-        if((bind(_sfd_icmp,sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
+        if((bind(mSfd_icmp,sourceAddr.getSockaddrP(),sourceAddr.getSize())) < 0)
         {
             throw std::runtime_error("Could not bind address: " + std::string(strerror(errno)));
         }
-        if(_sock_family == AF_INET6)
+        if(mSock_family == AF_INET6)
         {
             struct icmp6_filter myfilt;
             ICMP6_FILTER_SETBLOCKALL (&myfilt);
@@ -26,25 +34,25 @@ namespace Traceroute
             ICMP6_FILTER_SETPASS (ICMP6_ECHO_REPLY, &myfilt);
             ICMP6_FILTER_SETPASS (ICMP6_TIME_EXCEEDED, &myfilt);
             ICMP6_FILTER_SETPASS (ICMP6_DST_UNREACH, &myfilt);
-            if(setsockopt(_sfd_icmp,IPPROTO_ICMPV6,ICMP6_FILTER,&myfilt,sizeof(myfilt)) < 0)
+            if(setsockopt(mSfd_icmp,IPPROTO_ICMPV6,ICMP6_FILTER,&myfilt,sizeof(myfilt)) < 0)
             {
                 throw std::runtime_error("Error occured while setting icmpv6 filter: "+ std::string(strerror(errno)));
             }
         }
     }
-    int NBlockDataSenderBase::ReceiveFrom(char * buffer, size_t size,SocketAddress & address, int & protocol)
+    int NBlockDataSenderBase::receiveFrom(char * buffer, size_t size,SocketAddress & address, int & protocol)
     {
         sockaddr_storage temp;        
         socklen_t len = sizeof(temp);
         protocol = getCurrentProtocol();
-        int n = recvfrom (getReceivingSocket(), buffer, size, 0, SA & temp, &len);
+        int n = recvfrom (getReceivingSocket(), buffer, size, 0, (SA) & temp, &len);
         if(n < 0 && errno != EAGAIN)
         {
              throw std::runtime_error("Error occured while reading data: " + std::string(strerror(errno)));
         }        
         else if(n == 0)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(_delayMs));
+            std::this_thread::sleep_for(std::chrono::milliseconds(mDelayMs));
         }
         else
         {
@@ -52,9 +60,9 @@ namespace Traceroute
         }
         return n;
     }
-    void NBlockDataSenderBase::SetTtl(int ttl)
+    void NBlockDataSenderBase::setTtl(int ttl)
     {
-        switch(_sock_family)
+        switch(mSock_family)
         {
             case AF_INET:
             {
@@ -75,9 +83,9 @@ namespace Traceroute
             
         }
     }
-    int NBlockDataSenderBase::SendTo(const char * buffer, size_t size, const SocketAddress & address)
+    int NBlockDataSenderBase::sendTo(const char * buffer, size_t size, const SocketAddress & address)
     {
-        if(_sock_family != address.getFamily())
+        if(mSock_family != address.getFamily())
         {
             throw std::invalid_argument("Provided address is invalid");
         }
@@ -90,8 +98,8 @@ namespace Traceroute
         return result;
         
     }
-    int NBlockDataSenderBase::GetReceiveDelayMs()
+    int NBlockDataSenderBase::getReceiveDelayMs()
     {
-        return _delayMs;
+        return mDelayMs;
     }
 }

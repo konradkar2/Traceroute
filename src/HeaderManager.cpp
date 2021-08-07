@@ -1,5 +1,5 @@
 #include <Traceroute/HeaderManager.hpp>
-
+#include <netinet/in.h>
 namespace Traceroute
 {
     unsigned short HeaderManager::computeICMPHeaderChecksum(IcmpHeader header)

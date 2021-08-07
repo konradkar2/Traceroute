@@ -1,6 +1,7 @@
 #include <Traceroute/PacketBuilder.hpp>
-
-
+#include <stdexcept>
+#include <netinet/icmp6.h>
+#include <netinet/ip_icmp.h>
 
 namespace Traceroute{
     IcmpPacket PacketBuilder::CreateIcmpPacket(const SocketAddress & source, const SocketAddress & destination)

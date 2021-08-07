@@ -1,11 +1,9 @@
 #pragma once
 #include <string>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netdb.h>
-#include <cstring>
-#include <arpa/inet.h>
-#include <stdexcept> 
+
+
+
 namespace Traceroute
 {
     class SocketAddress 
@@ -13,7 +11,7 @@ namespace Traceroute
     public:
         SocketAddress(){}
         explicit SocketAddress(const sockaddr_storage & address);
-        explicit SocketAddress(const std::string & address, short dport = 32424);     
+        explicit SocketAddress(const std::string & address);     
         int getFamily() const;
         const sockaddr* getSockaddrP() const;       
         size_t getSize() const;      

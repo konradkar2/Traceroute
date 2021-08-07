@@ -1,8 +1,7 @@
 #pragma once
 #include "Packet.hpp"
 #include "HeaderManager.hpp"
-#include <netinet/icmp6.h>
-#include <netinet/ip_icmp.h>
+
 using namespace std;
 namespace Traceroute
 {

@@ -1,26 +1,20 @@
 #pragma once
-#include <cstdint>
-#include <string>
-#include<netinet/in.h>
-#include<sys/socket.h>
-#include<chrono>
-#include<thread>
-#include<netinet/icmp6.h>
 
+#include <cstdint>
 #include "SocketAddress.hpp"
 #include "IDataSender.hpp"
-#define SA (struct sockaddr*)
+
 namespace Traceroute
 {
     class NBlockDataSenderBase : public IDataSender
     {
     public:       
-        int SendTo(const char * buffer, size_t size, const SocketAddress & address) override;   
+        int sendTo(const char * buffer, size_t size, const SocketAddress & address) override;   
         //sets client ip addresss to 'address'
         //sets client transport protocol(or icmp/icmpv6) to 'protocol'
-        int ReceiveFrom(char * buffer, size_t size, SocketAddress & address, int & protocol) override;   
-        int GetReceiveDelayMs() override;
-        void SetTtl(int ttl) override;      
+        int receiveFrom(char * buffer, size_t size, SocketAddress & address, int & protocol) override;   
+        int getReceiveDelayMs() override;
+        void setTtl(int ttl) override;      
     protected:       
         //binds address to sourceAddr
         //sets delay on socket (nonblocking)
@@ -29,9 +23,9 @@ namespace Traceroute
         virtual int getSendingSocket()=0;
         virtual int getReceivingSocket()=0;     
         virtual int getCurrentProtocol()=0;           
-        int _sock_family;        
-        int _sfd_icmp;
-        int _delayMs;
+        int mSock_family;        
+        int mSfd_icmp;
+        int mDelayMs;
     private:
         NBlockDataSenderBase();
         

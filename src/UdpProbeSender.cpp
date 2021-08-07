@@ -42,7 +42,7 @@ namespace Traceroute
                 header->type == ICMP_TIME_EXCEEDED ||
                 (header->type == ICMP_UNREACH_PORT ||
                 header->type == ICMP_UNREACH_PROTOCOL) &&
-                _packet->GetDestinationAddress()
+                _packet->getDestinationAddress()
                         == client)//we hit target
                 {                                                   
                     //cant really check anything, lets assume its proper
@@ -55,7 +55,7 @@ namespace Traceroute
                 const IcmpHeader * header = reinterpret_cast<const IcmpHeader *>(ptr);           
                 if(header->type == ICMP6_TIME_EXCEEDED ||
                 (header->type == ICMP6_DST_UNREACH && 
-                _packet->GetDestinationAddress()
+                _packet->getDestinationAddress()
                          == client))
                 {
                     isResponseValid = true;

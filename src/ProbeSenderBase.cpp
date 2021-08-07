@@ -1,4 +1,5 @@
 #include <Traceroute/ProbeSenderBase.hpp>
+#include <stdexcept>
 namespace Traceroute
 {
     
@@ -25,24 +26,24 @@ namespace Traceroute
                     ProbeResult r;
                     r.success = false;
                     r.timevalms = timeoutms;
-                    resultContainer.Add(r);
+                    resultContainer.add(r);
                     break;
                 }
 
                 int receivedn;
                 SocketAddress client;                 
                 int receivedProto; 
-                receivedn = _dataSender->ReceiveFrom(_receiveBuf,BUFLEN,client,receivedProto);
+                receivedn = _dataSender->receiveFrom(_receiveBuf,BUFLEN,client,receivedProto);
                 if(receivedn >0 && IsResponseValid(client,receivedProto))
                 {
                     string responseAddr = client.toString();                                        
-                    resultContainer.SetResponseAddr(responseAddr);
+                    resultContainer.setResponseAddr(responseAddr);
                     auto now = chrono::steady_clock::now();
                     int uspassed = chrono::duration_cast<chrono::microseconds>(now - start).count();
                     ProbeResult r;
                     r.success = true;
                     r.timevalms = (double)uspassed/1000.0;
-                    resultContainer.Add(r);
+                    resultContainer.add(r);
                     break;
                 }
 
@@ -62,10 +63,10 @@ namespace Traceroute
     }
     void ProbeSenderBase::SendPacket()
     {
-        _packet->Serialize(_sendBuf);
-        size_t packet_size = _packet->Serialize_size();
+        _packet->serialize(_sendBuf);
+        size_t packet_size = _packet->getSerializeSize();
         int sentn;
-        sentn = _dataSender->SendTo(_sendBuf,packet_size,_packet->GetDestinationAddress());
+        sentn = _dataSender->sendTo(_sendBuf,packet_size,_packet->getDestinationAddress());
     }
     char * ProbeSenderBase::GetReceiveBuf()
     {
@@ -78,7 +79,7 @@ namespace Traceroute
     void ProbeSenderBase::SetTtl(int ttl) 
     {
         _ttl = ttl;
-        _dataSender->SetTtl(ttl);
+        _dataSender->setTtl(ttl);
     }    
     
 }

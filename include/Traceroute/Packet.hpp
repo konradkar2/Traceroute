@@ -10,15 +10,15 @@ namespace Traceroute
     {
     public:     
         Packet(const SocketAddress & source, const SocketAddress & destination);
-        const SocketAddress & GetSourceAddress() const;
-        const SocketAddress & GetDestinationAddress() const;
-        const int & getFamily() const;
-        virtual std::size_t Serialize_size() const = 0;
-        virtual void Serialize(char* dataOut) const = 0;   
+        const SocketAddress & getSourceAddress() const;
+        const SocketAddress & getDestinationAddress() const;
+        int getFamily() const;
+        virtual std::size_t getSerializeSize() const = 0;
+        virtual void serialize(char* dataOut) const = 0;   
         virtual ~Packet(){}
     protected:
-        const SocketAddress _saddress;
-        const SocketAddress _daddress;
+        const SocketAddress mSourceAddress;
+        const SocketAddress mDestinationAddress;
     };
 
 
@@ -29,17 +29,17 @@ namespace Traceroute
         TcpPacket(const SocketAddress source, const SocketAddress destination,
             TcpHeader tcpHeader) : Packet(source,destination)
         {
-            _tcpHeader = tcpHeader;
+            mTcpHeader = tcpHeader;
         }
         TcpPacket(const SocketAddress source, const SocketAddress destination)
             : Packet(source,destination){};        
 
-        const TcpHeader & GetTcpHeader() const ;
-        std::size_t Serialize_size() const override;
-        void Serialize(char* dataOut) const override;       
+        const TcpHeader & getTcpHeader() const ;
+        std::size_t getSerializeSize() const override;
+        void serialize(char* dataOut) const override;       
         ~TcpPacket() {}
     private:             
-        TcpHeader _tcpHeader;
+        TcpHeader mTcpHeader;
     };
 
 
@@ -49,17 +49,17 @@ namespace Traceroute
         UdpPacket(const SocketAddress source, const SocketAddress destination,
             UdpHeader udpHeader) : Packet(source,destination)
         {
-            _udpHeader = udpHeader;
+            mUdpHeader = udpHeader;
         }
         UdpPacket(const SocketAddress source, const SocketAddress destination)
             : Packet(source,destination){} 
         const UdpHeader & GetUdpHeader() const ;
 
-        std::size_t Serialize_size() const override;
-        void Serialize(char* dataOut) const override;        
+        std::size_t getSerializeSize() const override;
+        void serialize(char* dataOut) const override;        
         ~UdpPacket() {}
     private:     
-        UdpHeader _udpHeader;
+        UdpHeader mUdpHeader;
 
     };
 
@@ -70,15 +70,15 @@ namespace Traceroute
         IcmpPacket(const SocketAddress source, const SocketAddress destination,
             IcmpHeader icmpHeader) : Packet(source,destination)
         {
-            _icmpHeader = icmpHeader;
+            mIcmpHeader = icmpHeader;
         }
         IcmpPacket(const SocketAddress source, const SocketAddress destination)
             : Packet(source,destination){}
         const IcmpHeader & GetIcmpHeader() const;
-        std::size_t Serialize_size() const override;
-        void Serialize(char* dataOut) const override;       
+        std::size_t getSerializeSize() const override;
+        void serialize(char* dataOut) const override;       
         ~IcmpPacket() {}
     private:       
-        IcmpHeader _icmpHeader;
+        IcmpHeader mIcmpHeader;
     };
 }

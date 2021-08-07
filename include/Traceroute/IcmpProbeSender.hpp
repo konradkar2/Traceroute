@@ -2,8 +2,7 @@
 #include "Probe.hpp"
 #include "Packet.hpp"
 #include "ProbeSenderBase.hpp"
-#include <netinet/ip_icmp.h>
-#include <netinet/icmp6.h>
+#include "SocketAddress.hpp"
 #include "IDataSender.hpp"
 namespace Traceroute
 {
@@ -16,6 +15,6 @@ namespace Traceroute
     protected:         
         bool IsResponseValid(const SocketAddress & client, const int & protocol) override;
     private:        
-        const IcmpPacket * _packet;
+        const IcmpPacket * mPacket;
     };
 }

@@ -1,9 +1,9 @@
 #include <Traceroute/Packet.hpp>
-
+#include <stdexcept>
 namespace Traceroute{
 
     Packet::Packet(const SocketAddress & source,
-     const SocketAddress & destination) : _saddress(source), _daddress(destination)
+     const SocketAddress & destination) : mSourceAddress(source), mDestinationAddress(destination)
      {
         if(destination.getFamily() != source.getFamily())
         {
@@ -11,58 +11,58 @@ namespace Traceroute{
         }
         
      }
-    const SocketAddress & Packet::GetSourceAddress() const
+    const SocketAddress & Packet::getSourceAddress() const
     {
-        return _saddress;
+        return mSourceAddress;
     }
-    const SocketAddress & Packet::GetDestinationAddress() const
+    const SocketAddress & Packet::getDestinationAddress() const
     {
-        return _daddress;
+        return mDestinationAddress;
     }
-    const int & Packet::getFamily() const
+    int Packet::getFamily() const
     {
-        return _saddress.getFamily();
+        return mSourceAddress.getFamily();
     }
     
-    void TcpPacket::Serialize(char * dataOut) const
+    void TcpPacket::serialize(char * dataOut) const
     {
         //dataOut = Serializer<Ipv4Header>::Serialize(dataOut, _ipv4Header);
-        dataOut = Serializer<TcpHeader>::Serialize(dataOut, _tcpHeader);       
+        dataOut = Serializer<TcpHeader>::serialize(dataOut, mTcpHeader);       
     }   
-    size_t TcpPacket::Serialize_size() const
+    size_t TcpPacket::getSerializeSize() const
     {
-        return Serializer<TcpHeader>::Serialize_size(_tcpHeader);      
+        return Serializer<TcpHeader>::getSize(mTcpHeader);      
     }
-    void UdpPacket::Serialize(char * dataOut) const
+    void UdpPacket::serialize(char * dataOut) const
     {
-        dataOut = Serializer<UdpHeader>::Serialize(dataOut, _udpHeader);       
+        dataOut = Serializer<UdpHeader>::serialize(dataOut, mUdpHeader);       
     }
    
-    size_t UdpPacket::Serialize_size() const
+    size_t UdpPacket::getSerializeSize() const
     {
-        return Serializer<UdpHeader>::Serialize_size(_udpHeader);
+        return Serializer<UdpHeader>::getSize(mUdpHeader);
                
     }
 
-    void IcmpPacket::Serialize(char * dataOut) const
+    void IcmpPacket::serialize(char * dataOut) const
     {
-        dataOut = Serializer<IcmpHeader>::Serialize(dataOut, _icmpHeader);       
+        dataOut = Serializer<IcmpHeader>::serialize(dataOut, mIcmpHeader);       
     }   
-    size_t IcmpPacket::Serialize_size() const
+    size_t IcmpPacket::getSerializeSize() const
     {
-        return Serializer<IcmpHeader>::Serialize_size(_icmpHeader);               
+        return Serializer<IcmpHeader>::getSize(mIcmpHeader);               
     }  
     const IcmpHeader & IcmpPacket::GetIcmpHeader() const
     {
-        return _icmpHeader;
+        return mIcmpHeader;
     }       
-    const TcpHeader & TcpPacket::GetTcpHeader() const
+    const TcpHeader & TcpPacket::getTcpHeader() const
     {
-        return _tcpHeader;
+        return mTcpHeader;
     }  
     const UdpHeader & UdpPacket::GetUdpHeader() const
     {
-        return _udpHeader;
+        return mUdpHeader;
     }
 }
 
