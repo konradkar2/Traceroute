@@ -21,13 +21,17 @@ set(Headers
 
 set(Sources
     src/Icmp/IcmpDataSender.cpp
-    #src/Icmp/IcmpProbeSender.cpp
     src/Icmp/IcmpResponseValidator.cpp
+    src/Icmp/V4/Icmp4ResponseValidator.hpp
+    src/Icmp/V4/Icmp4ResponseValidator.cpp
+    src/Icmp/V6/Icmp6ResponseValidator.hpp
+    src/Icmp/V6/Icmp6ResponseValidator.cpp
+
     src/Tcp/TcpDataSender.cpp
-    #src/Tcp/TcpProbeSender.cpp
+   
     src/Tcp/TcpResponseValidator.cpp
     src/Udp/UdpDataSender.cpp
-    #src/Udp/UdpProbeSender.cpp
+   
     src/Udp/UdpResponseValidator.cpp
     src/ChecksumCalculator.cpp
     
@@ -44,25 +48,8 @@ add_library(${This} STATIC ${Sources} ${Headers})
 set_target_properties(${This} PROPERTIES
     FOLDER Libraries
 )
-target_include_directories(${This} PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${This}>
-    $<INSTALL_INTERFACE:include/${This}>
-)
 
-target_include_directories(${This} PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${This}/Icmp>
-    $<INSTALL_INTERFACE:include/${This}/Icmp>
-)
 
-target_include_directories(${This} PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${This}/Tcp>
-    $<INSTALL_INTERFACE:include/${This}/Tcp>
-)
-
-target_include_directories(${This} PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${This}/Udp>
-    $<INSTALL_INTERFACE:include/${This}/Udp>
-)
 target_include_directories(${This} PUBLIC include)
 
 add_subdirectory(tests)

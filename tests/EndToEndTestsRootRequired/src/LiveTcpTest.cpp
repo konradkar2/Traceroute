@@ -19,22 +19,19 @@ struct LiveTcpTest_test_dot_com : public ::testing::Test
     int mSockDelay = 5;
     std::chrono::milliseconds mTimeout{100};
     Traceroute::ProbeSender *mProbeSender;
-    Traceroute::Tcp::TcpDataSender *mDataSender;
-    Traceroute::Tcp::TcpResponseValidator *mResponseValidator;
+
     void SetUp() override
     {
         mDestinationText = "69.172.200.235";
         mDestinationAddr = Traceroute::SocketAddress{mDestinationText};
         mSource = Traceroute::SocketAddress("192.168.132.129");
         mFamily = mDestinationAddr.getFamily();
-        mDataSender = new Traceroute::Tcp::TcpDataSender(mFamily, mSource, mSockDelay);
-        mResponseValidator = new Traceroute::Tcp::TcpResponseValidator;
-        mProbeSender = new Traceroute::ProbeSender(mDataSender, mResponseValidator);
+        
+        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::Tcp::TcpDataSender>(mFamily,mSource,mRetries),
+				std::make_unique<Traceroute::Tcp::TcpResponseValidator>());
     }
     void TearDown() override
     {
-        delete mDataSender;
-        delete mResponseValidator;
         delete mProbeSender;
     }
 };

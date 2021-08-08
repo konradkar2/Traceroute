@@ -20,22 +20,17 @@ struct LiveIcmpTest_8888 : public ::testing::Test
     int mSockDelay = 5;
     std::chrono::milliseconds mTimeout {100};
     Traceroute::ProbeSender * mProbeSender;
-    Traceroute::Icmp::IcmpDataSender * mDataSender;
-    Traceroute::Icmp::IcmpResponseValidator * mResponseValidator;
     void SetUp() override
     {
         mDestinationText = "8.8.8.8";
         mDestinationAddr = Traceroute::SocketAddress{mDestinationText};
         mSource = Traceroute::SocketAddress("192.168.132.129");
         mFamily = mDestinationAddr.getFamily();       
-        mDataSender = new Traceroute::Icmp::IcmpDataSender(mFamily, mSource, mSockDelay);
-        mResponseValidator = new Traceroute::Icmp::IcmpResponseValidator;
-        mProbeSender = new Traceroute::ProbeSender(mDataSender,mResponseValidator);
+        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::Icmp::IcmpDataSender>(mFamily,mSource,mRetries),
+					std::make_unique<Traceroute::Icmp::IcmpResponseValidator>());
     }
     void TearDown() override
     {
-        delete mDataSender;
-        delete mResponseValidator;
         delete mProbeSender;
     }
     

@@ -1,6 +1,6 @@
 #pragma once
-#include "HeaderTypes.hpp"
-#include "SocketAddress.hpp"
+#include <Traceroute/HeaderTypes.hpp>
+#include <Traceroute/SocketAddress.hpp>
 namespace Traceroute
 {
     class ChecksumCalculator

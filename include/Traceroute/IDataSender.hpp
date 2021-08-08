@@ -4,7 +4,6 @@
 
 namespace Traceroute 
 {
-    using SA  = struct sockaddr*;
     class IDataSender
     {
     public:

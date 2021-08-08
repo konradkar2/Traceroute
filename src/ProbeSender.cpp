@@ -1,11 +1,11 @@
-#include "ProbeSender.hpp"
+#include <Traceroute/ProbeSender.hpp>
 #include <stdexcept>
 namespace Traceroute
 {
-    ProbeSender::ProbeSender(IDataSender * dataSender,IValidateResponse * responseValidator)
+    ProbeSender::ProbeSender(std::unique_ptr<IDataSender> && dataSender, std::unique_ptr<IValidateResponse> && responseValidator)
+        :   mDataSender{std::move(dataSender)}, mResponseValidator{std::move(responseValidator)}
     {
-        mDataSender = dataSender;     
-        mResponseValidator = responseValidator; 
+
     }
     ProbeResultContainer ProbeSender::beginProbing(const Packet * packet,
             int ttl,int retries, std::chrono::microseconds timeout)

@@ -1,5 +1,5 @@
-#include "TcpResponseValidator.hpp"
-#include "Packet.hpp"
+#include <Traceroute/Tcp/TcpResponseValidator.hpp>
+#include <Traceroute/Packet.hpp>
 #include <sys/socket.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/icmp6.h>
