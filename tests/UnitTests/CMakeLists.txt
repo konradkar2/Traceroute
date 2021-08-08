@@ -5,15 +5,14 @@ set(This UnitTests)
 
 set(Sources
     src/SocketAddressTests.cpp
-    src/Icmp4ResponseValidatorTests.cpp
+    src/ResponseValidatorsTests/Icmp4ResponseValidatorTests.cpp
+    src/ResponseValidatorsTests/Utils.hpp
 )
 
 add_executable(${This} ${Sources})
 set_target_properties(${This} PROPERTIES
     FOLDER Tests/UnitTests
 )
-
-
 
 target_link_libraries(${This} PUBLIC
     gtest_main

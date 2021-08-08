@@ -34,7 +34,9 @@ namespace Traceroute
                 else if (icmp_hdr->type == ICMP_TIME_EXCEEDED) //we hit transit router
                 {
                     pResponse += sizeof(IcmpHeader);
-                    pResponse += sizeof(Ipv4Header); //skip ip header
+                    const Ipv4Header * icmpInnerIpHeader = reinterpret_cast<const Ipv4Header *>(pResponse);
+                    size_t icmpInnerIpHeaderSize = icmpInnerIpHeader->ihl << 2;
+                    pResponse += icmpInnerIpHeaderSize; //skip ip header
                     //look inside inner icmp header and check if it belongs to us
                     const IcmpHeader *inner_icmp_hdr = reinterpret_cast<const IcmpHeader *>(pResponse);
                     if (inner_icmp_hdr->id == icmpPacket.GetIcmpHeader().id)
