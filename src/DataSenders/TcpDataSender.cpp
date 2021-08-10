@@ -1,4 +1,4 @@
-#include <Traceroute/Tcp/TcpDataSender.hpp>
+#include <Traceroute/DataSenders/TcpDataSender.hpp>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <sys/socket.h>
@@ -7,14 +7,14 @@
 
 namespace Traceroute
 {
-    namespace Tcp
+    namespace DataSenders
     {
         TcpDataSender::TcpDataSender(int family, const SocketAddress &sourceAddr, int delayMs)
             : NBlockDataSenderBase(family, sourceAddr, delayMs)
         {
             mSfdTcp = socket(mFamily, SOCK_RAW | SOCK_NONBLOCK, IPPROTO_TCP);
 
-            if ((bind(mSfdTcp, SA sourceAddr.getSockaddrP(), sourceAddr.getSize())) < 0)
+            if ((bind(mSfdTcp, sourceAddr.getSockaddrP(), sourceAddr.getSize())) < 0)
             {
                 throw std::runtime_error("Could not bind address");
             }

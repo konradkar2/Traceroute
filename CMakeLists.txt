@@ -5,12 +5,13 @@ cmake_minimum_required(VERSION 3.16)
 set(This Traceroute)
 
 set(Headers
-    include/Traceroute/Icmp/IcmpDataSender.hpp
-    include/Traceroute/Icmp/IcmpResponseValidator.hpp
-    include/Traceroute/Tcp/TcpDataSender.hpp
-    include/Traceroute/Tcp/TcpResponseValidator.hpp
-    include/Traceroute/Udp/UdpDataSender.hpp
-    include/Traceroute/Udp/UdpResponseValidator.hpp
+    include/Traceroute/DataSenders/IcmpDataSender.hpp    
+    include/Traceroute/DataSenders/TcpDataSender.hpp
+    include/Traceroute/DataSenders/UdpDataSender.hpp
+    
+    include/Traceroute/ResponseValidators/UdpResponseValidator.hpp
+    include/Traceroute/ResponseValidators/IcmpResponseValidator.hpp
+    include/Traceroute/ResponseValidators/TcpResponseValidator.hpp
 
     include/Traceroute/ProbeSender.hpp
     include/Traceroute/PacketBuilder.hpp
@@ -20,28 +21,33 @@ set(Headers
 )
 
 set(Sources
-    src/Icmp/IcmpDataSender.cpp
-    src/Icmp/IcmpResponseValidator.cpp
-    src/Icmp/V4/Icmp4ResponseValidator.hpp
-    src/Icmp/V4/Icmp4ResponseValidator.cpp
-    src/Icmp/V6/Icmp6ResponseValidator.hpp
-    src/Icmp/V6/Icmp6ResponseValidator.cpp
+    src/DataSenders/IcmpDataSender.cpp
+    src/DataSenders/UdpDataSender.cpp    
+    src/DataSenders/TcpDataSender.cpp
 
-    src/Tcp/TcpDataSender.cpp
    
-    src/Tcp/TcpResponseValidator.cpp
-    src/Udp/UdpDataSender.cpp
+    src/ResponseValidators/IcmpResponseValidator.cpp
+    src/ResponseValidators/V4/Icmp4ResponseValidator.hpp
+    src/ResponseValidators/V4/Icmp4ResponseValidator.cpp
+    src/ResponseValidators/V4/Utils.hpp
+    src/ResponseValidators/V4/Utils.cpp
+    src/ResponseValidators/V6/Icmp6ResponseValidator.hpp
+    src/ResponseValidators/V6/Icmp6ResponseValidator.cpp
+
    
-    src/Udp/UdpResponseValidator.cpp
-    src/ChecksumCalculator.cpp
+    src/ResponseValidators/TcpResponseValidator.cpp
+    src/ResponseValidators/UdpResponseValidator.cpp
+   
+       
     
+    src/ChecksumCalculator.cpp
     src/NBlockDataSenderBase.cpp
     src/PacketBuilder.cpp
     src/Packet.cpp
     src/Probe.cpp
     src/ProbeSender.cpp
     src/SocketAddress.cpp
-    src/PodSerializer.hh
+    src/PodSerializer.hpp
 )
 
 add_library(${This} STATIC ${Sources} ${Headers})

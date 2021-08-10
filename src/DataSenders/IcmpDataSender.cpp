@@ -1,9 +1,9 @@
-#include <Traceroute/Icmp/IcmpDataSender.hpp>
+#include <Traceroute/DataSenders/IcmpDataSender.hpp>
 #include <netinet/in.h>
 
 namespace Traceroute
 {
-    namespace Icmp
+    namespace DataSenders
     {
         IcmpDataSender::IcmpDataSender(int family, const SocketAddress &sourceAddr, int delayMs)
             : NBlockDataSenderBase(family, sourceAddr, delayMs)

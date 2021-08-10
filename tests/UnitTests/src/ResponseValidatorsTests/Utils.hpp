@@ -8,15 +8,19 @@
 
 namespace ResponseValidatorsTests
 {
-    void fillIPv4Header(const Traceroute::SocketAddress &source, const Traceroute::SocketAddress &destination, int ihl,
-                        int protocol, int ttl, Traceroute::Ipv4Header *ipHeader)
+    template <typename RequestProtocol>
+    struct ResponseIcmp
     {
-        ipHeader->version = 4;
-        ipHeader->ihl = ihl;
-        ipHeader->protocol = protocol;
-        ipHeader->ttl = ttl;
-        ipHeader->saddr = reinterpret_cast<const sockaddr_in *>(source.getSockaddrP())->sin_addr.s_addr;
-        ipHeader->daddr = reinterpret_cast<const sockaddr_in *>(destination.getSockaddrP())->sin_addr.s_addr;
-        
-    }
+        struct ReceivedPacketCopy
+        {
+            Traceroute::Ipv4Header ipv4Header;
+            RequestProtocol protocolHeader;
+        };
+        Traceroute::Ipv4Header ipv4Header;
+        Traceroute::IcmpHeader icmpHeader;
+        ReceivedPacketCopy receivedPacketCopy;
+    };
+
+    void fillIPv4Header(const Traceroute::SocketAddress &source, const Traceroute::SocketAddress &destination, int ihl,
+                        int protocol, Traceroute::Ipv4Header *ipHeader);
 }

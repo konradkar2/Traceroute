@@ -4,21 +4,19 @@
 
 namespace Traceroute
 {
-    namespace Udp
+    namespace DataSenders
+
     {
-        class UdpDataSender : public NBlockDataSenderBase
+        class IcmpDataSender : public NBlockDataSenderBase
         {
         public:
-            UdpDataSender(int family, const SocketAddress &sourceAddr, int delayMs); //e.g IPPROTO_ICMP
-            ~UdpDataSender(){};
+            IcmpDataSender(int family, const SocketAddress &sourceAddr, int delayMs); //e.g IPPROTO_ICMP
+            ~IcmpDataSender(){};
 
         protected:
             int getSendingSocket() override;
             int getReceivingSocket() override;
             int getCurrentProtocol() override;
-
-        private:
-            int SfdUdp;
         };
-    }
+    } 
 }

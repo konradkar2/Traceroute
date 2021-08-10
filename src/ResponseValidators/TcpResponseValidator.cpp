@@ -1,11 +1,11 @@
-#include <Traceroute/Tcp/TcpResponseValidator.hpp>
+#include <Traceroute/ResponseValidators/TcpResponseValidator.hpp>
 #include <Traceroute/Packet.hpp>
 #include <sys/socket.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/icmp6.h>
 namespace Traceroute
 {
-    namespace Tcp
+    namespace ResponseValidators
     {
         bool TcpResponseValidator::isResponseValid(const Packet &request, const SocketAddress &client,
                 int protocol, const char *response, size_t responseSize)

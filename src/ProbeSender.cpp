@@ -46,9 +46,8 @@ namespace Traceroute
                     string responseAddr = client.toString();                                        
                     resultContainer.setResponseAddr(responseAddr);
                     auto now = chrono::steady_clock::now();
-                    auto uspassed = chrono::duration_cast<chrono::microseconds>(now - start);
-                    ProbeResultContainer::ProbeResult probeResult{true,uspassed};
-                    resultContainer.add(probeResult);
+                    auto uspassed = chrono::duration_cast<chrono::microseconds>(now - start);                     
+                    resultContainer.add(ProbeResultContainer::ProbeResult{true,uspassed});
                     break;
                 }
 

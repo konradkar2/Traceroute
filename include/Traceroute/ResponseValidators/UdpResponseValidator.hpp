@@ -4,9 +4,9 @@
 #include <cstdint>
 namespace Traceroute
 {
-    namespace Tcp
+    namespace ResponseValidators
     {
-        class TcpResponseValidator : public IValidateResponse
+        class UdpResponseValidator : public IValidateResponse
         {
             bool isResponseValid(const Packet &request, const SocketAddress &client,
                                  int protocol, const char *response, size_t responseSize) override;

@@ -1,6 +1,6 @@
 #include <Traceroute/Packet.hpp>
 #include <stdexcept>
-#include "PodSerializer.hh"
+#include "PodSerializer.hpp"
 #include "ChecksumCalculator.hpp"
 namespace Traceroute{
 

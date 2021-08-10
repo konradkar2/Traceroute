@@ -19,7 +19,7 @@ namespace Traceroute
         void setResponseAddr(const std::string & responseAddr);
         const std::string & GetResponseAddr() const;
         
-        std::string toString();     
+        std::string toString() const;
         const std::vector<ProbeResult> & getResults() const;
     private:
         std::vector<ProbeResult> mProbeResults;  
@@ -28,16 +28,6 @@ namespace Traceroute
     };
        
     
-    class TracerouteResultCointainer
-    {
-    public:
-        using ProtocolType = int;
-        TracerouteResultCointainer(const std::vector<ProbeResultContainer> & probeResults,
-             ProtocolType protocol);
-        std::string ResultsToString();
-    private:
-        ProtocolType mProtocol;
-        std::vector<ProbeResultContainer> & mProbeResultsContainers;
-    };
+
 
 }

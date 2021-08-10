@@ -1,7 +1,7 @@
 #include <Traceroute/SocketAddress.hpp>
 #include <Traceroute/PacketBuilder.hpp>
-#include <Traceroute/Icmp/IcmpDataSender.hpp>
-#include <Traceroute/Icmp/IcmpResponseValidator.hpp>
+#include <Traceroute/DataSenders/IcmpDataSender.hpp>
+#include <Traceroute/ResponseValidators/IcmpResponseValidator.hpp>
 #include <Traceroute/ProbeSender.hpp>
 #include <gtest/gtest.h>
 #include <algorithm>
@@ -26,8 +26,8 @@ struct LiveIcmpTest_8888 : public ::testing::Test
         mDestinationAddr = Traceroute::SocketAddress{mDestinationText};
         mSource = Traceroute::SocketAddress("192.168.132.129");
         mFamily = mDestinationAddr.getFamily();       
-        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::Icmp::IcmpDataSender>(mFamily,mSource,mRetries),
-					std::make_unique<Traceroute::Icmp::IcmpResponseValidator>());
+        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::DataSenders::IcmpDataSender>(mFamily,mSource,mRetries),
+					std::make_unique<Traceroute::ResponseValidators::IcmpResponseValidator>());
     }
     void TearDown() override
     {
@@ -54,5 +54,13 @@ TEST_F(LiveIcmpTest_8888, GotResponse)
         return probe.GetResponseAddr() == dText;
     });
     EXPECT_TRUE(found != probes.end()) << "Didn't found ";
+
+    std::string result;
+    for(const auto & probeResult : probes)
+    {
+        result+= probeResult.toString() + "\n";
+    }
+    std::cerr << result;
+    
     
 }

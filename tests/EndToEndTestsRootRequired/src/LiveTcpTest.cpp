@@ -1,8 +1,8 @@
 #include <Traceroute/SocketAddress.hpp>
 #include <Traceroute/PacketBuilder.hpp>
-#include <Traceroute/Tcp/TcpResponseValidator.hpp>
+#include <Traceroute/ResponseValidators/TcpResponseValidator.hpp>
 #include <Traceroute/ProbeSender.hpp>
-#include <Traceroute/Tcp/TcpDataSender.hpp>
+#include <Traceroute/DataSenders/TcpDataSender.hpp>
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <string>
@@ -27,8 +27,8 @@ struct LiveTcpTest_test_dot_com : public ::testing::Test
         mSource = Traceroute::SocketAddress("192.168.132.129");
         mFamily = mDestinationAddr.getFamily();
         
-        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::Tcp::TcpDataSender>(mFamily,mSource,mRetries),
-				std::make_unique<Traceroute::Tcp::TcpResponseValidator>());
+        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::DataSenders::TcpDataSender>(mFamily,mSource,mRetries),
+				std::make_unique<Traceroute::ResponseValidators::TcpResponseValidator>());
     }
     void TearDown() override
     {
@@ -53,4 +53,11 @@ TEST_F(LiveTcpTest_test_dot_com, GotResponse)
     auto found = std::find_if(probes.cbegin(), probes.cend(), [dText = mDestinationText](const Traceroute::ProbeResultContainer &probe)
                               { return probe.GetResponseAddr() == dText; });
     EXPECT_TRUE(found != probes.end()) << "Didn't found " << mDestinationText;
+
+    std::string result;
+    for(const auto & probeResult : probes)
+    {
+        result+= probeResult.toString() + "\n";
+    }
+    std::cerr << result;
 }

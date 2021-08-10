@@ -1,4 +1,4 @@
-#include <Traceroute/Udp/UdpDataSender.hpp>
+#include <Traceroute/DataSenders/UdpDataSender.hpp>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <stdexcept>
@@ -7,7 +7,7 @@
 
 namespace Traceroute
 {
-    namespace Udp
+    namespace DataSenders
     {
         UdpDataSender::UdpDataSender(int family, const SocketAddress &sourceAddr, int delayMs)
             : NBlockDataSenderBase(family, sourceAddr, delayMs)

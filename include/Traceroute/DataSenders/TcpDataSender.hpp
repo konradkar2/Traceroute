@@ -3,7 +3,7 @@
 #include <Traceroute/SocketAddress.hpp>
 namespace Traceroute
 {
-    namespace Tcp
+    namespace DataSenders
     {
         class TcpDataSender : public NBlockDataSenderBase
         {

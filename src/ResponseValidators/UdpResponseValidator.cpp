@@ -1,11 +1,11 @@
-#include <Traceroute/Udp/UdpResponseValidator.hpp>
+#include <Traceroute/ResponseValidators/UdpResponseValidator.hpp>
 #include <Traceroute/Packet.hpp>
 #include <netinet/ip_icmp.h>
 #include <netinet/icmp6.h>
 
 namespace Traceroute
 {
-    namespace Udp
+    namespace ResponseValidators
     {
         bool UdpResponseValidator::isResponseValid(const Packet &request, const SocketAddress &client,
                                                    int protocol, const char *response, size_t responseSize)

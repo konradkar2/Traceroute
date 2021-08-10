@@ -4,7 +4,7 @@
 #include <Traceroute/HeaderTypes.hpp>
 namespace Traceroute
 {
-    namespace Icmp
+    namespace ResponseValidators
     {
         namespace V6
         {
