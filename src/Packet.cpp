@@ -2,22 +2,22 @@
 #include <stdexcept>
 #include "PodSerializer.hpp"
 #include "ChecksumCalculator.hpp"
-namespace Traceroute{
+namespace Traceroute
+{
 
-    Packet::Packet(const SocketAddress & source,
-     const SocketAddress & destination) : mSourceAddress(source), mDestinationAddress(destination)
-     {
-        if(destination.getFamily() != source.getFamily())
+    Packet::Packet(const SocketAddress &source,
+                   const SocketAddress &destination) : mSourceAddress(source), mDestinationAddress(destination)
+    {
+        if (destination.getFamily() != source.getFamily())
         {
             throw runtime_error("source address family doesnt match destination");
         }
-        
-     }
-    const SocketAddress & Packet::getSourceAddress() const
+    }
+    const SocketAddress &Packet::getSourceAddress() const
     {
         return mSourceAddress;
     }
-    const SocketAddress & Packet::getDestinationAddress() const
+    const SocketAddress &Packet::getDestinationAddress() const
     {
         return mDestinationAddress;
     }
@@ -25,49 +25,31 @@ namespace Traceroute{
     {
         return mSourceAddress.getFamily();
     }
-    
-    void TcpPacket::serialize(char * dataOut) const
+
+    std::string TcpPacket::serialize() const
     {
-        //dataOut = PodSerializer<Ipv4Header>::Serialize(dataOut, _ipv4Header);
-        dataOut = PodSerializer<TcpHeader>::serialize(dataOut, mTcpHeader);       
-    }   
-    size_t TcpPacket::getSerializeSize() const
-    {
-        return PodSerializer<TcpHeader>::getSize();      
-    }
-    void UdpPacket::serialize(char * dataOut) const
-    {
-        dataOut = PodSerializer<UdpHeader>::serialize(dataOut, mUdpHeader);       
-    }
-   
-    size_t UdpPacket::getSerializeSize() const
-    {
-        return PodSerializer<UdpHeader>::getSize();
-               
+        return PodSerializer<TcpHeader>::serialize(mTcpHeader);
     }
 
-    void IcmpPacket::serialize(char * dataOut) const
+    std::string UdpPacket::serialize() const
     {
-        dataOut = PodSerializer<IcmpHeader>::serialize(dataOut, mIcmpHeader);       
-    }   
-    size_t IcmpPacket::getSerializeSize() const
+        return PodSerializer<UdpHeader>::serialize(mUdpHeader);
+    }
+
+    std::string IcmpPacket::serialize() const
     {
-        return PodSerializer<IcmpHeader>::getSize();               
-    }  
-    const IcmpHeader & IcmpPacket::GetIcmpHeader() const
+        return PodSerializer<IcmpHeader>::serialize(mIcmpHeader);
+    }
+    const IcmpHeader &IcmpPacket::GetIcmpHeader() const
     {
         return mIcmpHeader;
-    }       
-    const TcpHeader & TcpPacket::getTcpHeader() const
+    }
+    const TcpHeader &TcpPacket::getTcpHeader() const
     {
         return mTcpHeader;
-    }  
-    const UdpHeader & UdpPacket::GetUdpHeader() const
+    }
+    const UdpHeader &UdpPacket::GetUdpHeader() const
     {
         return mUdpHeader;
     }
 }
-
-
-
-

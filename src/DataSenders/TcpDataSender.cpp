@@ -10,9 +10,9 @@ namespace Traceroute
     namespace DataSenders
     {
         TcpDataSender::TcpDataSender(int family, const SocketAddress &sourceAddr, int delayMs)
-            : NBlockDataSenderBase(family, sourceAddr, delayMs)
+            : DataSenderBase(family, sourceAddr, delayMs)
         {
-            mSfdTcp = socket(mFamily, SOCK_RAW | SOCK_NONBLOCK, IPPROTO_TCP);
+            mSfdTcp = socket(mFamily, SOCK_RAW , IPPROTO_TCP);
 
             if ((bind(mSfdTcp, sourceAddr.getSockaddrP(), sourceAddr.getSize())) < 0)
             {
@@ -27,36 +27,40 @@ namespace Traceroute
                     throw std::runtime_error("Could not set IPV6_CHECKSUM flag");
                 }
             }
-            mCurrentSfd = mSfdIcmp;
         }
 
-        int TcpDataSender::getCurrentProtocol()
-        {
-            int temp = -1;
-            if (mCurrentSfd == mSfdTcp)
-                temp = IPPROTO_TCP;
-            else
-            {
-                if (mFamily == AF_INET)
-                    temp = IPPROTO_ICMP;
-                else
-                    temp = IPPROTO_ICMPV6;
-            }
-            return temp;
-        }
+        // int TcpDataSender::getCurrentProtocol()
+        // {
+        //     int temp = -1;
+        //     if (mCurrentSfd == mSfdTcp)
+        //         temp = IPPROTO_TCP;
+        //     else
+        //     {
+        //         if (mFamily == AF_INET)
+        //             temp = IPPROTO_ICMP;
+        //         else
+        //             temp = IPPROTO_ICMPV6;
+        //     }
+        //     return temp;
+        // }
         int TcpDataSender::getSendingSocket()
         {
             return mSfdTcp;
         }
 
-        int TcpDataSender::getReceivingSocket()
+        std::vector<DataSenderBase::SocketInfo> TcpDataSender::getReceivingSockets()
         {
-            int temp = mCurrentSfd;
-
-            //swap current receiving socket
-            mCurrentSfd = (mCurrentSfd == mSfdIcmp) ? mSfdTcp : mSfdIcmp;
-
-            return temp;
+            DataSenderBase::SocketInfo tcpSocketInfo;
+            tcpSocketInfo.sfd = mSfdTcp;
+            tcpSocketInfo.protocol = IPPROTO_TCP;
+            DataSenderBase::SocketInfo icmpSocketInfo;
+            icmpSocketInfo.sfd = mSfdIcmp;
+            if (mFamily == AF_INET)
+                icmpSocketInfo.protocol =  IPPROTO_ICMP;
+            else
+                icmpSocketInfo.protocol =  IPPROTO_ICMPV6;
+          
+            return std::vector{tcpSocketInfo,icmpSocketInfo};
         }
 
     }

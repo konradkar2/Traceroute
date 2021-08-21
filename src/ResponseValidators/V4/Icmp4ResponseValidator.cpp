@@ -8,14 +8,16 @@ namespace Traceroute
     {
         namespace V4
         {
-
-            bool checkForEchoReply(const char *dataPtr, const IcmpPacket &icmpPacket, const SocketAddress &client);
-            bool checkForTimeExceeded(const char *dataPtr, const IcmpPacket &icmpPacket);
+            namespace
+            {
+                bool checkForEchoReply(const char *dataPtr, const IcmpPacket &icmpPacket, const SocketAddress &client);
+                bool checkForTimeExceeded(const char *dataPtr, const IcmpPacket &icmpPacket);
+            }
 
             bool Icmp4ResponseValidator::isResponseValid(const Packet &request, const SocketAddress &client,
                                                          int protocol, const char *response, size_t responseSize)
             {
-                const auto &icmpPacket = dynamic_cast<const IcmpPacket &>(request);               
+                const auto &icmpPacket = dynamic_cast<const IcmpPacket &>(request);
                 response = skipIpHeader(response);
                 if (checkForEchoReply(response, icmpPacket, client) ||
                     checkForTimeExceeded(response, icmpPacket))
@@ -23,30 +25,33 @@ namespace Traceroute
 
                 return false;
             }
-
-            bool checkForEchoReply(const char *icmpHdrP, const IcmpPacket &icmpPacket, const SocketAddress &client)
+            
+            namespace
             {
-                const IcmpHeader *icmpHdr = reinterpret_cast<const IcmpHeader *>(icmpHdrP);
-                if (icmpHdr->type == ICMP_ECHOREPLY)
+                bool checkForEchoReply(const char *icmpHdrP, const IcmpPacket &icmpPacket, const SocketAddress &client)
                 {
-                    if (client == icmpPacket.getDestinationAddress() &&
-                        icmpHdr->sequence == icmpPacket.GetIcmpHeader().sequence)
-                        return true;
+                    const IcmpHeader *icmpHdr = reinterpret_cast<const IcmpHeader *>(icmpHdrP);
+                    if (icmpHdr->type == ICMP_ECHOREPLY)
+                    {
+                        if (client == icmpPacket.getDestinationAddress() &&
+                            icmpHdr->sequence == icmpPacket.GetIcmpHeader().sequence)
+                            return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-            bool checkForTimeExceeded(const char *icmpHdrP, const IcmpPacket &icmpPacket)
-            {
-                const IcmpHeader *icmpHdr = reinterpret_cast<const IcmpHeader *>(icmpHdrP);
-                if (icmpHdr->type == ICMP_TIME_EXCEEDED)
+                bool checkForTimeExceeded(const char *icmpHdrP, const IcmpPacket &icmpPacket)
                 {
-                    icmpHdrP += sizeof(IcmpHeader);
-                    icmpHdrP = skipIpHeader(icmpHdrP);
-                    const IcmpHeader *inner_icmp_hdr = reinterpret_cast<const IcmpHeader *>(icmpHdrP);
-                    if (inner_icmp_hdr->id == icmpPacket.GetIcmpHeader().id)
-                        return true;
+                    const IcmpHeader *icmpHdr = reinterpret_cast<const IcmpHeader *>(icmpHdrP);
+                    if (icmpHdr->type == ICMP_TIME_EXCEEDED)
+                    {
+                        icmpHdrP += sizeof(IcmpHeader);
+                        icmpHdrP = skipIpHeader(icmpHdrP);
+                        const IcmpHeader *inner_icmp_hdr = reinterpret_cast<const IcmpHeader *>(icmpHdrP);
+                        if (inner_icmp_hdr->id == icmpPacket.GetIcmpHeader().id)
+                            return true;
+                    }
+                    return false;
                 }
-                return false;
             }
 
         }

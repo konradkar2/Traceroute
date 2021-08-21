@@ -12,7 +12,7 @@ namespace Traceroute
         struct ProbeResult
         {   
             bool success;
-            std::chrono::microseconds receivedAfterTimeout;
+            std::chrono::microseconds receivedAfter;
         };
         ProbeResultContainer(int ttl);
         void add(ProbeResult result);

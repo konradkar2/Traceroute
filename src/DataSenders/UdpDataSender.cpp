@@ -10,9 +10,9 @@ namespace Traceroute
     namespace DataSenders
     {
         UdpDataSender::UdpDataSender(int family, const SocketAddress &sourceAddr, int delayMs)
-            : NBlockDataSenderBase(family, sourceAddr, delayMs)
+            : DataSenderBase(family, sourceAddr, delayMs)
         {
-            SfdUdp = socket(mFamily, SOCK_RAW | SOCK_NONBLOCK, IPPROTO_UDP);
+            SfdUdp = socket(mFamily, SOCK_RAW , IPPROTO_UDP);
             if ((bind(SfdUdp, SA sourceAddr.getSockaddrP(), sourceAddr.getSize())) < 0)
             {
                 throw std::runtime_error("Could not bind address");
@@ -27,22 +27,29 @@ namespace Traceroute
                 }
             }
         }
-        int UdpDataSender::getCurrentProtocol()
-        {
-            int temp = -1;
-            if(mFamily == AF_INET)
-                temp = IPPROTO_ICMP;
-            else
-                temp = IPPROTO_ICMPV6;
-            return temp;
-        }
+        // int UdpDataSender::getCurrentProtocol()
+        // {
+        //     int temp = -1;
+        //     if (mFamily == AF_INET)
+        //         temp = IPPROTO_ICMP;
+        //     else
+        //         temp = IPPROTO_ICMPV6;
+        //     return temp;
+        // }
         int UdpDataSender::getSendingSocket()
         {
             return SfdUdp;
         }
-        int UdpDataSender::getReceivingSocket()
+        std::vector<DataSenderBase::SocketInfo>  UdpDataSender::getReceivingSockets()
         {
-            return mSfdIcmp;
+            SocketInfo icmpSocketInfo;
+            icmpSocketInfo.sfd = mSfdIcmp;
+            if (mFamily == AF_INET)
+                icmpSocketInfo.protocol =  IPPROTO_ICMP;
+            else
+                icmpSocketInfo.protocol =  IPPROTO_ICMPV6;
+            
+            return std::vector{icmpSocketInfo};
         }
     }
 

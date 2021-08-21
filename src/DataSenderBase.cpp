@@ -1,4 +1,4 @@
-#include <Traceroute/NBlockDataSenderBase.hpp>
+#include <Traceroute/DataSenderBase.hpp>
 #include <string>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -6,11 +6,13 @@
 #include <thread>
 #include <netinet/icmp6.h>
 #include <cstdint>
+#include <poll.h>
+#include <array>
 
 #define SA (struct sockaddr *)
 namespace Traceroute
 {
-    NBlockDataSenderBase::NBlockDataSenderBase(int family, const SocketAddress &sourceAddr, int delayMs)
+    DataSenderBase::DataSenderBase(int family, const SocketAddress &sourceAddr, int delayMs)
     {
         mFamily = family;
         if (mFamily != sourceAddr.getFamily())
@@ -28,39 +30,47 @@ namespace Traceroute
         }
         if (mFamily == AF_INET6)
         {
-            struct icmp6_filter myfilt;
-            ICMP6_FILTER_SETBLOCKALL(&myfilt);
-            //receive only echo reply, timeexceeded,dest unreachable);
-            ICMP6_FILTER_SETPASS(ICMP6_ECHO_REPLY, &myfilt);
-            ICMP6_FILTER_SETPASS(ICMP6_TIME_EXCEEDED, &myfilt);
-            ICMP6_FILTER_SETPASS(ICMP6_DST_UNREACH, &myfilt);
-            if (setsockopt(mSfdIcmp, IPPROTO_ICMPV6, ICMP6_FILTER, &myfilt, sizeof(myfilt)) < 0)
+            struct icmp6_filter filter;
+            ICMP6_FILTER_SETBLOCKALL(&filter);
+            ICMP6_FILTER_SETPASS(ICMP6_ECHO_REPLY, &filter);
+            ICMP6_FILTER_SETPASS(ICMP6_TIME_EXCEEDED, &filter);
+            ICMP6_FILTER_SETPASS(ICMP6_DST_UNREACH, &filter);
+            if (setsockopt(mSfdIcmp, IPPROTO_ICMPV6, ICMP6_FILTER, &filter, sizeof(filter)) < 0)
             {
                 throw std::runtime_error("Error occured while setting icmpv6 filter: setsockopt(..): " + std::string(strerror(errno)));
             }
         }
     }
-    int NBlockDataSenderBase::receiveFrom(char *buffer, size_t size, SocketAddress &address, int &protocol)
+   
+    int DataSenderBase::receiveFrom(char *buffer, size_t size, SocketAddress &address, int &protocol)
     {
-        sockaddr_storage temp;
-        socklen_t len = sizeof(temp);
-        protocol = getCurrentProtocol();
-        int n = recvfrom(getReceivingSocket(), buffer, size, 0, SA & temp, &len);
-        if (n < 0 && errno != EAGAIN)
+        int n = 0;
+        std::vector<SocketInfo> socketInfos = getReceivingSockets();
+        std::vector<struct pollfd> pollfds;
+        for(auto socketInfo : socketInfos)
         {
-            throw std::runtime_error("Error occured while reading data: " + std::string(strerror(errno)));
+            struct pollfd fd;
+            fd.fd = socketInfo.sfd;
+            fd.events = POLLIN;
+            pollfds.push_back(fd);
         }
-        else if (n == 0)
+        ret = poll(pollfds, 1, 100); 
+        switch (ret)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(mDelayMs));
-        }
-        else
-        {
+        case -1:
+            throw std::runtime_error("Error occured on polling: " + std::string(strerror(errno)));
+            break;
+        case 0:
+            break;
+        default:
+            sockaddr_storage temp;
+            socklen_t len = sizeof(temp);
+            n = recvfrom(fd[0].fd, buffer, size, 0, SA & temp, &len);
             address = SocketAddress{temp};
         }
         return n;
     }
-    void NBlockDataSenderBase::setTtl(int ttl)
+    void DataSenderBase::setTtl(int ttl)
     {
         switch (mFamily)
         {
@@ -82,21 +92,21 @@ namespace Traceroute
         }
         }
     }
-    int NBlockDataSenderBase::sendTo(const char *buffer, size_t size, const SocketAddress &address)
+    int DataSenderBase::sendTo(const std::string &&buffer, const SocketAddress &address)
     {
         if (mFamily != address.getFamily())
         {
             throw std::invalid_argument("Provided address is invalid");
         }
 
-        int result = sendto(getSendingSocket(), buffer, size, 0, address.getSockaddrP(), address.getSize());
+        int result = sendto(getSendingSocket(), buffer.c_str(), buffer.size(), 0, address.getSockaddrP(), address.getSize());
         if (result < 0)
         {
             throw std::runtime_error("Error occured while sending data " + std::string(strerror(errno)));
         }
         return result;
     }
-    int NBlockDataSenderBase::getReceiveDelayMs()
+    int DataSenderBase::getReceiveDelayMs()
     {
         return mDelayMs;
     }

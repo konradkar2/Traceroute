@@ -16,11 +16,10 @@ namespace Traceroute
                 const char *pResponse = response;
 
                 const IcmpHeader *header = reinterpret_cast<const IcmpHeader *>(pResponse);
-                //we hit transit router
                 if (header->type == ICMP6_TIME_EXCEEDED)
                 {
                     pResponse += sizeof(IcmpHeader);
-                    pResponse += Ipv6HeaderSize; //skip ipv6 inner header
+                    pResponse += Ipv6HeaderSize; 
                     const IcmpHeader *inner_icmp_header = reinterpret_cast<const IcmpHeader *>(pResponse);
                     if (inner_icmp_header->id == icmpPacket.GetIcmpHeader().id)
                     {

@@ -1,11 +1,11 @@
 #pragma once
-#include <Traceroute/NBlockDataSenderBase.hpp>
+#include <Traceroute/DataSenderBase.hpp>
 #include <Traceroute/SocketAddress.hpp>
 namespace Traceroute
 {
     namespace DataSenders
     {
-        class TcpDataSender : public NBlockDataSenderBase
+        class TcpDataSender : public DataSenderBase
         {
         public:
             TcpDataSender(int family, const SocketAddress &sourceAddr, int delayMs); //e.g IPPROTO_ICMP
@@ -13,13 +13,10 @@ namespace Traceroute
 
         protected:
             int getSendingSocket() override;
-            int getReceivingSocket() override;
-            int getCurrentProtocol() override;
+            std::vector<SocketInfo> getReceivingSockets() override;
 
         private:
-            void nextSocket();
             int mSfdTcp;
-            int mCurrentSfd;
         };
     }
 }

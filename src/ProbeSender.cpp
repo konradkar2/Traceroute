@@ -29,7 +29,7 @@ namespace Traceroute
                 {
                     ProbeResultContainer::ProbeResult r;
                     r.success = false;
-                    r.receivedAfterTimeout = timeout;
+                    r.receivedAfter = timeout;
                     resultContainer.add(r);
                     break;
                 }
@@ -60,9 +60,7 @@ namespace Traceroute
     
     void ProbeSender::sendPacket()
     {
-        mPacket->serialize(mSendingBuffer);
-        size_t packetSize = mPacket->getSerializeSize();
-        mDataSender->sendTo(mSendingBuffer,packetSize,mPacket->getDestinationAddress());
+        mDataSender->sendTo(mPacket->serialize(),mPacket->getDestinationAddress());
     }
    
     void ProbeSender::setTtl(int ttl) 

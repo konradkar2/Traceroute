@@ -7,12 +7,10 @@ set(This Traceroute)
 set(Headers
     include/Traceroute/DataSenders/IcmpDataSender.hpp    
     include/Traceroute/DataSenders/TcpDataSender.hpp
-    include/Traceroute/DataSenders/UdpDataSender.hpp
-    
+    include/Traceroute/DataSenders/UdpDataSender.hpp    
     include/Traceroute/ResponseValidators/UdpResponseValidator.hpp
     include/Traceroute/ResponseValidators/IcmpResponseValidator.hpp
     include/Traceroute/ResponseValidators/TcpResponseValidator.hpp
-
     include/Traceroute/ProbeSender.hpp
     include/Traceroute/PacketBuilder.hpp
     include/Traceroute/SocketAddress.hpp    
@@ -23,25 +21,18 @@ set(Headers
 set(Sources
     src/DataSenders/IcmpDataSender.cpp
     src/DataSenders/UdpDataSender.cpp    
-    src/DataSenders/TcpDataSender.cpp
-
-   
+    src/DataSenders/TcpDataSender.cpp   
     src/ResponseValidators/IcmpResponseValidator.cpp
     src/ResponseValidators/V4/Icmp4ResponseValidator.hpp
     src/ResponseValidators/V4/Icmp4ResponseValidator.cpp
     src/ResponseValidators/V4/Utils.hpp
     src/ResponseValidators/V4/Utils.cpp
     src/ResponseValidators/V6/Icmp6ResponseValidator.hpp
-    src/ResponseValidators/V6/Icmp6ResponseValidator.cpp
-
-   
+    src/ResponseValidators/V6/Icmp6ResponseValidator.cpp   
     src/ResponseValidators/TcpResponseValidator.cpp
-    src/ResponseValidators/UdpResponseValidator.cpp
-   
-       
-    
+    src/ResponseValidators/UdpResponseValidator.cpp       
     src/ChecksumCalculator.cpp
-    src/NBlockDataSenderBase.cpp
+    src/DataSenderBase.cpp
     src/PacketBuilder.cpp
     src/Packet.cpp
     src/Probe.cpp

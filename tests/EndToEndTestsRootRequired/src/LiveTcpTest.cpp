@@ -24,7 +24,7 @@ struct LiveTcpTest_test_dot_com : public ::testing::Test
     {
         mDestinationText = "69.172.200.235";
         mDestinationAddr = Traceroute::SocketAddress{mDestinationText};
-        mSource = Traceroute::SocketAddress("192.168.132.129");
+        mSource = Traceroute::SocketAddress("192.168.197.250");
         mFamily = mDestinationAddr.getFamily();
         
         mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::DataSenders::TcpDataSender>(mFamily,mSource,mRetries),

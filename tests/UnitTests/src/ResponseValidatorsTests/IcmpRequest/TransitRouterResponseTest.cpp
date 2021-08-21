@@ -1,5 +1,5 @@
 
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <string>
 #include <vector>
 #include "ResponseValidators/V4/Icmp4ResponseValidator.hpp"
@@ -9,6 +9,7 @@
 #include <netinet/ip_icmp.h>
 #include "../Utils.hpp"
 
+using ::testing::Eq;
 namespace ResponseValidatorsTests
 {
     namespace IcmpRequest
@@ -34,25 +35,25 @@ namespace ResponseValidatorsTests
             }
         };
 
-        TEST_F(Icmp4TimeExceed, hitTransitRouterAndItRespondedWithIcmpTimeExceededContainingProperIcmpIdTest)
+        TEST_F(Icmp4TimeExceed, hitTransitRouterAndItRespondedWithIcmpTimeExceededContainingProperIcmpId)
         {
             response.receivedPacketCopy.protocolHeader.id = icmpProbePacket.GetIcmpHeader().id;
             const char *dataPtr = reinterpret_cast<const char *>(&response);
             size_t responseSize = sizeof(response);
 
-            auto result = validator->isResponseValid(icmpProbePacket, responseSourceTransitRouter, protocol, dataPtr, responseSize);
+            bool isResponseValid = validator->isResponseValid(icmpProbePacket, responseSourceTransitRouter, protocol, dataPtr, responseSize);
 
-            EXPECT_TRUE(result);
+            EXPECT_THAT(isResponseValid, Eq(true));
         }
-        TEST_F(Icmp4TimeExceed, hitTransitRouterAndItRespondedWithIcmpTimeExceededNOTContainingProperIcmpIdTest)
+        TEST_F(Icmp4TimeExceed, hitTransitRouterAndItRespondedWithIcmpTimeExceededNOTContainingProperIcmpId)
         {
             response.receivedPacketCopy.protocolHeader.id = icmpProbePacket.GetIcmpHeader().id - 1;
             const char *dataPtr = reinterpret_cast<const char *>(&response);
             size_t responseSize = sizeof(response);
 
-            auto result = validator->isResponseValid(icmpProbePacket, responseSourceTransitRouter, protocol, dataPtr, responseSize);
+            bool isResponseValid = validator->isResponseValid(icmpProbePacket, responseSourceTransitRouter, protocol, dataPtr, responseSize);
 
-            EXPECT_FALSE(result);
+            EXPECT_THAT(isResponseValid, Eq(false));
         }
       
     }

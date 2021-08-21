@@ -11,8 +11,6 @@ namespace Traceroute
             public:
                 bool isResponseValid(const Packet &request, const SocketAddress &client,
                                      int protocol, const char *response, size_t responseSize) override;
-            
-               
             };
         }
     }
