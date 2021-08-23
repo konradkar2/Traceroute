@@ -1,22 +1,24 @@
 #pragma once
-#include <Traceroute/DataSenderBase.hpp>
+#include <Traceroute/IDataSender.hpp>
 #include <Traceroute/SocketAddress.hpp>
+#include <memory>
+#include <chrono>
+
 namespace Traceroute
 {
     namespace DataSenders
     {
-        class TcpDataSender : public DataSenderBase
+        class TcpDataSender : public IDataSender
         {
         public:
-            TcpDataSender(int family, const SocketAddress &sourceAddr, int delayMs); //e.g IPPROTO_ICMP
+            TcpDataSender(const SocketAddress &sourceAddr, std::chrono::milliseconds receiveTimeout); 
             ~TcpDataSender(){};
-
-        protected:
-            int getSendingSocket() override;
-            std::vector<SocketInfo> getReceivingSockets() override;
-
+            int sendTo(const std::string &&buffer, const SocketAddress &receiver) override;
+            int receiveFrom(char *buffer, size_t size, SocketAddress &sender, int &protocol) override;
+            void setTtl(int ttl) override;
+            
         private:
-            int mSfdTcp;
+            std::unique_ptr<IDataSender> mDataSenderBase;
         };
     }
 }

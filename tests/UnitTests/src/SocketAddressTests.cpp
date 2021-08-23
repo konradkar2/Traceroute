@@ -10,7 +10,7 @@ TEST(SocketAddressTests, AddressIsParsedWithProperFamily4)
     const auto expectedFamily = AF_INET;
 
     Traceroute::SocketAddress socketAddress{address};
-    auto family = socketAddress.getFamily();
+    auto family = socketAddress.family();
 
     EXPECT_EQ(expectedFamily,family);
 }
@@ -20,7 +20,7 @@ TEST(SocketAddressTests, AddressIsParsedWithProperFamily6)
     const auto expectedFamily = AF_INET6;
 
     Traceroute::SocketAddress socketAddress{address};
-    auto family = socketAddress.getFamily();
+    auto family = socketAddress.family();
 
     EXPECT_EQ(expectedFamily,family);
 }

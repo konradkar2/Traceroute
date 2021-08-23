@@ -17,17 +17,18 @@ struct LiveTcpTest_test_dot_com : public ::testing::Test
     int mFamily;
     int mRetries = 2;
     int mSockDelay = 5;
-    std::chrono::milliseconds mTimeout{100};
+    std::chrono::milliseconds mTimeoutTotal {100};
+    std::chrono::milliseconds mPollTimeout {5};
     Traceroute::ProbeSender *mProbeSender;
 
     void SetUp() override
     {
         mDestinationText = "69.172.200.235";
         mDestinationAddr = Traceroute::SocketAddress{mDestinationText};
-        mSource = Traceroute::SocketAddress("192.168.197.250");
-        mFamily = mDestinationAddr.getFamily();
+        mSource = Traceroute::SocketAddress("192.168.238.129");
+        mFamily = mDestinationAddr.family();
         
-        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::DataSenders::TcpDataSender>(mFamily,mSource,mRetries),
+        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::DataSenders::TcpDataSender>(mSource,mPollTimeout),
 				std::make_unique<Traceroute::ResponseValidators::TcpResponseValidator>());
     }
     void TearDown() override
@@ -42,7 +43,7 @@ TEST_F(LiveTcpTest_test_dot_com, GotResponse)
     for (int ttl = 1; ttl < 32; ++ttl)
     {
         auto packet = Traceroute::PacketBuilder::CreateTcpPacket(mSource, mDestinationAddr, 80);
-        auto result = mProbeSender->beginProbing(&packet, ttl, mRetries, mTimeout);
+        auto result = mProbeSender->beginProbing(&packet, ttl, mRetries, mTimeoutTotal);
         probes.push_back(result);
         if (result.GetResponseAddr() == mDestinationText)
         {

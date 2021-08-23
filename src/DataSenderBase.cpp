@@ -7,107 +7,141 @@
 #include <netinet/icmp6.h>
 #include <cstdint>
 #include <poll.h>
-#include <array>
+
 
 #define SA (struct sockaddr *)
 namespace Traceroute
 {
-    DataSenderBase::DataSenderBase(int family, const SocketAddress &sourceAddr, int delayMs)
+    namespace
     {
-        mFamily = family;
-        if (mFamily != sourceAddr.getFamily())
-        {
-            throw std::invalid_argument("Sock family does not match SocketAddress family");
-        }
-        mDelayMs = delayMs;
+        SocketInfo createIcmpSocket(const SocketAddress &addressToBind);
+    }
+    DataSenderBase::DataSenderBase(const SocketAddress &sourceAddr, const SocketInfo &transportProtocolSocket, std::chrono::milliseconds receiveTimeout)
+    {
+        mFamily = sourceAddr.family();
+        mReceiveTimeout = receiveTimeout;
+        SocketInfo icmpSfd = createIcmpSocket(sourceAddr);
+        mReceivingSockets.push_back(icmpSfd);
+        if (transportProtocolSocket.sfd != 0)
+            handleTransportProtocolSocket(transportProtocolSocket);
+        else
+            mSendingSocket = icmpSfd;
 
-        int proto = (mFamily == AF_INET) ? (int)IPPROTO_ICMP : (int)IPPROTO_ICMPV6;
-        mSfdIcmp = socket(mFamily, SOCK_RAW | SOCK_NONBLOCK, proto);
-
-        if ((bind(mSfdIcmp, sourceAddr.getSockaddrP(), sourceAddr.getSize())) < 0)
+        initializePollingFds();
+    }
+    void DataSenderBase::handleTransportProtocolSocket(const SocketInfo &transportProtocolSocket)
+    {
+        mSendingSocket = transportProtocolSocket;
+        if (transportProtocolSocket.isDesignatedToReceive)
+            mReceivingSockets.push_back(transportProtocolSocket);
+    }
+    void DataSenderBase::initializePollingFds()
+    {
+        for(size_t i = 0; i< mReceivingSockets.size(); ++i)
         {
-            throw std::runtime_error("Could not bind address: " + sourceAddr.toString() + " bind() Error: " + std::string(strerror(errno)));
-        }
-        if (mFamily == AF_INET6)
-        {
-            struct icmp6_filter filter;
-            ICMP6_FILTER_SETBLOCKALL(&filter);
-            ICMP6_FILTER_SETPASS(ICMP6_ECHO_REPLY, &filter);
-            ICMP6_FILTER_SETPASS(ICMP6_TIME_EXCEEDED, &filter);
-            ICMP6_FILTER_SETPASS(ICMP6_DST_UNREACH, &filter);
-            if (setsockopt(mSfdIcmp, IPPROTO_ICMPV6, ICMP6_FILTER, &filter, sizeof(filter)) < 0)
-            {
-                throw std::runtime_error("Error occured while setting icmpv6 filter: setsockopt(..): " + std::string(strerror(errno)));
-            }
+            mPollFds[i].fd = mReceivingSockets[i].sfd;
+            mPollFds[i].events = POLLIN;
         }
     }
-   
     int DataSenderBase::receiveFrom(char *buffer, size_t size, SocketAddress &address, int &protocol)
     {
         int n = 0;
-        std::vector<SocketInfo> socketInfos = getReceivingSockets();
-        std::vector<struct pollfd> pollfds;
-        for(auto socketInfo : socketInfos)
+        int sfdIndex = getIndexOfAnySocketReadyToReceive();
+        if (sfdIndex >= 0)
         {
-            struct pollfd fd;
-            fd.fd = socketInfo.sfd;
-            fd.events = POLLIN;
-            pollfds.push_back(fd);
-        }
-        ret = poll(pollfds, 1, 100); 
-        switch (ret)
-        {
-        case -1:
-            throw std::runtime_error("Error occured on polling: " + std::string(strerror(errno)));
-            break;
-        case 0:
-            break;
-        default:
+            int sfd = mReceivingSockets[sfdIndex].sfd;
             sockaddr_storage temp;
             socklen_t len = sizeof(temp);
-            n = recvfrom(fd[0].fd, buffer, size, 0, SA & temp, &len);
+            n = recvfrom(sfd, buffer, size, 0, SA & temp, &len);
             address = SocketAddress{temp};
+            protocol = mReceivingSockets[sfdIndex].protocol;
         }
         return n;
     }
-    void DataSenderBase::setTtl(int ttl)
-    {
-        switch (mFamily)
-        {
-        case AF_INET:
-        {
-            if (setsockopt(getSendingSocket(), IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl)) < 0)
-            {
-                throw std::runtime_error("Could not set ttl:" + std::string(strerror(errno)));
-            }
-            break;
-        }
-        case AF_INET6:
-        {
-            if (setsockopt(getSendingSocket(), IPPROTO_IPV6, IPV6_UNICAST_HOPS, &ttl, sizeof(ttl)) < 0)
-            {
-                throw std::runtime_error("Could not set ttl:" + std::string(strerror(errno)));
-            }
-            break;
-        }
-        }
-    }
+
     int DataSenderBase::sendTo(const std::string &&buffer, const SocketAddress &address)
     {
-        if (mFamily != address.getFamily())
+        if (mFamily != address.family())
         {
-            throw std::invalid_argument("Provided address is invalid");
+            throw std::invalid_argument("Provided address's family is invalid");
         }
 
-        int result = sendto(getSendingSocket(), buffer.c_str(), buffer.size(), 0, address.getSockaddrP(), address.getSize());
+        int result = sendto(mSendingSocket.sfd, buffer.c_str(), buffer.size(), 0, address.sockaddrP(), address.size());
         if (result < 0)
         {
             throw std::runtime_error("Error occured while sending data " + std::string(strerror(errno)));
         }
         return result;
     }
-    int DataSenderBase::getReceiveDelayMs()
+
+    void DataSenderBase::setTtl(int ttl)
     {
-        return mDelayMs;
+        int level = (mFamily == AF_INET) ? (int)IPPROTO_IP : (int)IPPROTO_IPV6;
+        int protocol = (mFamily == AF_INET) ? (int)IPPROTO_ICMP : (int)IPPROTO_ICMPV6;
+        if(mFamily)
+        if (setsockopt(mSendingSocket.sfd, level, protocol, &ttl, sizeof(ttl)) < 0)
+        {
+            throw std::runtime_error("Could not set ttl:" + std::string(strerror(errno)));
+        }
     }
+
+    ssize_t DataSenderBase::getIndexOfAnySocketReadyToReceive()
+    {
+        int index = -1;
+        int result = poll(mPollFds,1,mReceiveTimeout.count());
+        if(result < 0)
+        {
+            throw std::runtime_error("Exception occurred while polling " + std::string(strerror(errno)));
+        }
+        else if( result > 0)
+        {
+            for(size_t i = 0; i< mReceivingSockets.size(); ++i)
+            {
+                if(mPollFds[i].revents == 0)
+                    continue;
+                else
+                {
+                    auto revents = mPollFds[i].revents;
+                    if(revents == POLLIN)
+                    {
+                        index = i;
+                        break;
+                    } 
+                    else
+                    {
+                        throw std::runtime_error("Exception occurred while polling: got revents: " + std::to_string(revents));
+                    }
+                }
+            }
+        }
+        return index;
+    }
+
+    namespace
+    {
+        SocketInfo createIcmpSocket(const SocketAddress &addressToBind)
+        {
+            int protocol = addressToBind.isV4() ? (int)IPPROTO_ICMP : (int)IPPROTO_ICMPV6;
+            int sfdIcmp = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, protocol);
+
+            if ((bind(sfdIcmp, addressToBind.sockaddrP(), addressToBind.size())) < 0)
+            {
+                throw std::runtime_error("Could not bind address: " + addressToBind.toString() + " bind() Error: " + std::string(strerror(errno)));
+            }
+            if (addressToBind.isV6())
+            {
+                struct icmp6_filter filter;
+                ICMP6_FILTER_SETBLOCKALL(&filter);
+                ICMP6_FILTER_SETPASS(ICMP6_ECHO_REPLY, &filter);
+                ICMP6_FILTER_SETPASS(ICMP6_TIME_EXCEEDED, &filter);
+                ICMP6_FILTER_SETPASS(ICMP6_DST_UNREACH, &filter);
+                if (setsockopt(sfdIcmp, IPPROTO_ICMPV6, ICMP6_FILTER, &filter, sizeof(filter)) < 0)
+                {
+                    throw std::runtime_error("Error occured while setting icmpv6 filter: " + std::string(strerror(errno)));
+                }
+            }
+            return {sfdIcmp, protocol, true};
+        }
+    }
+
 }

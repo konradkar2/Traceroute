@@ -13,7 +13,7 @@ namespace Traceroute
             const auto &tcpPacket = dynamic_cast<const TcpPacket &>(request);
             bool isResponseValid = false;
             const char *pResponse = response;
-            int family = client.getFamily();
+            int family = client.family();
 
             //skip ipv4 header
             if (family == AF_INET)

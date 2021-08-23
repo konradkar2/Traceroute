@@ -12,28 +12,28 @@ namespace Traceroute
         short protocol, short headerlen, const SocketAddress &source, const SocketAddress &destination)
     {
         unsigned long sum = 0;
-        switch (source.getFamily())
+        switch (source.family())
         {
         case AF_INET:
         {
-            in_addr_t src = ((sockaddr_in *)source.getSockaddrP())->sin_addr.s_addr;
+            in_addr_t src = ((sockaddr_in *)source.sockaddrP())->sin_addr.s_addr;
             sum += (src >> 16) & 0xFFFF;
             sum += (src)&0xFFFF;
-            in_addr_t dst = ((sockaddr_in *)destination.getSockaddrP())->sin_addr.s_addr;
+            in_addr_t dst = ((sockaddr_in *)destination.sockaddrP())->sin_addr.s_addr;
             sum += (dst >> 16) & 0xFFFF;
             sum += (dst)&0xFFFF;
             break;
         }
         case AF_INET6:
         {
-            in6_addr src = ((sockaddr_in6 *)source.getSockaddrP())->sin6_addr;
+            in6_addr src = ((sockaddr_in6 *)source.sockaddrP())->sin6_addr;
             for (int i = 0; i < 4; i++)
             {
                 uint32_t temp = src.__in6_u.__u6_addr32[i];
                 sum += (temp >> 16) & 0xFFFF;
                 sum += (temp)&0xFFFF;
             }
-            in6_addr dst = ((sockaddr_in6 *)source.getSockaddrP())->sin6_addr;
+            in6_addr dst = ((sockaddr_in6 *)source.sockaddrP())->sin6_addr;
             for (int i = 0; i < 4; i++)
             {
                 uint32_t temp = dst.__in6_u.__u6_addr32[i];

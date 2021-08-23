@@ -1,4 +1,5 @@
 #include <Traceroute/DataSenders/UdpDataSender.hpp>
+#include <Traceroute/DataSenderBase.hpp>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <stdexcept>
@@ -9,48 +10,53 @@ namespace Traceroute
 {
     namespace DataSenders
     {
-        UdpDataSender::UdpDataSender(int family, const SocketAddress &sourceAddr, int delayMs)
-            : DataSenderBase(family, sourceAddr, delayMs)
+        namespace
         {
-            SfdUdp = socket(mFamily, SOCK_RAW , IPPROTO_UDP);
-            if ((bind(SfdUdp, SA sourceAddr.getSockaddrP(), sourceAddr.getSize())) < 0)
+            int createUdpSocket(const SocketAddress &addressToBind);
+        }
+        UdpDataSender::UdpDataSender(const SocketAddress &sourceAddr, std::chrono::milliseconds receiveTimeout)
+        {
+            int sfdUdp = createUdpSocket(sourceAddr);
+            bool isDesignatedToBeReadingSocket = false;
+            SocketInfo udpSocketInfo{sfdUdp, IPPROTO_UDP, isDesignatedToBeReadingSocket};
+
+            mDataSenderBase = std::make_unique<DataSenderBase>(sourceAddr, udpSocketInfo, receiveTimeout);
+        }
+
+        int UdpDataSender::sendTo(const std::string &&buffer, const SocketAddress &receiver)
+        {
+            return mDataSenderBase->sendTo(std::move(buffer), receiver);
+        }
+        int UdpDataSender::receiveFrom(char *buffer, size_t size, SocketAddress &sender, int &protocol)
+        {
+            return mDataSenderBase->receiveFrom(buffer, size, sender, protocol);
+        }
+        void UdpDataSender::setTtl(int ttl)
+        {
+            return mDataSenderBase->setTtl(ttl);
+        }
+
+        namespace
+        {
+            int createUdpSocket(const SocketAddress &addressToBind)
             {
-                throw std::runtime_error("Could not bind address");
-            }
-            if (mFamily == AF_INET6)
-            {
-                int offset = 6;
-                if ((setsockopt(SfdUdp, IPPROTO_IPV6, IPV6_CHECKSUM,
-                                &offset, sizeof(offset))) < 0)
+                int sfd = socket(addressToBind.family(), SOCK_RAW, IPPROTO_UDP);
+                if ((bind(sfd, SA addressToBind.sockaddrP(), addressToBind.size())) < 0)
                 {
-                    throw std::runtime_error("Could not set IPV6_CHECKSUM flag");
+                    throw std::runtime_error("Could not bind address");
                 }
+                if (addressToBind.isV6())
+                {
+                    int offset = 6;
+                    if ((setsockopt(sfd, IPPROTO_IPV6, IPV6_CHECKSUM,
+                                    &offset, sizeof(offset))) < 0)
+                    {
+                        throw std::runtime_error("Could not set IPV6_CHECKSUM flag");
+                    }
+                }
+                return sfd;
             }
-        }
-        // int UdpDataSender::getCurrentProtocol()
-        // {
-        //     int temp = -1;
-        //     if (mFamily == AF_INET)
-        //         temp = IPPROTO_ICMP;
-        //     else
-        //         temp = IPPROTO_ICMPV6;
-        //     return temp;
-        // }
-        int UdpDataSender::getSendingSocket()
-        {
-            return SfdUdp;
-        }
-        std::vector<DataSenderBase::SocketInfo>  UdpDataSender::getReceivingSockets()
-        {
-            SocketInfo icmpSocketInfo;
-            icmpSocketInfo.sfd = mSfdIcmp;
-            if (mFamily == AF_INET)
-                icmpSocketInfo.protocol =  IPPROTO_ICMP;
-            else
-                icmpSocketInfo.protocol =  IPPROTO_ICMPV6;
-            
-            return std::vector{icmpSocketInfo};
-        }
+        } //namespae
     }
 
 }

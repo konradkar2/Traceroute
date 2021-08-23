@@ -1,67 +1,62 @@
 #include <Traceroute/DataSenders/TcpDataSender.hpp>
+#include <Traceroute/DataSenderBase.hpp>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <sys/socket.h>
-
-#define SA (struct sockaddr *)
+#include <chrono>
 
 namespace Traceroute
 {
     namespace DataSenders
     {
-        TcpDataSender::TcpDataSender(int family, const SocketAddress &sourceAddr, int delayMs)
-            : DataSenderBase(family, sourceAddr, delayMs)
+        namespace
         {
-            mSfdTcp = socket(mFamily, SOCK_RAW , IPPROTO_TCP);
+            int createTcpSocket(const SocketAddress &addressToBind);
+        } //namespace
+        TcpDataSender::TcpDataSender(const SocketAddress &sourceAddr, std::chrono::milliseconds receiveTimeout)
+        {
+            int sfdTcp = createTcpSocket(sourceAddr);
+            bool isDesignatedToBeReadingSocket = true;
+            SocketInfo tcpSocketInfo{sfdTcp, IPPROTO_TCP, isDesignatedToBeReadingSocket};
 
-            if ((bind(mSfdTcp, sourceAddr.getSockaddrP(), sourceAddr.getSize())) < 0)
+            mDataSenderBase = std::make_unique<DataSenderBase>(sourceAddr, tcpSocketInfo, receiveTimeout);
+        }
+
+        int TcpDataSender::sendTo(const std::string &&buffer, const SocketAddress &receiver)
+        {
+            return mDataSenderBase->sendTo(std::move(buffer), receiver);
+        }
+
+        int TcpDataSender::receiveFrom(char *buffer, size_t size, SocketAddress &sender, int &protocol)
+        {
+            return mDataSenderBase->receiveFrom(buffer, size, sender, protocol);
+        }
+
+        void TcpDataSender::setTtl(int ttl)
+        {
+            return mDataSenderBase->setTtl(ttl);
+        }
+
+        namespace
+        {
+            int createTcpSocket(const SocketAddress &addressToBind)
             {
-                throw std::runtime_error("Could not bind address");
-            }
-            if (mFamily == AF_INET6)
-            {
-                int offset = 16;
-                if ((setsockopt(mSfdTcp, IPPROTO_IPV6, IPV6_CHECKSUM,
-                                &offset, sizeof(offset))) < 0)
+                int sfd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, IPPROTO_TCP);
+                if ((bind(sfd, addressToBind.sockaddrP(), addressToBind.size())) < 0)
                 {
-                    throw std::runtime_error("Could not set IPV6_CHECKSUM flag");
+                    throw std::runtime_error("Could not bind address");
                 }
+                if (addressToBind.isV6())
+                {
+                    const int TCP_CHECKSUM_OFFSET = 16;
+                    if ((setsockopt(sfd, IPPROTO_IPV6, IPV6_CHECKSUM,
+                                    &TCP_CHECKSUM_OFFSET, sizeof(TCP_CHECKSUM_OFFSET))) < 0)
+                    {
+                        throw std::runtime_error("Could not set IPV6_CHECKSUM flag");
+                    }
+                }
+                return sfd;
             }
-        }
-
-        // int TcpDataSender::getCurrentProtocol()
-        // {
-        //     int temp = -1;
-        //     if (mCurrentSfd == mSfdTcp)
-        //         temp = IPPROTO_TCP;
-        //     else
-        //     {
-        //         if (mFamily == AF_INET)
-        //             temp = IPPROTO_ICMP;
-        //         else
-        //             temp = IPPROTO_ICMPV6;
-        //     }
-        //     return temp;
-        // }
-        int TcpDataSender::getSendingSocket()
-        {
-            return mSfdTcp;
-        }
-
-        std::vector<DataSenderBase::SocketInfo> TcpDataSender::getReceivingSockets()
-        {
-            DataSenderBase::SocketInfo tcpSocketInfo;
-            tcpSocketInfo.sfd = mSfdTcp;
-            tcpSocketInfo.protocol = IPPROTO_TCP;
-            DataSenderBase::SocketInfo icmpSocketInfo;
-            icmpSocketInfo.sfd = mSfdIcmp;
-            if (mFamily == AF_INET)
-                icmpSocketInfo.protocol =  IPPROTO_ICMP;
-            else
-                icmpSocketInfo.protocol =  IPPROTO_ICMPV6;
-          
-            return std::vector{tcpSocketInfo,icmpSocketInfo};
-        }
-
+        } //namespace
     }
 }

@@ -13,7 +13,7 @@ namespace ResponseValidatorsTests
         ipHeader->version = 4;
         ipHeader->ihl = ihl;
         ipHeader->protocol = protocol;       
-        ipHeader->saddr = reinterpret_cast<const sockaddr_in *>(source.getSockaddrP())->sin_addr.s_addr;
-        ipHeader->daddr = reinterpret_cast<const sockaddr_in *>(destination.getSockaddrP())->sin_addr.s_addr;
+        ipHeader->saddr = reinterpret_cast<const sockaddr_in *>(source.sockaddrP())->sin_addr.s_addr;
+        ipHeader->daddr = reinterpret_cast<const sockaddr_in *>(destination.sockaddrP())->sin_addr.s_addr;
     }
 }

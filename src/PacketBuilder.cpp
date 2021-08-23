@@ -7,7 +7,7 @@
 namespace Traceroute{
     IcmpPacket PacketBuilder::CreateIcmpPacket(const SocketAddress & source, const SocketAddress & destination)
     {
-        int family = source.getFamily();
+        int family = source.family();
         switch(family)
         {
             case AF_INET:
@@ -57,7 +57,7 @@ namespace Traceroute{
         tcp_hdr.th_off = 5;
         tcp_hdr.th_flags = 0x02;   
         tcp_hdr.check = 0;  
-        if(source.getFamily() == AF_INET)
+        if(source.family() == AF_INET)
         {
             tcp_hdr.check = ChecksumCalculator::computeTCPHeaderChecksum(tcp_hdr,source,destination);
             //leave it to kernel if AF_INET6
@@ -76,7 +76,7 @@ namespace Traceroute{
         udp_hdr.dest = htons(dport);
         udp_hdr.len = htons(sizeof(udp_hdr));
         udp_hdr.check = 0;
-        if(source.getFamily() == AF_INET)
+        if(source.family() == AF_INET)
         {
             udp_hdr.check = ChecksumCalculator::computeUdpHeaderChecksum(udp_hdr,source,destination);
             //leave it to kernel if AF_INET6

@@ -1,38 +1,29 @@
 #include <Traceroute/DataSenders/IcmpDataSender.hpp>
-#include <netinet/in.h>
+#include <Traceroute/DataSenderBase.hpp>
 #include <vector>
 namespace Traceroute
 {
     namespace DataSenders
     {
-        IcmpDataSender::IcmpDataSender(int family, const SocketAddress &sourceAddr, int delayMs)
-            : DataSenderBase(family, sourceAddr, delayMs)
+        IcmpDataSender::IcmpDataSender(const SocketAddress &sourceAddr, std::chrono::milliseconds receiveTimeout)
         {
-        }
-        // int IcmpDataSender::getCurrentProtocol()
-        // {
-        //     if (mFamily == AF_INET)
-        //         temp = IPPROTO_ICMP;
-        //     else
-        //         temp = IPPROTO_ICMPV6;
-        //     return temp;
-        // }
-        int IcmpDataSender::getSendingSocket()
-        {
-            return mSfdIcmp;
-        }
-        std::vector<DataSenderBase::SocketInfo> IcmpDataSender::getReceivingSockets()
-        {
-            SocketInfo socketInfo;
-            socketInfo.sfd = mSfdIcmp;
-            if (mFamily == AF_INET)
-                socketInfo.protocol =  IPPROTO_ICMP;
-            else
-                socketInfo.protocol =  IPPROTO_ICMPV6;
-            
-            return std::vector{socketInfo};
+            mDataSenderBase = std::make_unique<DataSenderBase>(sourceAddr, SocketInfo{}, receiveTimeout);
         }
 
+        int IcmpDataSender::sendTo(const std::string &&buffer, const SocketAddress &receiver)
+        {
+            return mDataSenderBase->sendTo(std::move(buffer), receiver);
+        }
+
+        int IcmpDataSender::receiveFrom(char *buffer, size_t size, SocketAddress &sender, int &protocol)
+        {
+            return mDataSenderBase->receiveFrom(buffer, size, sender, protocol);
+        }
+
+        void IcmpDataSender::setTtl(int ttl)
+        {
+            return mDataSenderBase->setTtl(ttl);
+        }
     }
 
 }
