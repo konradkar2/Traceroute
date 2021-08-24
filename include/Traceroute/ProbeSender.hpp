@@ -13,15 +13,14 @@ namespace Traceroute
     class ProbeSender
     {
     public:
-        ProbeSender(std::unique_ptr<IDataSender> && dataSender, std::unique_ptr<IValidateResponse> && responseValidator);
-        ProbeResultContainer beginProbing(const Packet * packet, int ttl, int retries, std::chrono::microseconds timeout);
+        ProbeSender(std::unique_ptr<IDataSender> dataSender, std::unique_ptr<IValidateResponse> responseValidator);
+        ProbeResultContainer beginProbing(const Packet *packet, int ttl, int retries, std::chrono::microseconds timeout);
+
     private:
         void sendPacket();
-        void setTtl(int ttl);
-        const Packet * mPacket;
+        const Packet *mPacket;
         std::unique_ptr<IDataSender> mDataSender;
         std::unique_ptr<IValidateResponse> mResponseValidator;
-        int mTtl;
         char mSendingBuffer[BUFLEN] = {0};
         char mReceivingBuffer[BUFLEN] = {0};
     };

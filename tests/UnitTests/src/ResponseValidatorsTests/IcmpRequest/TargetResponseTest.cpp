@@ -22,7 +22,7 @@ namespace ResponseValidatorsTests
             const Traceroute::IcmpPacket icmpProbePacket = Traceroute::PacketBuilder::CreateIcmpPacket(requestSource, requestDestination);
             const Traceroute::SocketAddress responseSource = requestDestination;
             const Traceroute::SocketAddress responseDestination = requestSource;
-            ResponseIcmp<Traceroute::IcmpHeader> response;
+            ResponseIcmpToIcmp response;
             const int responseProtocol = IPPROTO_ICMP;
             const int responseIhl = 5;            
             const char *dataPtr;

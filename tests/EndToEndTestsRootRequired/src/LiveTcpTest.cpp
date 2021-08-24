@@ -10,7 +10,6 @@
 
 struct LiveTcpTest_test_dot_com : public ::testing::Test
 {
-    std::string mDestinationText;
     Traceroute::SocketAddress mDestinationAddr;
     Traceroute::SocketAddress mSource;
 
@@ -23,9 +22,8 @@ struct LiveTcpTest_test_dot_com : public ::testing::Test
 
     void SetUp() override
     {
-        mDestinationText = "69.172.200.235";
-        mDestinationAddr = Traceroute::SocketAddress{mDestinationText};
-        mSource = Traceroute::SocketAddress("192.168.238.129");
+        mDestinationAddr = Traceroute::SocketAddress{"69.172.200.235"};
+        mSource = Traceroute::SocketAddress("10.8.0.2");
         mFamily = mDestinationAddr.family();
         
         mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::DataSenders::TcpDataSender>(mSource,mPollTimeout),
@@ -45,15 +43,15 @@ TEST_F(LiveTcpTest_test_dot_com, GotResponse)
         auto packet = Traceroute::PacketBuilder::CreateTcpPacket(mSource, mDestinationAddr, 80);
         auto result = mProbeSender->beginProbing(&packet, ttl, mRetries, mTimeoutTotal);
         probes.push_back(result);
-        if (result.GetResponseAddr() == mDestinationText)
+        if (result.GetResponseAddr() == mDestinationAddr)
         {
             break;
         }
     }
     ASSERT_GT(probes.size(), 0);
-    auto found = std::find_if(probes.cbegin(), probes.cend(), [dText = mDestinationText](const Traceroute::ProbeResultContainer &probe)
-                              { return probe.GetResponseAddr() == dText; });
-    EXPECT_TRUE(found != probes.end()) << "Didn't found " << mDestinationText;
+    auto found = std::find_if(probes.cbegin(), probes.cend(), [addr = mDestinationAddr](const Traceroute::ProbeResultContainer &probe)
+                              { return probe.GetResponseAddr() == addr; });
+    EXPECT_TRUE(found != probes.end()) << "Didn't found " ;
 
     std::string result;
     for(const auto & probeResult : probes)

@@ -15,7 +15,7 @@ namespace Traceroute
                                                     int protocol, const char *response, size_t responseSize)
         {
             bool isResponseValid = false;
-            if(client.family() == AF_INET)
+            if(client.isV4())
                 isResponseValid = mIcmp4ResponseValidator->isResponseValid(request,client,protocol,response,responseSize);
             else
                 isResponseValid = mIcmp6ResponseValidator->isResponseValid(request,client,protocol,response,responseSize);

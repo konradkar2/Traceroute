@@ -8,36 +8,33 @@
 #include <string>
 #include <vector>
 
-
 struct LiveIcmpTest_8888 : public ::testing::Test
 {
-    std::string mDestinationText;
+
     Traceroute::SocketAddress mDestinationAddr;
     Traceroute::SocketAddress mSource;
 
     int mFamily;
     int mRetries = 2;
     int mSockDelay = 5;
-    std::chrono::milliseconds mTimeoutTotal {100};
-    std::chrono::milliseconds mPollTimeout {5};
-    Traceroute::ProbeSender * mProbeSender;
+    std::chrono::milliseconds mTimeoutTotal{100};
+    std::chrono::milliseconds mPollTimeout{5};
+    Traceroute::ProbeSender *mProbeSender;
     void SetUp() override
     {
-        mDestinationText = "8.8.8.8";
-        mDestinationAddr = Traceroute::SocketAddress{mDestinationText};
-        mSource = Traceroute::SocketAddress("192.168.238.129");
-        mFamily = mDestinationAddr.family();       
-        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::DataSenders::IcmpDataSender>(mSource,mPollTimeout),
-					std::make_unique<Traceroute::ResponseValidators::IcmpResponseValidator>());
+        mDestinationAddr = Traceroute::SocketAddress{"8.8.8.8"};
+        mSource = Traceroute::SocketAddress("10.8.0.2");
+        mFamily = mDestinationAddr.family();
+        mProbeSender = new Traceroute::ProbeSender(std::make_unique<Traceroute::DataSenders::IcmpDataSender>(mSource, mPollTimeout),
+                                                   std::make_unique<Traceroute::ResponseValidators::IcmpResponseValidator>());
     }
     void TearDown() override
     {
         delete mProbeSender;
     }
-    
 };
 
-TEST_F(LiveIcmpTest_8888, GotResponse)
+TEST_F(LiveIcmpTest_8888, GotResponseFrom8888)
 {
     std::vector<Traceroute::ProbeResultContainer> probes;
     for (int ttl = 1; ttl < 32; ++ttl)
@@ -45,23 +42,20 @@ TEST_F(LiveIcmpTest_8888, GotResponse)
         auto packet = Traceroute::PacketBuilder::CreateIcmpPacket(mSource, mDestinationAddr);
         auto result = mProbeSender->beginProbing(&packet, ttl, mRetries, mTimeoutTotal);
         probes.push_back(result);
-        if (result.GetResponseAddr() == mDestinationText)
+        if (result.GetResponseAddr() == mDestinationAddr)
         {
             break;
         }
     }
-    ASSERT_GT(probes.size(),0);
-    auto found = std::find_if(probes.cbegin(),probes.cend(),[dText=mDestinationText](const Traceroute::ProbeResultContainer & probe){
-        return probe.GetResponseAddr() == dText;
-    });
+    ASSERT_GT(probes.size(), 0);
+    auto found = std::find_if(probes.cbegin(), probes.cend(), [addr = mDestinationAddr](const Traceroute::ProbeResultContainer &probe)
+                              { return probe.GetResponseAddr() == addr; });
     EXPECT_TRUE(found != probes.end()) << "Didn't found ";
 
     std::string result;
-    for(const auto & probeResult : probes)
+    for (const auto &probeResult : probes)
     {
-        result+= probeResult.toString() + "\n";
+        result += probeResult.toString() + "\n";
     }
     std::cerr << result;
-    
-    
 }

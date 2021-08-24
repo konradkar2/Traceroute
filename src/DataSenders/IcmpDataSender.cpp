@@ -20,9 +20,9 @@ namespace Traceroute
             return mDataSenderBase->receiveFrom(buffer, size, sender, protocol);
         }
 
-        void IcmpDataSender::setTtl(int ttl)
+        void IcmpDataSender::setTtlOnSocket(int ttl)
         {
-            return mDataSenderBase->setTtl(ttl);
+            return mDataSenderBase->setTtlOnSocket(ttl);
         }
     }
 

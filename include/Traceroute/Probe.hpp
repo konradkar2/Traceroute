@@ -2,32 +2,32 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include "SocketAddress.hpp"
+
 namespace Traceroute
 {
-    
 
     class ProbeResultContainer
     {
-    public:   
+    public:
         struct ProbeResult
-        {   
+        {
             bool success;
             std::chrono::microseconds receivedAfter;
         };
         ProbeResultContainer(int ttl);
-        void add(ProbeResult result);
-        void setResponseAddr(const std::string & responseAddr);
-        const std::string & GetResponseAddr() const;
-        
+        void addFailedProbe(std::chrono::microseconds waitedFor);
+        void addSuccessfulProbe(std::chrono::microseconds waitedFor);
+        void setResponseAddr(const SocketAddress & responseSender);
+        const SocketAddress &GetResponseAddr() const;
+
         std::string toString() const;
-        const std::vector<ProbeResult> & getResults() const;
+        const std::vector<ProbeResult> &getResults() const;
+
     private:
-        std::vector<ProbeResult> mProbeResults;  
-        std::string MresponseAddr;   
+        std::vector<ProbeResult> mProbeResults;
+        SocketAddress mResponseSender;
         int mTtl;
     };
-       
-    
-
 
 }

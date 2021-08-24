@@ -74,12 +74,12 @@ namespace Traceroute
         return result;
     }
 
-    void DataSenderBase::setTtl(int ttl)
+    void DataSenderBase::setTtlOnSocket(int ttl)
     {
         int level = (mFamily == AF_INET) ? (int)IPPROTO_IP : (int)IPPROTO_IPV6;
-        int protocol = (mFamily == AF_INET) ? (int)IPPROTO_ICMP : (int)IPPROTO_ICMPV6;
+        int option = (mFamily == AF_INET) ? (int)IP_TTL : (int)IPV6_UNICAST_HOPS;
         if(mFamily)
-        if (setsockopt(mSendingSocket.sfd, level, protocol, &ttl, sizeof(ttl)) < 0)
+        if (setsockopt(mSendingSocket.sfd, level, option, &ttl, sizeof(ttl)) < 0)
         {
             throw std::runtime_error("Could not set ttl:" + std::string(strerror(errno)));
         }

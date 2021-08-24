@@ -79,7 +79,6 @@ namespace Traceroute{
         if(source.family() == AF_INET)
         {
             udp_hdr.check = ChecksumCalculator::computeUdpHeaderChecksum(udp_hdr,source,destination);
-            //leave it to kernel if AF_INET6
         }            
         
         UdpPacket packet(source,destination,udp_hdr);

@@ -15,7 +15,7 @@ namespace Traceroute
             IcmpDataSender(const SocketAddress &sourceAddr, std::chrono::milliseconds receiveTimeout); 
             int sendTo(const std::string &&buffer, const SocketAddress &receiver) override;
             int receiveFrom(char *buffer, size_t size, SocketAddress &sender, int &protocol) override;
-            void setTtl(int ttl) override;
+            void setTtlOnSocket(int ttl) override;
             ~IcmpDataSender(){};
 
         private:

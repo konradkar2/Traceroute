@@ -2,71 +2,51 @@
 #include <stdexcept>
 namespace Traceroute
 {
-    ProbeSender::ProbeSender(std::unique_ptr<IDataSender> && dataSender, std::unique_ptr<IValidateResponse> && responseValidator)
-        :   mDataSender{std::move(dataSender)}, mResponseValidator{std::move(responseValidator)}
+    ProbeSender::ProbeSender(std::unique_ptr<IDataSender> dataSender, std::unique_ptr<IValidateResponse> responseValidator)
+        : mDataSender{std::move(dataSender)}, mResponseValidator{std::move(responseValidator)}
     {
-
     }
-    ProbeResultContainer ProbeSender::beginProbing(const Packet * packet,
-            int ttl,int retries, std::chrono::microseconds timeout)
-    {       
+    ProbeResultContainer ProbeSender::beginProbing(const Packet *packet,
+                                                   int ttl, int retries, std::chrono::microseconds timeout)
+    {
         mPacket = packet;
         mReceivingBuffer[BUFLEN] = {0};
-        mSendingBuffer[BUFLEN] = {0};       
-        setTtl(ttl);
+        mSendingBuffer[BUFLEN] = {0};
+        mDataSender->setTtlOnSocket(ttl);
 
-        ProbeResultContainer resultContainer(mTtl);
-        for(int i = 0 ;i< retries ; i++)
+        ProbeResultContainer resultContainer(ttl);
+        for (int i = 0; i < retries; i++)
         {
-            
-            sendPacket();            
+            sendPacket();
             auto start = std::chrono::steady_clock::now();
-            while(true)
+            while (true)
             {
                 auto end = std::chrono::steady_clock::now();
-                auto uspassed = std::chrono::duration_cast<chrono::microseconds>(end - start);
-                if(uspassed > timeout) //timeout
+                auto timepassed = std::chrono::duration_cast<chrono::microseconds>(end - start);
+                if (timepassed > timeout)
                 {
-                    ProbeResultContainer::ProbeResult r;
-                    r.success = false;
-                    r.receivedAfter = timeout;
-                    resultContainer.add(r);
+                    resultContainer.addFailedProbe(timepassed);
                     break;
                 }
-
-                
-                SocketAddress client;                 
-                int responseProtocol; 
-                int responseSize = mDataSender->receiveFrom(mReceivingBuffer,BUFLEN,client,responseProtocol);
-
-                
-                auto isResponseValid = mResponseValidator->isResponseValid(*packet,client,responseProtocol,mReceivingBuffer,responseSize);
-                if(isResponseValid)
+                SocketAddress client;
+                int responseProtocol;
+                int responseSize = mDataSender->receiveFrom(mReceivingBuffer, BUFLEN, client, responseProtocol);
+                auto isResponseValid = mResponseValidator->isResponseValid(*packet, client, responseProtocol, mReceivingBuffer, responseSize);
+                if (isResponseValid)
                 {
-                    string responseAddr = client.toString();                                        
-                    resultContainer.setResponseAddr(responseAddr);
+                    resultContainer.setResponseAddr(client);
                     auto now = chrono::steady_clock::now();
-                    auto uspassed = chrono::duration_cast<chrono::microseconds>(now - start);                     
-                    resultContainer.add(ProbeResultContainer::ProbeResult{true,uspassed});
+                    auto timepassed = chrono::duration_cast<chrono::microseconds>(now - start);
+                    resultContainer.addSuccessfulProbe(timepassed);
                     break;
                 }
-
-                                 
-                
-            }           
-        }  
+            }
+        }
         return resultContainer;
     }
-    
+
     void ProbeSender::sendPacket()
     {
-        mDataSender->sendTo(mPacket->serialize(),mPacket->getDestinationAddress());
+        mDataSender->sendTo(mPacket->serialize(), mPacket->getDestinationAddress());
     }
-   
-    void ProbeSender::setTtl(int ttl) 
-    {
-        mTtl = ttl;
-        mDataSender->setTtl(ttl);
-    }    
-    
 }

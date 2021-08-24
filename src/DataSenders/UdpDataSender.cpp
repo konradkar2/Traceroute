@@ -31,16 +31,16 @@ namespace Traceroute
         {
             return mDataSenderBase->receiveFrom(buffer, size, sender, protocol);
         }
-        void UdpDataSender::setTtl(int ttl)
+        void UdpDataSender::setTtlOnSocket(int ttl)
         {
-            return mDataSenderBase->setTtl(ttl);
+            return mDataSenderBase->setTtlOnSocket(ttl);
         }
 
         namespace
         {
             int createUdpSocket(const SocketAddress &addressToBind)
             {
-                int sfd = socket(addressToBind.family(), SOCK_RAW, IPPROTO_UDP);
+                int sfd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, IPPROTO_UDP);
                 if ((bind(sfd, SA addressToBind.sockaddrP(), addressToBind.size())) < 0)
                 {
                     throw std::runtime_error("Could not bind address");

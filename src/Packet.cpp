@@ -25,7 +25,18 @@ namespace Traceroute
     {
         return mSourceAddress.family();
     }
-
+    TcpPacket::TcpPacket(const SocketAddress source, const SocketAddress destination,
+                         TcpHeader tcpHeader) : Packet{source, destination}, mTcpHeader{tcpHeader}
+    {
+    }
+    UdpPacket::UdpPacket(const SocketAddress source, const SocketAddress destination,
+                         UdpHeader udpHeader) : Packet{source, destination}, mUdpHeader{udpHeader}
+    {
+    }
+    IcmpPacket::IcmpPacket(const SocketAddress source, const SocketAddress destination,
+                           IcmpHeader icmpHeader) : Packet(source, destination), mIcmpHeader{icmpHeader}
+    {
+    }
     std::string TcpPacket::serialize() const
     {
         return PodSerializer<TcpHeader>::serialize(mTcpHeader);

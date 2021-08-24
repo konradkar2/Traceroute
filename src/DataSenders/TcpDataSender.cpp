@@ -32,9 +32,9 @@ namespace Traceroute
             return mDataSenderBase->receiveFrom(buffer, size, sender, protocol);
         }
 
-        void TcpDataSender::setTtl(int ttl)
+        void TcpDataSender::setTtlOnSocket(int ttl)
         {
-            return mDataSenderBase->setTtl(ttl);
+            return mDataSenderBase->setTtlOnSocket(ttl);
         }
 
         namespace

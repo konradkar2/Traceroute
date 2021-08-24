@@ -1,26 +1,46 @@
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <string>
 #include <vector>
 #include <Traceroute/SocketAddress.hpp>
+#include <sys/socket.h>
 
+using ::testing::Eq;
+using ::testing::IsTrue;
+struct SocketAddressTests : public ::testing::Test
+{
+    Traceroute::SocketAddress socketAddress;
+};
 
-TEST(SocketAddressTests, AddressIsParsedWithProperFamily4)
+TEST_F(SocketAddressTests, addressIsRecognizedAsIPv4)
 {
     const std::string address = "1.1.1.1";
-    const auto expectedFamily = AF_INET;
 
-    Traceroute::SocketAddress socketAddress{address};
-    auto family = socketAddress.family();
+    socketAddress = Traceroute::SocketAddress{address};
 
-    EXPECT_EQ(expectedFamily,family);
+    EXPECT_THAT(socketAddress.isV4(), IsTrue);
 }
-TEST(SocketAddressTests, AddressIsParsedWithProperFamily6)
+TEST_F(SocketAddressTests, addressIsRecognizedAsIPv6)
 {  
     const std::string address = "2001:0db8:0000:0000:0000:0000:1428:57ab";
-    const auto expectedFamily = AF_INET6;
+    
+    socketAddress = Traceroute::SocketAddress{address};
 
-    Traceroute::SocketAddress socketAddress{address};
-    auto family = socketAddress.family();
+    EXPECT_THAT(socketAddress.isV6(), IsTrue);
+}
 
-    EXPECT_EQ(expectedFamily,family);
+TEST_F(SocketAddressTests, addressFamilyIsAF_INET)
+{
+    const std::string address = "1.1.1.1";
+
+    socketAddress = Traceroute::SocketAddress{address};
+
+    EXPECT_THAT(socketAddress.family(), Eq(AF_INET));
+}
+TEST_F(SocketAddressTests, addressFamilyIsAF_INET6)
+{  
+    const std::string address = "2001:0db8:0000:0000:0000:0000:1428:57ab";
+    
+    socketAddress = Traceroute::SocketAddress{address};
+
+    EXPECT_THAT(socketAddress.family(), Eq(AF_INET6));
 }

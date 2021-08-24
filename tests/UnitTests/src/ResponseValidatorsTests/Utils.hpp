@@ -9,16 +9,17 @@
 namespace ResponseValidatorsTests
 {
     template <typename RequestProtocol>
-    struct ResponseIcmp
+    struct ReceivedPacketCopy
     {
-        struct ReceivedPacketCopy
-        {
-            Traceroute::Ipv4Header ipv4Header;
-            RequestProtocol protocolHeader;
-        };
+        Traceroute::Ipv4Header ipv4Header;
+        RequestProtocol protocolHeader;
+    };
+    struct ResponseIcmpToIcmp
+    {
+
         Traceroute::Ipv4Header ipv4Header;
         Traceroute::IcmpHeader icmpHeader;
-        ReceivedPacketCopy receivedPacketCopy;
+        ReceivedPacketCopy<Traceroute::IcmpHeader> receivedPacketCopy;
     };
 
     void fillIPv4Header(const Traceroute::SocketAddress &source, const Traceroute::SocketAddress &destination, int ihl,

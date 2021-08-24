@@ -20,7 +20,7 @@ namespace Traceroute
         DataSenderBase(const SocketAddress &sourceAddr, const SocketInfo &transportProtocolSocket, std::chrono::milliseconds receiveTimeout);
         int sendTo(const std::string &&buffer, const SocketAddress &receiver) override;
         int receiveFrom(char *buffer, size_t size, SocketAddress &sender, int &protocol) override;
-        void setTtl(int ttl) override;
+        void setTtlOnSocket(int ttl) override;
 
     private:
         void handleTransportProtocolSocket(const SocketInfo &transportProtocolSocket);
