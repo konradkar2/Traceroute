@@ -6,6 +6,7 @@
 #include "Probe.hpp"
 #include "IDataSender.hpp"
 #include "IValidateResponse.hpp"
+#include "IPacketFactory.hpp"
 
 namespace Traceroute
 {
@@ -13,12 +14,14 @@ namespace Traceroute
     class ProbeSender
     {
     public:
-        ProbeSender(std::unique_ptr<IDataSender> dataSender, std::unique_ptr<IValidateResponse> responseValidator);
-        ProbeResultContainer beginProbing(const Packet *packet, int ttl, int retries, std::chrono::microseconds timeout);
+        ProbeSender(std::unique_ptr<IPacketFactory> packetFactory,
+                    std::unique_ptr<IDataSender> dataSender,
+                    std::unique_ptr<IValidateResponse> responseValidator);
+        std::vector<ProbeResultContainer>  beginProbing(int ttlBegin, int ttlEnd, int retries,
+                                          std::chrono::microseconds timeout);
 
     private:
-        void sendPacket();
-        const Packet *mPacket;
+        std::unique_ptr<IPacketFactory> mPacketFactory;
         std::unique_ptr<IDataSender> mDataSender;
         std::unique_ptr<IValidateResponse> mResponseValidator;
         char mSendingBuffer[BUFLEN] = {0};

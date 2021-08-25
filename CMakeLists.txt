@@ -12,7 +12,14 @@ set(Headers
     include/Traceroute/ResponseValidators/IcmpResponseValidator.hpp
     include/Traceroute/ResponseValidators/TcpResponseValidator.hpp
     include/Traceroute/ProbeSender.hpp
-    include/Traceroute/PacketBuilder.hpp
+    include/Traceroute/Packet.hpp
+    include/Traceroute/Packet/IcmpPacket.hpp
+    include/Traceroute/Packet/TcpPacket.hpp
+    include/Traceroute/Packet/UdpPacket.hpp
+    include/Traceroute/IPacketFactory.hpp
+    include/Traceroute/PacketFactory/IcmpPacketFactory.hpp
+    include/Traceroute/PacketFactory/TcpPacketFactory.hpp
+    include/Traceroute/PacketFactory/UdpPacketFactory.hpp
     include/Traceroute/SocketAddress.hpp    
     include/Traceroute/IDataSender.hpp
     include/Traceroute/IValidateResponse.hpp
@@ -33,8 +40,13 @@ set(Sources
     src/ResponseValidators/UdpResponseValidator.cpp       
     src/ChecksumCalculator.cpp
     src/DataSenderBase.cpp
-    src/PacketBuilder.cpp
     src/Packet.cpp
+    src/Packet/IcmpPacket.cpp
+    src/Packet/TcpPacket.cpp
+    src/Packet/UdpPacket.cpp
+    src/PacketFactory/IcmpPacketFactory.cpp
+    src/PacketFactory/TcpPacketFactory.cpp
+    src/PacketFactory/UdpPacketFactory.cpp
     src/Probe.cpp
     src/ProbeSender.cpp
     src/SocketAddress.cpp

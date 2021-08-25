@@ -1,5 +1,5 @@
 #include <Traceroute/ResponseValidators/UdpResponseValidator.hpp>
-#include <Traceroute/Packet.hpp>
+#include <Traceroute/Packet/UdpPacket.hpp>
 #include <netinet/ip_icmp.h>
 #include <netinet/icmp6.h>
 

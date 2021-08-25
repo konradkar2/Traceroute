@@ -2,16 +2,16 @@
 #include <cstdint>
 #include <cstring>
 namespace Traceroute
-{    
-   
-    template <typename POD>
-    class  PodSerializer
+{
+
+    class PodSerializer
     {
     public:
-        static std::string serialize(POD pod)
+        template <typename POD>
+        static std::string serialize(const POD &pod)
         {
-            auto podP = reinterpret_cast<const char*>(&pod);
-            std::string serializedPod{podP,podP+sizeof(pod)};
+            auto podP = reinterpret_cast<const char *>(&pod);
+            std::string serializedPod{podP, podP + sizeof(pod)};
             return serializedPod;
         }
     };

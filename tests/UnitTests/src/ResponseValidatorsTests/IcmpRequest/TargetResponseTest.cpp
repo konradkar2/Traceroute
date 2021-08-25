@@ -4,8 +4,7 @@
 #include <vector>
 #include "ResponseValidators/V4/Icmp4ResponseValidator.hpp"
 #include <Traceroute/HeaderTypes.hpp>
-#include <Traceroute/PacketBuilder.hpp>
-#include <Traceroute/Packet.hpp>
+#include <Traceroute/Packet/IcmpPacket.hpp>
 #include <netinet/ip_icmp.h>
 #include "../Utils.hpp"
 
@@ -19,7 +18,7 @@ namespace ResponseValidatorsTests
             std::unique_ptr<Traceroute::IValidateResponse> validator = std::make_unique<Traceroute::ResponseValidators::V4::Icmp4ResponseValidator>();
             const Traceroute::SocketAddress requestSource{"192.168.1.1"};
             const Traceroute::SocketAddress requestDestination{"8.8.8.8"};
-            const Traceroute::IcmpPacket icmpProbePacket = Traceroute::PacketBuilder::CreateIcmpPacket(requestSource, requestDestination);
+            const Traceroute::IcmpPacket icmpProbePacket = Traceroute::IcmpPacket::CreateIcmp4Packet(requestSource,requestDestination);
             const Traceroute::SocketAddress responseSource = requestDestination;
             const Traceroute::SocketAddress responseDestination = requestSource;
             ResponseIcmpToIcmp response;

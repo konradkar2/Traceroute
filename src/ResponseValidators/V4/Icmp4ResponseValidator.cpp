@@ -1,4 +1,5 @@
 #include "Icmp4ResponseValidator.hpp"
+#include <Traceroute/Packet/IcmpPacket.hpp>
 #include <netinet/ip_icmp.h>
 #include <cassert>
 #include "Utils.hpp"

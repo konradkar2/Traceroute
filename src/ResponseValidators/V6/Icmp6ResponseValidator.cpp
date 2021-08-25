@@ -2,6 +2,8 @@
 #include <netinet/icmp6.h>
 #include <cassert>
 #include <Traceroute/HeaderTypes.hpp>
+#include <Traceroute/Packet/IcmpPacket.hpp>
+
 namespace Traceroute
 {
     namespace ResponseValidators

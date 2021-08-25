@@ -15,6 +15,8 @@ namespace Traceroute
                                                     int protocol, const char *response, size_t responseSize)
         {
             bool isResponseValid = false;
+            if(responseSize == 0)
+                return false;
             if(client.isV4())
                 isResponseValid = mIcmp4ResponseValidator->isResponseValid(request,client,protocol,response,responseSize);
             else

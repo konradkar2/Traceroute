@@ -2,7 +2,6 @@
 
 #include <string>
 #include <Traceroute/HeaderTypes.hpp>
-#include <Traceroute/PacketBuilder.hpp>
 #include <Traceroute/Packet.hpp>
 #include <netinet/ip_icmp.h>
 
