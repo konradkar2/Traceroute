@@ -3,7 +3,7 @@
 #include <memory>
 #include "Packet.hpp"
 
-namespace Traceroute
+namespace traceroute
 {
     class IPacketFactory
     {

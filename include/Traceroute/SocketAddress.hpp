@@ -2,7 +2,7 @@
 #include <string>
 #include <sys/socket.h>
 
-namespace Traceroute
+namespace traceroute
 {
     class SocketAddress
     {
@@ -12,12 +12,12 @@ namespace Traceroute
         explicit SocketAddress(const std::string &address);
         int family() const;
         const sockaddr *sockaddrP() const;
-        size_t size() const;
         std::string toString() const;
-        bool operator==(const SocketAddress &rhs) const;
+        size_t size() const;       
         bool isV4() const;
         bool isV6() const;
-
+        bool operator==(const SocketAddress &rhs) const;
+        bool operator!=(const SocketAddress &rhs) const;
     private:
         struct sockaddr_storage mAddress;
     };

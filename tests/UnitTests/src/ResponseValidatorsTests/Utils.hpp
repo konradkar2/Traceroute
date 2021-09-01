@@ -5,22 +5,43 @@
 #include <Traceroute/Packet.hpp>
 #include <netinet/ip_icmp.h>
 
-namespace ResponseValidatorsTests
+namespace traceroute::responseValidatorsTests
 {
     template <typename RequestProtocol>
     struct ReceivedPacketCopy
     {
-        Traceroute::Ipv4Header ipv4Header;
+        Ipv4Header ipv4Header;
         RequestProtocol protocolHeader;
     };
     struct ResponseIcmpToIcmp
     {
 
-        Traceroute::Ipv4Header ipv4Header;
-        Traceroute::IcmpHeader icmpHeader;
-        ReceivedPacketCopy<Traceroute::IcmpHeader> receivedPacketCopy;
+        Ipv4Header ipv4Header;
+        IcmpHeader icmpHeader;
+        ReceivedPacketCopy<traceroute::IcmpHeader> receivedPacketCopy;
     };
+    struct ResponseIcmpToTcp
+    {
 
-    void fillIPv4Header(const Traceroute::SocketAddress &source, const Traceroute::SocketAddress &destination, int ihl,
-                        int protocol, Traceroute::Ipv4Header *ipHeader);
+        Ipv4Header ipv4Header;
+        IcmpHeader icmpHeader;
+        ReceivedPacketCopy<traceroute::TcpHeader> receivedPacketCopy;
+    };
+    struct ResponseIcmpToUdp
+    {
+
+        Ipv4Header ipv4Header;
+        IcmpHeader icmpHeader;
+        ReceivedPacketCopy<traceroute::UdpHeader> receivedPacketCopy;
+    };
+    // struct ResponseTcpToTcp
+    // {
+
+    //     Ipv4Header ipv4Header;
+    //     IcmpHeader icmpHeader;
+    //     ReceivedPacketCopy<traceroute::IcmpHeader> receivedPacketCopy;
+    // };
+
+    void fillIPv4Header(const SocketAddress &source, const SocketAddress &destination, int ihl,
+                        int protocol, Ipv4Header *ipHeader);
 }

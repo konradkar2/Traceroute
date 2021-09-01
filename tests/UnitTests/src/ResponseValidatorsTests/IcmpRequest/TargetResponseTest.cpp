@@ -8,35 +8,35 @@
 #include <netinet/ip_icmp.h>
 #include "../Utils.hpp"
 
-namespace ResponseValidatorsTests
+using namespace traceroute::packet;
+namespace traceroute::responseValidatorsTests::icmpRequest
 {
-    namespace IcmpRequest
+    namespace icmpRequest
     {
-        
+
         struct Icmp4EchoReply : public ::testing::Test
         {
-            std::unique_ptr<Traceroute::IValidateResponse> validator = std::make_unique<Traceroute::ResponseValidators::V4::Icmp4ResponseValidator>();
-            const Traceroute::SocketAddress requestSource{"192.168.1.1"};
-            const Traceroute::SocketAddress requestDestination{"8.8.8.8"};
-            const Traceroute::IcmpPacket icmpProbePacket = Traceroute::IcmpPacket::CreateIcmp4Packet(requestSource,requestDestination);
-            const Traceroute::SocketAddress responseSource = requestDestination;
-            const Traceroute::SocketAddress responseDestination = requestSource;
+            std::unique_ptr<traceroute::IValidateResponse> validator = std::make_unique<responseValidators::v4::Icmp4ResponseValidator>();
+            const SocketAddress requestSource{"192.168.1.1"};
+            const SocketAddress requestDestination{"8.8.8.8"};
+            const IcmpPacket icmpProbePacket = IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination);
+            const SocketAddress responseSource = requestDestination;
+            const SocketAddress responseDestination = requestSource;
             ResponseIcmpToIcmp response;
             const int responseProtocol = IPPROTO_ICMP;
-            const int responseIhl = 5;            
+            const int responseIhl = 5;
             const char *dataPtr;
-            void SetUp() override 
+            void SetUp() override
             {
                 response.icmpHeader.type = ICMP_ECHOREPLY;
                 response.receivedPacketCopy.ipv4Header.ihl = 5;
                 response.receivedPacketCopy.ipv4Header.version = 4;
                 fillIPv4Header(responseSource, responseDestination, responseIhl, responseProtocol, &response.ipv4Header);
-                
             }
-        };      
+        };
         TEST_F(Icmp4EchoReply, hitTargetAndItRespondedWithIcmpEchoReplyWithIdenticalSequence)
         {
-            
+
             response.icmpHeader.sequence = icmpProbePacket.GetIcmpHeader().sequence;
             const char *dataPtr = reinterpret_cast<const char *>(&response);
             size_t responseSize = sizeof(response);
@@ -47,7 +47,7 @@ namespace ResponseValidatorsTests
         }
         TEST_F(Icmp4EchoReply, hitTargetAndItRespondedWithIcmpEchoReplyWithDifferentSequence)
         {
-            response.icmpHeader.sequence = icmpProbePacket.GetIcmpHeader().sequence -1;
+            response.icmpHeader.sequence = icmpProbePacket.GetIcmpHeader().sequence - 1;
             const char *dataPtr = reinterpret_cast<const char *>(&response);
             size_t responseSize = sizeof(response);
 

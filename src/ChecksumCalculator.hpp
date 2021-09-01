@@ -1,7 +1,7 @@
 #pragma once
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/SocketAddress.hpp>
-namespace Traceroute
+namespace traceroute
 {
     class ChecksumCalculator
     {

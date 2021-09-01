@@ -4,7 +4,7 @@
 #include <chrono>
 #include "SocketAddress.hpp"
 
-namespace Traceroute
+namespace traceroute
 {
 
     class ProbeResultContainer
@@ -15,7 +15,7 @@ namespace Traceroute
             bool success;
             std::chrono::microseconds receivedAfter;
         };
-        ProbeResultContainer(int ttl);
+        explicit ProbeResultContainer(int ttl);
         void addFailedProbe(std::chrono::microseconds waitedFor);
         void addSuccessfulProbe(std::chrono::microseconds waitedFor);
         void setResponseAddr(const SocketAddress & responseSender);

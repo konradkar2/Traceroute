@@ -2,7 +2,7 @@
 #include "HeaderTypes.hpp"
 #include "SocketAddress.hpp"
 
-namespace Traceroute
+namespace traceroute
 {
     class Packet
     {

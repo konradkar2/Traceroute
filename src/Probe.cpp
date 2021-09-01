@@ -1,5 +1,5 @@
 #include <Traceroute/Probe.hpp>
-namespace Traceroute
+namespace traceroute
 {
     ProbeResultContainer::ProbeResultContainer(int ttl) 
     {

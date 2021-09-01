@@ -4,10 +4,10 @@
 #include <Traceroute/Packet.hpp>
 #include <netinet/ip_icmp.h>
 
-namespace ResponseValidatorsTests
+namespace traceroute::responseValidatorsTests
 {
-    void fillIPv4Header(const Traceroute::SocketAddress &source, const Traceroute::SocketAddress &destination, int ihl,
-                        int protocol, Traceroute::Ipv4Header *ipHeader)
+    void fillIPv4Header(const traceroute::SocketAddress &source, const traceroute::SocketAddress &destination, int ihl,
+                        int protocol, traceroute::Ipv4Header *ipHeader)
     {
         ipHeader->version = 4;
         ipHeader->ihl = ihl;

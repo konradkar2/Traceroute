@@ -1,7 +1,8 @@
 #include <Traceroute/PacketFactory/TcpPacketFactory.hpp>
 #include <Traceroute/Packet/TcpPacket.hpp>
-namespace Traceroute
+namespace traceroute
 {
+    using namespace traceroute::packet;
    TcpPacketFactory::TcpPacketFactory(const SocketAddress &source, const SocketAddress &destination, int dport)
     {
         mSource = source;

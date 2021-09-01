@@ -4,7 +4,7 @@
 #include <Traceroute/Packet/TcpPacket.hpp>
 #include <arpa/inet.h>
 
-namespace Traceroute
+namespace traceroute::packet
 {
 
     std::string TcpPacket::serialize() const

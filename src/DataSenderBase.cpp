@@ -1,16 +1,14 @@
 #include <Traceroute/DataSenderBase.hpp>
 #include <string>
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <cstdint>
 #include <chrono>
 #include <thread>
 #include <netinet/icmp6.h>
-#include <cstdint>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include <poll.h>
 
-
-#define SA (struct sockaddr *)
-namespace Traceroute
+namespace traceroute
 {
     namespace
     {
@@ -19,7 +17,7 @@ namespace Traceroute
     DataSenderBase::DataSenderBase(const SocketAddress &sourceAddr, const SocketInfo &transportProtocolSocket, std::chrono::milliseconds receiveTimeout)
     {
         mFamily = sourceAddr.family();
-        mReceiveTimeout = receiveTimeout;
+        mPollingTimeout = receiveTimeout;
         SocketInfo icmpSfd = createIcmpSocket(sourceAddr);
         mReceivingSockets.push_back(icmpSfd);
         if (transportProtocolSocket.sfd != 0)
@@ -37,7 +35,7 @@ namespace Traceroute
     }
     void DataSenderBase::initializePollingFds()
     {
-        for(size_t i = 0; i< mReceivingSockets.size(); ++i)
+        for (size_t i = 0; i < mReceivingSockets.size(); ++i)
         {
             mPollFds[i].fd = mReceivingSockets[i].sfd;
             mPollFds[i].events = POLLIN;
@@ -50,11 +48,11 @@ namespace Traceroute
         if (sfdIndex >= 0)
         {
             int sfd = mReceivingSockets[sfdIndex].sfd;
+            protocol = mReceivingSockets[sfdIndex].protocol;
             sockaddr_storage temp;
             socklen_t len = sizeof(temp);
-            n = recvfrom(sfd, buffer, size, 0, SA & temp, &len);
+            n = recvfrom(sfd, buffer, size, 0, (struct sockaddr *)&temp, &len);
             address = SocketAddress{temp};
-            protocol = mReceivingSockets[sfdIndex].protocol;
         }
         return n;
     }
@@ -63,7 +61,7 @@ namespace Traceroute
     {
         if (mFamily != address.family())
         {
-            throw std::invalid_argument("Provided address's family is invalid");
+            throw std::invalid_argument("Provided address's family doesn't match family of source address");
         }
 
         int result = sendto(mSendingSocket.sfd, buffer.c_str(), buffer.size(), 0, address.sockaddrP(), address.size());
@@ -74,11 +72,10 @@ namespace Traceroute
         return result;
     }
 
-    void DataSenderBase::setTtlOnSocket(int ttl)
+    void DataSenderBase::setTtlOnSendingSocket(int ttl)
     {
         int level = (mFamily == AF_INET) ? (int)IPPROTO_IP : (int)IPPROTO_IPV6;
         int option = (mFamily == AF_INET) ? (int)IP_TTL : (int)IPV6_UNICAST_HOPS;
-        if(mFamily)
         if (setsockopt(mSendingSocket.sfd, level, option, &ttl, sizeof(ttl)) < 0)
         {
             throw std::runtime_error("Could not set ttl:" + std::string(strerror(errno)));
@@ -88,25 +85,29 @@ namespace Traceroute
     ssize_t DataSenderBase::getIndexOfAnySocketReadyToReceive()
     {
         int index = -1;
-        int result = poll(mPollFds,1,mReceiveTimeout.count());
-        if(result < 0)
+        int result = poll(mPollFds, 1, 0);
+        if (result < 0)
         {
             throw std::runtime_error("Exception occurred while polling " + std::string(strerror(errno)));
         }
-        else if( result > 0)
+        else if (result == 0)
         {
-            for(size_t i = 0; i< mReceivingSockets.size(); ++i)
+            std::this_thread::sleep_for(mPollingTimeout);
+        }
+        else if (result > 0)
+        {
+            for (size_t i = 0; i < mReceivingSockets.size(); ++i)
             {
-                if(mPollFds[i].revents == 0)
+                if (mPollFds[i].revents == 0)
                     continue;
                 else
                 {
                     auto revents = mPollFds[i].revents;
-                    if(revents == POLLIN)
+                    if (revents == POLLIN)
                     {
                         index = i;
                         break;
-                    } 
+                    }
                     else
                     {
                         throw std::runtime_error("Exception occurred while polling: got revents: " + std::to_string(revents));

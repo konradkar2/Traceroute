@@ -1,6 +1,6 @@
 #pragma once
 #include "../IPacketFactory.hpp"
-namespace Traceroute
+namespace traceroute
 {
     class IcmpPacketFactory : public IPacketFactory
     {

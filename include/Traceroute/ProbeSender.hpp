@@ -8,7 +8,7 @@
 #include "IValidateResponse.hpp"
 #include "IPacketFactory.hpp"
 
-namespace Traceroute
+namespace traceroute
 {
 #define BUFLEN 4096
     class ProbeSender

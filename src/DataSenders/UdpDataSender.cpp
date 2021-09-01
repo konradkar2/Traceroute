@@ -6,7 +6,7 @@
 
 #define SA (struct sockaddr *)
 
-namespace Traceroute
+namespace traceroute
 {
     namespace DataSenders
     {
@@ -31,9 +31,9 @@ namespace Traceroute
         {
             return mDataSenderBase->receiveFrom(buffer, size, sender, protocol);
         }
-        void UdpDataSender::setTtlOnSocket(int ttl)
+        void UdpDataSender::setTtlOnSendingSocket(int ttl)
         {
-            return mDataSenderBase->setTtlOnSocket(ttl);
+            return mDataSenderBase->setTtlOnSendingSocket(ttl);
         }
 
         namespace

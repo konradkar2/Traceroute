@@ -1,7 +1,7 @@
 #include <Traceroute/ProbeSender.hpp>
 #include <stdexcept>
 #include <chrono>
-namespace Traceroute
+namespace traceroute
 {
     namespace
     {
@@ -22,7 +22,7 @@ namespace Traceroute
         std::vector<ProbeResultContainer> probesContainer;
         for (int ttl = ttlBegin; ttl <= ttlEnd; ++ttl)
         {
-            mDataSender->setTtlOnSocket(ttl);
+            mDataSender->setTtlOnSendingSocket(ttl);
 
             ProbeResultContainer probes(ttl);
             for (int i = 0; i < retries; i++)

@@ -1,7 +1,8 @@
 #include <Traceroute/PacketFactory/IcmpPacketFactory.hpp>
 #include <Traceroute/Packet/IcmpPacket.hpp>
-namespace Traceroute
+namespace traceroute
 {
+    using namespace traceroute::packet;
     IcmpPacketFactory::IcmpPacketFactory(const SocketAddress &source, const SocketAddress &destination)
     {
         mSource = source;

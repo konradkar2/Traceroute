@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 #include <chrono>
 
-namespace Traceroute
+namespace traceroute
 {
     namespace DataSenders
     {
@@ -32,9 +32,9 @@ namespace Traceroute
             return mDataSenderBase->receiveFrom(buffer, size, sender, protocol);
         }
 
-        void TcpDataSender::setTtlOnSocket(int ttl)
+        void TcpDataSender::setTtlOnSendingSocket(int ttl)
         {
-            return mDataSenderBase->setTtlOnSocket(ttl);
+            return mDataSenderBase->setTtlOnSendingSocket(ttl);
         }
 
         namespace

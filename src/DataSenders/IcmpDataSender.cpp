@@ -1,7 +1,7 @@
 #include <Traceroute/DataSenders/IcmpDataSender.hpp>
 #include <Traceroute/DataSenderBase.hpp>
 #include <vector>
-namespace Traceroute
+namespace traceroute
 {
     namespace DataSenders
     {
@@ -20,9 +20,9 @@ namespace Traceroute
             return mDataSenderBase->receiveFrom(buffer, size, sender, protocol);
         }
 
-        void IcmpDataSender::setTtlOnSocket(int ttl)
+        void IcmpDataSender::setTtlOnSendingSocket(int ttl)
         {
-            return mDataSenderBase->setTtlOnSocket(ttl);
+            return mDataSenderBase->setTtlOnSendingSocket(ttl);
         }
     }
 

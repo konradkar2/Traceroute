@@ -5,6 +5,8 @@ set(This UnitTests)
 
 set(Headers 
     src/ResponseValidatorsTests/Utils.hpp
+    src/ResponseValidatorsTests/responseBuilder/ResponseBuilder.hpp
+    src/ResponseValidatorsTests/responseBuilder/IpHeaderBuilder.hpp
 )
 
 set(Sources
@@ -12,6 +14,7 @@ set(Sources
     src/ResponseValidatorsTests/IcmpRequest/TransitRouterResponseTest.cpp
     src/ResponseValidatorsTests/IcmpRequest/TargetResponseTest.cpp
     src/ResponseValidatorsTests/Utils.cpp
+    src/ResponseValidatorsTests/responseBuilder/ResponseBuilderTests.cpp
     
 )
 

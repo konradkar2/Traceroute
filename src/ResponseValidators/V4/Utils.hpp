@@ -1,11 +1,6 @@
 #pragma once
-namespace Traceroute
+
+namespace traceroute::responseValidators::v4
 {
-    namespace ResponseValidators
-    {
-        namespace V4
-        {
-            const char * skipIpHeader(const char * ptr);
-        }
-    }
+    const char *skipIpHeader(const char *ptr);
 }

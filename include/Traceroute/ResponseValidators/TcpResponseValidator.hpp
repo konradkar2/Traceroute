@@ -2,9 +2,9 @@
 #include <Traceroute/Packet.hpp>
 #include <Traceroute/SocketAddress.hpp>
 #include <cstdint>
-namespace Traceroute
+namespace traceroute
 {
-    namespace ResponseValidators
+    namespace responseValidators
     {
         class TcpResponseValidator : public IValidateResponse
         {

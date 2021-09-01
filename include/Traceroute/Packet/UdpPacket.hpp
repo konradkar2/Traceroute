@@ -3,7 +3,7 @@
 #include "../SocketAddress.hpp"
 #include "../Packet.hpp"
 
-namespace Traceroute
+namespace traceroute::packet
 {
     class UdpPacket : public Packet
     {

@@ -1,17 +1,11 @@
 #include <Traceroute/IValidateResponse.hpp>
 
-namespace Traceroute
+namespace traceroute::responseValidators::v4
 {
-    namespace ResponseValidators
+    class Icmp4ResponseValidator : public IValidateResponse
     {
-        namespace V4
-        {
-            class Icmp4ResponseValidator : public IValidateResponse
-            {
-            public:
-                bool isResponseValid(const Packet &request, const SocketAddress &client,
-                                     int protocol, const char *response, size_t responseSize) override;
-            };
-        }
-    }
+    public:
+        bool isResponseValid(const Packet &request, const SocketAddress &client,
+                             int protocol, const char *response, size_t responseSize) override;
+    };
 }

@@ -1,7 +1,8 @@
 #include <Traceroute/PacketFactory/UdpPacketFactory.hpp>
 #include <Traceroute/Packet/UdpPacket.hpp>
-namespace Traceroute
+namespace traceroute
 {
+    using namespace traceroute::packet;
    UdpPacketFactory::UdpPacketFactory(const SocketAddress &source, const SocketAddress &destination, int dport)
     {
         mSource = source;

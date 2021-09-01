@@ -2,7 +2,7 @@
 #include "Packet.hpp"
 #include "SocketAddress.hpp"
 #include <cstdint>
-namespace Traceroute 
+namespace traceroute 
 {
     class IValidateResponse
     {

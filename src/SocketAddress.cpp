@@ -4,7 +4,7 @@
 #include <cstring>
 #include <arpa/inet.h>
 #include <stdexcept>
-namespace Traceroute
+namespace traceroute
 {
     SocketAddress::SocketAddress(const sockaddr_storage &address)
     {
@@ -86,6 +86,10 @@ namespace Traceroute
             }
         }
         return isEqual;
+    }
+    bool SocketAddress::operator!=(const SocketAddress &rhs) const
+    {
+        return !operator==(rhs);
     }
     bool SocketAddress::isV4() const 
     {

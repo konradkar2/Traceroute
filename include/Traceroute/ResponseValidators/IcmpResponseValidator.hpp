@@ -3,9 +3,9 @@
 #include <Traceroute/SocketAddress.hpp>
 #include <memory>
 #include <cstdint>
-namespace Traceroute
+namespace traceroute
 {
-    namespace ResponseValidators
+    namespace responseValidators
     {
         class IcmpResponseValidator : public IValidateResponse
         {

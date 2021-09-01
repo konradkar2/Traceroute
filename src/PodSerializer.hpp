@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <cstring>
-namespace Traceroute
+namespace traceroute
 {
 
     class PodSerializer
@@ -11,8 +11,7 @@ namespace Traceroute
         static std::string serialize(const POD &pod)
         {
             auto podP = reinterpret_cast<const char *>(&pod);
-            std::string serializedPod{podP, podP + sizeof(pod)};
-            return serializedPod;
+            return std::string{podP, podP + sizeof(pod)};
         }
     };
 

@@ -2,14 +2,14 @@
 #include <cstdint>
 #include "SocketAddress.hpp"
 
-namespace Traceroute 
+namespace traceroute 
 {
     class IDataSender
     {
     public:
         virtual int sendTo(const std::string && buffer, const SocketAddress & address)= 0;
         virtual int receiveFrom(char * buffer, size_t size, SocketAddress & address, int & protocol)= 0;   
-        virtual void setTtlOnSocket(int ttl)= 0;
+        virtual void setTtlOnSendingSocket(int ttl)= 0;
         virtual ~IDataSender(){}
     };
 }

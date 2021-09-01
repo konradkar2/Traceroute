@@ -6,7 +6,7 @@
 #include <vector>
 #include <chrono>
 #include <poll.h>
-namespace Traceroute
+namespace traceroute
 {
     struct SocketInfo
     {
@@ -17,20 +17,19 @@ namespace Traceroute
     class DataSenderBase : public IDataSender
     {
     public:
-        DataSenderBase(const SocketAddress &sourceAddr, const SocketInfo &transportProtocolSocket, std::chrono::milliseconds receiveTimeout);
+        DataSenderBase(const SocketAddress &sourceAddr, const SocketInfo &transportProtocolSocket, std::chrono::milliseconds pollingTimeout);
         int sendTo(const std::string &&buffer, const SocketAddress &receiver) override;
         int receiveFrom(char *buffer, size_t size, SocketAddress &sender, int &protocol) override;
-        void setTtlOnSocket(int ttl) override;
+        void setTtlOnSendingSocket(int ttl) override;
 
     private:
         void handleTransportProtocolSocket(const SocketInfo &transportProtocolSocket);
         void initializePollingFds();
         ssize_t getIndexOfAnySocketReadyToReceive();
         std::vector<SocketInfo> mReceivingSockets;
+        std::chrono::milliseconds mPollingTimeout;
         SocketInfo mSendingSocket;
         int mFamily;
-        std::chrono::milliseconds mReceiveTimeout;
-
         struct pollfd mPollFds[2];
     };
 }

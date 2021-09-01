@@ -1,6 +1,6 @@
 #include "ChecksumCalculator.hpp"
 #include <netinet/in.h>
-namespace Traceroute
+namespace traceroute
 {
     unsigned short ChecksumCalculator::computeICMPHeaderChecksum(IcmpHeader header)
     {
@@ -12,9 +12,7 @@ namespace Traceroute
         short protocol, short headerlen, const SocketAddress &source, const SocketAddress &destination)
     {
         unsigned long sum = 0;
-        switch (source.family())
-        {
-        case AF_INET:
+        if(source.isV4())
         {
             in_addr_t src = ((sockaddr_in *)source.sockaddrP())->sin_addr.s_addr;
             sum += (src >> 16) & 0xFFFF;
@@ -22,9 +20,8 @@ namespace Traceroute
             in_addr_t dst = ((sockaddr_in *)destination.sockaddrP())->sin_addr.s_addr;
             sum += (dst >> 16) & 0xFFFF;
             sum += (dst)&0xFFFF;
-            break;
         }
-        case AF_INET6:
+        else
         {
             in6_addr src = ((sockaddr_in6 *)source.sockaddrP())->sin6_addr;
             for (int i = 0; i < 4; i++)
@@ -40,7 +37,6 @@ namespace Traceroute
                 sum += (temp >> 16) & 0xFFFF;
                 sum += (temp)&0xFFFF;
             }
-        }
         }
         sum += htons(protocol);
         sum += htons(headerlen);

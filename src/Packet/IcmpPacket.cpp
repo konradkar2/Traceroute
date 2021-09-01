@@ -6,7 +6,7 @@
 #include "../ChecksumCalculator.hpp"
 #include <Traceroute/Packet/IcmpPacket.hpp>
 
-namespace Traceroute
+namespace traceroute::packet
 {
     std::string IcmpPacket::serialize() const
     {

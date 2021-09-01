@@ -4,7 +4,7 @@
 #include <Traceroute/Packet/UdpPacket.hpp>
 #include <arpa/inet.h>
 
-namespace Traceroute
+namespace traceroute::packet
 {
     std::string UdpPacket::serialize() const
     {

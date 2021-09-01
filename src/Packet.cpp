@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include "PodSerializer.hpp"
 #include "ChecksumCalculator.hpp"
-namespace Traceroute
+namespace traceroute
 {
 
     Packet::Packet(const SocketAddress &source,
@@ -26,12 +26,4 @@ namespace Traceroute
         return mSourceAddress.family();
     }
 
-   
-
-    
-
-    
-   
-    
-    
 }

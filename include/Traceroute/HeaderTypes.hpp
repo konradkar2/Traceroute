@@ -2,7 +2,7 @@
 #include <cstdint>
 
 using namespace std;
-namespace Traceroute
+namespace traceroute
 {
 #define Ipv6HeaderSize 40;
     struct Ipv4Header
