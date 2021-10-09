@@ -1,3 +1,4 @@
+#pragma once
 #include <Traceroute/IValidateResponse.hpp>
 
 namespace traceroute::responseValidators::v4

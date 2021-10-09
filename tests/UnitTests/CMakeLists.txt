@@ -4,17 +4,17 @@ cmake_minimum_required(VERSION 3.16)
 set(This UnitTests)
 
 set(Headers 
-    src/ResponseValidatorsTests/Utils.hpp
-    src/ResponseValidatorsTests/responseBuilder/ResponseBuilder.hpp
-    src/ResponseValidatorsTests/responseBuilder/IpHeaderBuilder.hpp
+    ResponseValidatorsTests/utils/Utils.hpp
+    ResponseValidatorsTests/utils/IpHeaderBuilder.hpp
+    ResponseValidatorsTests/IcmpRequest/IcmpToIcmpBase.hpp
 )
 
 set(Sources
-    src/SocketAddressTests.cpp
-    src/ResponseValidatorsTests/IcmpRequest/TransitRouterResponseTest.cpp
-    src/ResponseValidatorsTests/IcmpRequest/TargetResponseTest.cpp
-    src/ResponseValidatorsTests/Utils.cpp
-    src/ResponseValidatorsTests/responseBuilder/ResponseBuilderTests.cpp
+    SocketAddressTests.cpp
+    ResponseValidatorsTests/IcmpRequest/TransitRouterResponseTest.cpp
+    ResponseValidatorsTests/IcmpRequest/TargetResponseTest.cpp
+    ResponseValidatorsTests/utils/Utils.cpp
+    ResponseValidatorsTests/utils/ResponseBuilderTests.cpp
     
 )
 

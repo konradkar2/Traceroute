@@ -85,16 +85,12 @@ namespace traceroute
     ssize_t DataSenderBase::getIndexOfAnySocketReadyToReceive()
     {
         int index = -1;
-        int result = poll(mPollFds, 1, 0);
+        int result = poll(mPollFds, 1, mPollingTimeout.count());
         if (result < 0)
         {
             throw std::runtime_error("Exception occurred while polling " + std::string(strerror(errno)));
-        }
-        else if (result == 0)
-        {
-            std::this_thread::sleep_for(mPollingTimeout);
-        }
-        else if (result > 0)
+        }       
+        if (result > 0)
         {
             for (size_t i = 0; i < mReceivingSockets.size(); ++i)
             {

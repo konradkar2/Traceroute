@@ -11,6 +11,7 @@ namespace traceroute
         const SocketAddress &getSourceAddress() const;
         const SocketAddress &getDestinationAddress() const;
         int getFamily() const;
+        
         virtual std::string serialize() const = 0;
         virtual ~Packet() {}
     protected:

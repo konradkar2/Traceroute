@@ -5,7 +5,7 @@
 #include <Traceroute/Packet.hpp>
 #include <netinet/ip_icmp.h>
 
-namespace traceroute::responseValidatorsTests
+namespace traceroute
 {
     template <typename RequestProtocol>
     struct ReceivedPacketCopy
