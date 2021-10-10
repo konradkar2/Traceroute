@@ -4,18 +4,16 @@ cmake_minimum_required(VERSION 3.16)
 set(This UnitTests)
 
 set(Headers 
-    ResponseValidatorsTests/utils/Utils.hpp
-    ResponseValidatorsTests/utils/IpHeaderBuilder.hpp
-    ResponseValidatorsTests/IcmpRequest/IcmpToIcmpBase.hpp
+
+    ResponseValidatorsTests/Responses.hpp
+    ResponseValidatorsTests/V4/IpHeaderBuilder.hpp
+    ResponseValidatorsTests/V4/IcmpRequest/IcmpToIcmpBase.hpp
 )
 
 set(Sources
     SocketAddressTests.cpp
-    ResponseValidatorsTests/IcmpRequest/TransitRouterResponseTest.cpp
-    ResponseValidatorsTests/IcmpRequest/TargetResponseTest.cpp
-    ResponseValidatorsTests/utils/Utils.cpp
-    ResponseValidatorsTests/utils/ResponseBuilderTests.cpp
-    
+    ResponseValidatorsTests/V4/IcmpRequest/TimeExceeded.cpp
+    ResponseValidatorsTests/V4/IcmpRequest/EchoReply.cpp
 )
 
 add_executable(${This} ${Sources} ${Header})
@@ -29,6 +27,9 @@ target_link_libraries(${This} PUBLIC
 )
 
 target_include_directories(${This} PRIVATE ../../src)
+target_include_directories(${This} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+
 add_test(
     NAME ${This}
     COMMAND ${This}

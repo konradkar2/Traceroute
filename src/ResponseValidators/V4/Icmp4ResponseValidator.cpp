@@ -1,55 +1,62 @@
 #include "Icmp4ResponseValidator.hpp"
-#include <Traceroute/Packet/IcmpPacket.hpp>
-#include <netinet/ip_icmp.h>
-#include <cassert>
 #include "Utils.hpp"
+#include <Traceroute/Packet/IcmpPacket.hpp>
+#include <cassert>
+#include <netinet/ip_icmp.h>
 namespace traceroute::responseValidators::v4
 {
-    using namespace traceroute::packet;
-    namespace
-    {
-        bool checkForEchoReply(const char *dataPtr, const IcmpPacket &icmpPacket, const SocketAddress &client);
-        bool checkForTimeExceeded(const char *dataPtr, const IcmpPacket &icmpPacket);
-    }
+using namespace traceroute::packet;
+namespace
+{
+bool validateEchoReply(const char *icmpHeader, const IcmpPacket &icmpPacket, const SocketAddress &client);
+bool validateTimeExceeded(const char *icmpHeader, const IcmpPacket &icmpPacket);
+bool validateIcmpId(const char *icmpHeader, const IcmpPacket &icmpPacket);
+int getIcmpType(const char *icmpHeader);
+} // namespace
 
-    bool Icmp4ResponseValidator::isResponseValid(const Packet &request, const SocketAddress &client,
-                                                 int protocol, const char *response, size_t responseSize)
+bool Icmp4ResponseValidator::isResponseValid(const Packet &request, const SocketAddress &client, int protocol,
+                                             const char *response, size_t responseSize)
+{
+    const auto &icmpPacket = dynamic_cast<const IcmpPacket &>(request);
+    response += getIpHeaderSize(response);
+    switch(getIcmpType(response))
     {
-        const auto &icmpPacket = dynamic_cast<const IcmpPacket &>(request);
-        response = skipIpHeader(response);
-        if (checkForEchoReply(response, icmpPacket, client) ||
-            checkForTimeExceeded(response, icmpPacket))
-            return true;
-
-        return false;
-    }
-
-    namespace
-    {
-        bool checkForEchoReply(const char *icmpHdrP, const IcmpPacket &icmpPacket, const SocketAddress &client)
-        {
-            const IcmpHeader *icmpHdr = reinterpret_cast<const IcmpHeader *>(icmpHdrP);
-            if (icmpHdr->type == ICMP_ECHOREPLY)
-            {
-                if (client == icmpPacket.getDestinationAddress() &&
-                    icmpHdr->sequence == icmpPacket.GetIcmpHeader().sequence)
-                    return true;
-            }
+        case ICMP_ECHOREPLY:
+            return validateEchoReply(response, icmpPacket, client);
+        case ICMP_TIME_EXCEEDED:
+            return validateTimeExceeded(response, icmpPacket);
+        default:
             return false;
-        }
-        bool checkForTimeExceeded(const char *icmpHdrP, const IcmpPacket &icmpPacket)
-        {
-            const IcmpHeader *icmpHdr = reinterpret_cast<const IcmpHeader *>(icmpHdrP);
-            if (icmpHdr->type == ICMP_TIME_EXCEEDED)
-            {
-                icmpHdrP += sizeof(IcmpHeader);
-                icmpHdrP = skipIpHeader(icmpHdrP);
-                const IcmpHeader *inner_icmp_hdr = reinterpret_cast<const IcmpHeader *>(icmpHdrP);
-                if (inner_icmp_hdr->id == icmpPacket.GetIcmpHeader().id)
-                    return true;
-            }
-            return false;
-        }
     }
-
 }
+
+namespace
+{
+bool validateEchoReply(const char *icmpHeader, const IcmpPacket &icmpPacket, const SocketAddress &client)
+{    
+    if (client == icmpPacket.getDestinationAddress())
+        return validateIcmpId(icmpHeader, icmpPacket);
+    return false;
+}
+bool validateTimeExceeded(const char *icmpHeader, const IcmpPacket &icmpPacket)
+{
+    icmpHeader += sizeof(IcmpHeader);
+    icmpHeader += getIpHeaderSize(icmpHeader);
+    return validateIcmpId(icmpHeader, icmpPacket);
+}
+bool validateIcmpId(const char *icmpHeader, const IcmpPacket &icmpPacket)
+{
+    const IcmpHeader *icmpH = reinterpret_cast<const IcmpHeader *>(icmpHeader);
+    if (icmpH->id == icmpPacket.GetIcmpHeader().id)
+        return true;
+    return false;
+}
+int getIcmpType(const char *icmpHeader)
+{
+    const IcmpHeader *icmpHdr = reinterpret_cast<const IcmpHeader *>(icmpHeader);
+    return icmpHdr->type;
+}
+
+} // namespace
+
+} // namespace traceroute::responseValidators::v4

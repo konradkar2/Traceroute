@@ -1,4 +1,4 @@
-#include "../utils/Utils.hpp"
+
 #include "IcmpToIcmpBase.hpp"
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet/IcmpPacket.hpp>
@@ -12,11 +12,10 @@ using namespace traceroute::packet;
 namespace traceroute::responseValidatorsTests::icmpRequest
 {
 
-struct Icmp4ResponseValidatorTest : public IcmpToIcmpBase
+struct EchoReplyTest : public IcmpToIcmpBase
 {
     const SocketAddress responseSource = requestDestination;
     const SocketAddress responseDestination = requestSource;
-    const int responseProtocol = IPPROTO_ICMP;
     void SetUp() override
     {
         response.icmpHeader.type = ICMP_ECHOREPLY;
@@ -26,23 +25,23 @@ struct Icmp4ResponseValidatorTest : public IcmpToIcmpBase
                                   .build();
     }
 };
-TEST_F(Icmp4ResponseValidatorTest, echoReply_identicalSequenceValid)
+TEST_F(EchoReplyTest, sameIdValid)
 {
     response.icmpHeader.id = icmpProbePacket.GetIcmpHeader().id;
-    const char *dataPtr = reinterpret_cast<const char *>(&response);
+    const char *resp = reinterpret_cast<const char *>(&response);
     size_t responseSize = sizeof(response);
 
-    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, dataPtr, responseSize);
+    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
 
     EXPECT_TRUE(isValid);
 }
-TEST_F(Icmp4ResponseValidatorTest, echoReply_differentSequenceInvalid)
+TEST_F(EchoReplyTest, differentIdInvalid)
 {
-    response.icmpHeader.sequence = icmpProbePacket.GetIcmpHeader().sequence - 1;
-    const char *dataPtr = reinterpret_cast<const char *>(&response);
+    response.icmpHeader.id = icmpProbePacket.GetIcmpHeader().id -1;
+    const char *resp = reinterpret_cast<const char *>(&response);
     size_t responseSize = sizeof(response);
 
-    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, dataPtr, responseSize);
+    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
 
     EXPECT_FALSE(isValid);
 }

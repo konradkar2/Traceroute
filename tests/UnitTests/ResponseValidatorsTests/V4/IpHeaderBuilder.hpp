@@ -42,7 +42,7 @@ namespace traceroute
         void finishAndVerify()
         {
             mHeader.version = 4;
-            if(mHeader.ihl != 0)
+            if(mHeader.ihl == 0)
                 mHeader.ihl = 5;
             assert(mHeader.protocol != 0);
         }

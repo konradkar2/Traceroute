@@ -1,4 +1,4 @@
-#include "../utils/Utils.hpp"
+#include "ResponseValidatorsTests/V4/IpHeaderBuilder.hpp"
 #include "IcmpToIcmpBase.hpp"
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet/IcmpPacket.hpp>
@@ -13,11 +13,10 @@ using namespace traceroute::packet;
 namespace traceroute::responseValidatorsTests::icmpRequest
 {
 
-struct Icmp4ResponseValidatorTest : public IcmpToIcmpBase
+struct Icmp4TimeExceed: public IcmpToIcmpBase
 {
     const SocketAddress responseSource{"123.123.123.123"};
     const SocketAddress responseDestination = requestSource;
-    const int responseProtocol = IPPROTO_ICMP;
     void SetUp() override
     {
         response.icmpHeader.type = ICMP_TIME_EXCEEDED;
@@ -25,27 +24,27 @@ struct Icmp4ResponseValidatorTest : public IcmpToIcmpBase
                                   .setSource(responseSource)
                                   .setProtocol(responseProtocol)
                                   .build();
-        response.receivedPacketCopy.ipv4Header = ipHeaderBuilder.setProtocol(IPPROTO_ICMP).build();
-        response.receivedPacketCopy.protocolHeader = icmpProbePacket.GetIcmpHeader();
+        response.triggerPacket.ipHeader = ipHeaderBuilder.setProtocol(IPPROTO_ICMP).build();
+        response.triggerPacket.transportHeader = icmpProbePacket.GetIcmpHeader();
     }
 };
 
-TEST_F(Icmp4ResponseValidatorTest, timeExceeded_innerIcmpSameIdValid)
+TEST_F(Icmp4TimeExceed, innerIcmpSameIdValid)
 {
-    const char *respP = reinterpret_cast<const char *>(&response);
+    const char *resp = reinterpret_cast<const char *>(&response);
     size_t responseSize = sizeof(response);
 
-    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, respP, responseSize);
+    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
 
     EXPECT_TRUE(isValid);
 }
-TEST_F(Icmp4ResponseValidatorTest, timeExceeded_innerIcmpDifferentIdInvalid)
+TEST_F(Icmp4TimeExceed, innerIcmpDifferentIdInvalid)
 {
-    response.receivedPacketCopy.protocolHeader.id--;
-    const char *respP = reinterpret_cast<const char *>(&response);
+    response.triggerPacket.transportHeader.id--;
+    const char *resp = reinterpret_cast<const char *>(&response);
     size_t responseSize = sizeof(response);
 
-    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, respP, responseSize);
+    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
 
     EXPECT_FALSE(isValid);
 }

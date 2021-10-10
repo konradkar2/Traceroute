@@ -1,6 +1,7 @@
 #pragma once
+#include <cstddef>
 
 namespace traceroute::responseValidators::v4
 {
-    const char *skipIpHeader(const char *ptr);
+size_t getIpHeaderSize(const char *ptr);
 }

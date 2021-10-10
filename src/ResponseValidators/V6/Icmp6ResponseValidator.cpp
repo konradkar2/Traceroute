@@ -27,7 +27,7 @@ namespace traceroute::responseValidators::v6
             }
         }
         else if ((header->type == ICMP6_ECHO_REPLY) &&
-                 header->sequence == icmpPacket.GetIcmpHeader().sequence &&
+                 header->id == icmpPacket.GetIcmpHeader().id &&
                  icmpPacket.getDestinationAddress() == client)
         {
             isResponseValid = true;
