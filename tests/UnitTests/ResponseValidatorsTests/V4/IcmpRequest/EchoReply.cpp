@@ -19,10 +19,10 @@ struct EchoReplyTest : public IcmpToIcmpBase
     void SetUp() override
     {
         response.icmpHeader.type = ICMP_ECHOREPLY;
-        response.ipv4Header = ipHeaderBuilder.setDestination(responseDestination)
-                                  .setSource(responseSource)
-                                  .setProtocol(responseProtocol)
-                                  .build();
+        response.ipHeader = ipHeaderBuilder.setDestination(responseDestination)
+                                .setSource(responseSource)
+                                .setProtocol(responseProtocol)
+                                .build();
     }
 };
 TEST_F(EchoReplyTest, sameIdValid)
@@ -31,17 +31,17 @@ TEST_F(EchoReplyTest, sameIdValid)
     const char *resp = reinterpret_cast<const char *>(&response);
     size_t responseSize = sizeof(response);
 
-    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
+    bool isValid = validator->validate(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
 
     EXPECT_TRUE(isValid);
 }
 TEST_F(EchoReplyTest, differentIdInvalid)
 {
-    response.icmpHeader.id = icmpProbePacket.GetIcmpHeader().id -1;
+    response.icmpHeader.id = icmpProbePacket.GetIcmpHeader().id - 1;
     const char *resp = reinterpret_cast<const char *>(&response);
     size_t responseSize = sizeof(response);
 
-    bool isValid = validator->isResponseValid(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
+    bool isValid = validator->validate(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
 
     EXPECT_FALSE(isValid);
 }

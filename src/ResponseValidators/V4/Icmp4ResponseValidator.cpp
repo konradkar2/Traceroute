@@ -14,26 +14,26 @@ bool validateIcmpId(const char *icmpHeader, const IcmpPacket &icmpPacket);
 int getIcmpType(const char *icmpHeader);
 } // namespace
 
-bool Icmp4ResponseValidator::isResponseValid(const Packet &request, const SocketAddress &client, int protocol,
-                                             const char *response, size_t responseSize)
+bool Icmp4ResponseValidator::validate(const Packet &request, const SocketAddress &client, int protocol,
+                                      const char *response, size_t responseSize)
 {
     const auto &icmpPacket = dynamic_cast<const IcmpPacket &>(request);
     response += getIpHeaderSize(response);
-    switch(getIcmpType(response))
+    switch (getIcmpType(response))
     {
-        case ICMP_ECHOREPLY:
-            return validateEchoReply(response, icmpPacket, client);
-        case ICMP_TIME_EXCEEDED:
-            return validateTimeExceeded(response, icmpPacket);
-        default:
-            return false;
+    case ICMP_ECHOREPLY:
+        return validateEchoReply(response, icmpPacket, client);
+    case ICMP_TIME_EXCEEDED:
+        return validateTimeExceeded(response, icmpPacket);
+    default:
+        return false;
     }
 }
 
 namespace
 {
 bool validateEchoReply(const char *icmpHeader, const IcmpPacket &icmpPacket, const SocketAddress &client)
-{    
+{
     if (client == icmpPacket.getDestinationAddress())
         return validateIcmpId(icmpHeader, icmpPacket);
     return false;

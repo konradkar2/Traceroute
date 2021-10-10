@@ -8,7 +8,7 @@ namespace traceroute
     {
         class UdpResponseValidator : public IValidateResponse
         {
-            bool isResponseValid(const Packet &request, const SocketAddress &client,
+            bool validate(const Packet &request, const SocketAddress &client,
                                  int protocol, const char *response, size_t responseSize) override;
         };
     }

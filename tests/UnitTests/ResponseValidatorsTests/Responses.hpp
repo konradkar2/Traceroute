@@ -17,7 +17,7 @@ struct TriggerPacket
 template <typename InternetProtocol>
 struct ResponseIcmpToIcmp
 {
-    Ipv4Header ipv4Header;
+    InternetProtocol ipHeader;
     IcmpHeader icmpHeader;
     TriggerPacket<InternetProtocol, IcmpHeader> triggerPacket;
 };
@@ -25,7 +25,7 @@ struct ResponseIcmpToIcmp
 template <typename InternetProtocol>
 struct ResponseIcmpToTcp
 {
-    Ipv4Header ipv4Header;
+    InternetProtocol ipHeader;
     IcmpHeader icmpHeader;
     TriggerPacket<InternetProtocol, IcmpHeader> triggerPacket;
 };
@@ -33,7 +33,7 @@ struct ResponseIcmpToTcp
 template <typename InternetProtocol>
 struct ResponseIcmpToUdp
 {
-    Ipv4Header ipv4Header;
+    InternetProtocol ipHeader;
     IcmpHeader icmpHeader;
     TriggerPacket<InternetProtocol, IcmpHeader> triggerPacket;
 };
