@@ -13,6 +13,7 @@ ProbeSender::ProbeSender(std::unique_ptr<IPacketFactory> packetFactory, std::uni
                                                                                         std::move(responseValidator)}
 {
 }
+
 std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int ttlEnd, int retries,
                                                             std::chrono::microseconds timeout)
 {
@@ -28,26 +29,27 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
             auto packet = mPacketFactory->createPacket();
             mDataSender->sendTo(packet->serialize(), packet->getDestinationAddress());
             auto sendTimestamp = std::chrono::steady_clock::now();
-            while (true)
+
+            SocketAddress client;
+            int responseProtocol;
+            bool isResponseValid = false;
+            int responseSize;
+            while (not isResponseValid && getTimePassedTillNow(sendTimestamp) < timeout)
             {
-                if (getTimePassedTillNow(sendTimestamp) > timeout)
-                {
-                    probes.addFailedProbe(timeout);
-                    break;
-                }
-                SocketAddress client;
-                int responseProtocol;
-                int responseSize = mDataSender->receiveFrom(mReceivingBuffer, BUFLEN, client, responseProtocol);
-                auto isResponseValid =
-                    mResponseValidator->validate(*packet, client, responseProtocol, mReceivingBuffer, responseSize);
-                if (isResponseValid)
-                {
-                    probes.setResponseAddr(client);
-                    probes.addSuccessfulProbe(getTimePassedTillNow(sendTimestamp));
-                    if (client == packet->getDestinationAddress())
-                        wasDestinationReached = true;
-                    break;
-                }
+                responseSize = mDataSender->receiveFrom(mBuffer, BUFLEN, client, responseProtocol);
+                isResponseValid =
+                    mResponseValidator->validate(*packet, client, responseProtocol, mBuffer, responseSize);
+            }
+            if (isResponseValid)
+            {
+                probes.setResponseAddr(client);
+                probes.addSuccessfulProbe(getTimePassedTillNow(sendTimestamp));
+                if (client == packet->getDestinationAddress())
+                    wasDestinationReached = true;
+            }
+            else
+            {
+                probes.addFailedProbe(timeout);
             }
         }
         probesContainer.push_back(std::move(probes));

@@ -17,6 +17,7 @@ target_include_directories(${This} PRIVATE ../src)
 
 target_link_libraries(${This} PUBLIC
     gtest_main
+    gmock
     Traceroute
 )
 
