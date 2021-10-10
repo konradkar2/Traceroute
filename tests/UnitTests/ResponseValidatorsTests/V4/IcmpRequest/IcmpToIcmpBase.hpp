@@ -4,6 +4,7 @@
 #include "ResponseValidatorsTests/V4/IpHeaderBuilder.hpp"
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet/IcmpPacket.hpp>
+#include <cstdio>
 #include <gtest/gtest.h>
 #include <netinet/ip_icmp.h>
 #include <string>

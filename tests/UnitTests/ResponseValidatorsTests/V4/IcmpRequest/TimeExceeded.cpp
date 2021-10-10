@@ -13,7 +13,7 @@ using namespace traceroute::packet;
 namespace traceroute::responseValidatorsTests::icmpRequest
 {
 
-struct Icmp4TimeExceed : public IcmpToIcmpBase
+struct TimeExceededV4 : public IcmpToIcmpBase
 {
     const SocketAddress responseSource{"123.123.123.123"};
     const SocketAddress responseDestination = requestSource;
@@ -29,7 +29,7 @@ struct Icmp4TimeExceed : public IcmpToIcmpBase
     }
 };
 
-TEST_F(Icmp4TimeExceed, innerIcmpSameIdValid)
+TEST_F(TimeExceededV4, innerIcmpSameIdValid)
 {
     const char *resp = reinterpret_cast<const char *>(&response);
     size_t responseSize = sizeof(response);
@@ -38,7 +38,7 @@ TEST_F(Icmp4TimeExceed, innerIcmpSameIdValid)
 
     EXPECT_TRUE(isValid);
 }
-TEST_F(Icmp4TimeExceed, innerIcmpDifferentIdInvalid)
+TEST_F(TimeExceededV4, innerIcmpDifferentIdInvalid)
 {
     response.triggerPacket.transportHeader.id--;
     const char *resp = reinterpret_cast<const char *>(&response);

@@ -12,7 +12,7 @@ using namespace traceroute::packet;
 namespace traceroute::responseValidatorsTests::icmpRequest
 {
 
-struct EchoReplyTest : public IcmpToIcmpBase
+struct EchoReplyV4 : public IcmpToIcmpBase
 {
     const SocketAddress responseSource = requestDestination;
     const SocketAddress responseDestination = requestSource;
@@ -25,7 +25,7 @@ struct EchoReplyTest : public IcmpToIcmpBase
                                 .build();
     }
 };
-TEST_F(EchoReplyTest, sameIdValid)
+TEST_F(EchoReplyV4, sameIdValid)
 {
     response.icmpHeader.id = icmpProbePacket.GetIcmpHeader().id;
     const char *resp = reinterpret_cast<const char *>(&response);
@@ -35,7 +35,7 @@ TEST_F(EchoReplyTest, sameIdValid)
 
     EXPECT_TRUE(isValid);
 }
-TEST_F(EchoReplyTest, differentIdInvalid)
+TEST_F(EchoReplyV4, differentIdInvalid)
 {
     response.icmpHeader.id = icmpProbePacket.GetIcmpHeader().id - 1;
     const char *resp = reinterpret_cast<const char *>(&response);
