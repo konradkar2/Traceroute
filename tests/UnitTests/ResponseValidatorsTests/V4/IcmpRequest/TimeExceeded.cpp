@@ -1,5 +1,6 @@
-#include "IcmpToIcmpBase.hpp"
-#include "ResponseValidatorsTests/V4/IpHeaderBuilder.hpp"
+#include "ResponseValidators/V4/Icmp4ResponseValidator.hpp"
+#include "ResponseValidatorsTests/Responses.hpp"
+#include "ResponseValidatorsTests/V4/IpHeaderVariants.hpp"
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet/IcmpPacket.hpp>
 #include <gmock/gmock.h>
@@ -13,38 +14,43 @@ using namespace traceroute::packet;
 namespace traceroute::responseValidatorsTests::icmpRequest
 {
 
-struct TimeExceededV4 : public IcmpToIcmpBase
+struct TimeExceededV4 : public ::testing::Test
 {
-    const SocketAddress responseSource{"123.123.123.123"};
-    const SocketAddress responseDestination = requestSource;
+    ResponseIcmpToIcmp<Ipv4Header> response;
+    const int responseProtocol = IPPROTO_ICMP;
+    const SocketAddress ArbitraryDestAddr{"192.51.100.1"};
+    std::unique_ptr<traceroute::IValidateResponse> validator =
+        std::make_unique<responseValidators::v4::Icmp4ResponseValidator>();
+    const SocketAddress requestSource{"192.0.2.1"};
+    const SocketAddress validResponseAddr = requestSource;
+    const IcmpPacket request = IcmpPacket::CreateIcmp4Packet(requestSource, ArbitraryDestAddr);
+
     void SetUp() override
     {
+        response.ipHeader.ihl = 5;
         response.icmpHeader.type = ICMP_TIME_EXCEEDED;
-        response.ipHeader = ipHeaderBuilder.setDestination(responseDestination)
-                                .setSource(responseSource)
-                                .setProtocol(responseProtocol)
-                                .build();
-        response.triggerPacket.ipHeader = ipHeaderBuilder.setProtocol(IPPROTO_ICMP).build();
-        response.triggerPacket.transportHeader = icmpProbePacket.GetIcmpHeader();
+        response.triggerPacket.ipHeader.ihl = 5;
+        response.triggerPacket.transportHeader = request.GetIcmpHeader();
     }
 };
 
-TEST_F(TimeExceededV4, innerIcmpSameIdValid)
+TEST_F(TimeExceededV4, ProperResponseAddr_InnerIcmpSameId_Valid)
 {
+    ResponseIcmpToIcmp<Ipv4Header> response;
+    response.ipHeader = createStandardIpHeader();
     const char *resp = reinterpret_cast<const char *>(&response);
-    size_t responseSize = sizeof(response);
 
-    bool isValid = validator->validate(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
+    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
 
     EXPECT_TRUE(isValid);
 }
-TEST_F(TimeExceededV4, innerIcmpDifferentIdInvalid)
+TEST_F(TimeExceededV4, ProperResponseAddr_InnerIcmpDifferentId_Invalid)
 {
     response.triggerPacket.transportHeader.id--;
     const char *resp = reinterpret_cast<const char *>(&response);
     size_t responseSize = sizeof(response);
 
-    bool isValid = validator->validate(icmpProbePacket, responseSource, responseProtocol, resp, responseSize);
+    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, responseSize);
 
     EXPECT_FALSE(isValid);
 }
