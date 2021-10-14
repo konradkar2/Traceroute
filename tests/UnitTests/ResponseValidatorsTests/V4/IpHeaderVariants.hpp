@@ -15,11 +15,12 @@ struct Ipv4HeaderCustomSize
     char padding [PaddingSize];
 };
 
+
 template<int PaddingSize>
 Ipv4HeaderCustomSize<PaddingSize> createCustomSizeIpHeader()
 {
     Ipv4HeaderCustomSize<PaddingSize> wrapper;
-    wrapper.header.ihl = 5 + (PaddingSize << 2);
+    wrapper.header.ihl = sizeof(wrapper) >> 2;
     wrapper.header.version = 4;
     return wrapper;
 }

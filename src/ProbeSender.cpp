@@ -34,7 +34,7 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
             int responseProtocol;
             bool isResponseValid = false;
             int responseSize;
-            while (not isResponseValid && getTimePassedTillNow(sendTimestamp) < timeout)
+            while (not (isResponseValid || getTimePassedTillNow(sendTimestamp) > timeout))
             {
                 responseSize = mDataSender->receiveFrom(mBuffer, BUFLEN, client, responseProtocol);
                 isResponseValid =

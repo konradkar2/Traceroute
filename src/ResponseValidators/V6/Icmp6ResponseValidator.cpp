@@ -13,14 +13,13 @@ bool Icmp6ResponseValidator::validate(const Packet &request, const SocketAddress
 {
     bool isResponseValid = false;
     const auto &icmpPacket = dynamic_cast<const IcmpPacket &>(request);
-    const char *pResponse = response;
 
-    const IcmpHeader *header = reinterpret_cast<const IcmpHeader *>(pResponse);
+    const IcmpHeader *header = reinterpret_cast<const IcmpHeader *>(response);
     if (header->type == ICMP6_TIME_EXCEEDED)
     {
-        pResponse += sizeof(IcmpHeader);
-        pResponse += Ipv6HeaderSize;
-        const IcmpHeader *inner_icmp_header = reinterpret_cast<const IcmpHeader *>(pResponse);
+        response += sizeof(IcmpHeader);
+        response += Ipv6HeaderSize;
+        const IcmpHeader *inner_icmp_header = reinterpret_cast<const IcmpHeader *>(response);
         if (inner_icmp_header->id == icmpPacket.GetIcmpHeader().id)
         {
             isResponseValid = true;

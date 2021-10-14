@@ -16,7 +16,6 @@ namespace traceroute::responseValidatorsTests::icmpRequest
 
 struct TimeExceededV4 : public ::testing::Test
 {
-    ResponseIcmpToIcmp<Ipv4Header> response;
     const int responseProtocol = IPPROTO_ICMP;
     const SocketAddress ArbitraryDestAddr{"192.51.100.1"};
     std::unique_ptr<traceroute::IValidateResponse> validator =
@@ -27,10 +26,6 @@ struct TimeExceededV4 : public ::testing::Test
 
     void SetUp() override
     {
-        response.ipHeader.ihl = 5;
-        response.icmpHeader.type = ICMP_TIME_EXCEEDED;
-        response.triggerPacket.ipHeader.ihl = 5;
-        response.triggerPacket.transportHeader = request.GetIcmpHeader();
     }
 };
 
@@ -38,19 +33,26 @@ TEST_F(TimeExceededV4, ProperResponseAddr_InnerIcmpSameId_Valid)
 {
     ResponseIcmpToIcmp<Ipv4Header> response;
     response.ipHeader = createStandardIpHeader();
-    const char *resp = reinterpret_cast<const char *>(&response);
+    response.icmpHeader.type = ICMP_TIME_EXCEEDED;
+    
+    response.triggerPacket.ipHeader = createStandardIpHeader();
+    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id;
 
+    auto resp = reinterpret_cast<const char *>(&response);
     bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
 
     EXPECT_TRUE(isValid);
 }
 TEST_F(TimeExceededV4, ProperResponseAddr_InnerIcmpDifferentId_Invalid)
 {
-    response.triggerPacket.transportHeader.id--;
-    const char *resp = reinterpret_cast<const char *>(&response);
-    size_t responseSize = sizeof(response);
+    ResponseIcmpToIcmp<Ipv4Header> response;
+    response.icmpHeader.type = ICMP_TIME_EXCEEDED;
+    response.ipHeader = createStandardIpHeader();
+    response.triggerPacket.ipHeader = createStandardIpHeader();
+    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id - 1;
 
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, responseSize);
+    auto resp  = reinterpret_cast<const char *>(&response);
+    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
 
     EXPECT_FALSE(isValid);
 }

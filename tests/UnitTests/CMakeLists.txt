@@ -6,14 +6,13 @@ set(This UnitTests)
 set(Headers 
 
     ResponseValidatorsTests/Responses.hpp
-    ResponseValidatorsTests/V4/IpHeaderBuilder.hpp
-    ResponseValidatorsTests/V4/IcmpRequest/IcmpToIcmpBase.hpp
 )
 
 set(Sources
     SocketAddressTests.cpp
-    ResponseValidatorsTests/V4/IcmpRequest/TimeExceeded.cpp
-    ResponseValidatorsTests/V4/IcmpRequest/EchoReply.cpp
+    ResponseValidatorsTests/V4/IcmpRequest/TimeExceededV4.cpp
+    ResponseValidatorsTests/V4/IcmpRequest/EchoReplyV4.cpp
+    ResponseValidatorsTests/V6/IcmpRequest/EchoReplyV6.cpp
 )
 
 add_executable(${This} ${Sources} ${Header})
