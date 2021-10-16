@@ -1,3 +1,4 @@
+#include "Traceroute/SocketAddress.hpp"
 #include "utils/Poll.hpp"
 #include <Traceroute/DataSender.hpp>
 #include <algorithm>
@@ -12,10 +13,9 @@
 #include <thread>
 namespace traceroute
 {
-DataSender::DataSender(std::vector<Socket> sockets, int family, std::chrono::milliseconds pollingTimeout)
+DataSender::DataSender(std::vector<Socket> sockets, int family)
 {
     mFamily = family;
-    mPollingTimeout = pollingTimeout;
     for (const auto &socket : sockets)
     {
         if (socket.isReceiving)
@@ -34,19 +34,20 @@ DataSender::DataSender(std::vector<Socket> sockets, int family, std::chrono::mil
     }
 }
 
-int DataSender::receiveFrom(char *buffer, size_t size, SocketAddress &address, int &protocol)
+ResponseInfo DataSender::receiveFrom(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout)
 {
-    int n = 0;
-    int sfd = getAnySocketReadyToReceive();
+    ResponseInfo info;
+    info.size = 0;
+    int sfd = getAnySocketReadyToReceive(timeout);
     if (sfd > 0)
     {
-        protocol = sfdToProtocol.at(sfd);
+        info.protocol = sfdToProtocol.at(sfd);
         sockaddr_storage temp;
         socklen_t len = sizeof(temp);
-        n = recvfrom(sfd, buffer, size, 0, (struct sockaddr *)&temp, &len);
-        address = SocketAddress{temp};
+        info.size = recvfrom(sfd, buffer, bufferSize, 0, (struct sockaddr *)&temp, &len);
+        info.client = SocketAddress{temp};
     }
-    return n;
+    return info;
 }
 
 int DataSender::sendTo(const std::string &&buffer, const SocketAddress &address)
@@ -74,9 +75,9 @@ void DataSender::setTtlOnSendingSocket(int ttl)
     }
 }
 
-int DataSender::getAnySocketReadyToReceive()
+int DataSender::getAnySocketReadyToReceive(std::chrono::milliseconds timeout)
 {
-    return utils::Poll(mReceivingSockets, POLLIN, mPollingTimeout);
+    return utils::Poll(mReceivingSockets, POLLIN, timeout);
 }
 
 } // namespace traceroute

@@ -10,7 +10,8 @@
 
 namespace traceroute
 {
-#define BUFLEN 4096
+const constexpr int BufferSize = 4096;
+const constexpr std::chrono::microseconds MinTimeWaitForResponse = 100us;
 class ProbeSender
 {
   public:
@@ -23,7 +24,7 @@ class ProbeSender
     std::unique_ptr<IPacketFactory> mPacketFactory;
     std::unique_ptr<IDataSender> mDataSender;
     std::unique_ptr<IValidateResponse> mResponseValidator;
-    char mBuffer[BUFLEN] = {0};
+    char mBuffer[BufferSize] = {0};
 };
 
 } // namespace traceroute

@@ -4,5 +4,5 @@
 
 namespace traceroute::utils
 {
-int Poll(std::vector<int> fds, int events, std::chrono::milliseconds timeout);
+int Poll(std::vector<int> fds, short int events, std::chrono::milliseconds timeout);
 } // namespace traceroute::utils

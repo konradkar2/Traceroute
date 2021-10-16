@@ -1,15 +1,24 @@
 #pragma once
-#include <cstdint>
 #include "SocketAddress.hpp"
+#include <cstdint>
+#include <sys/types.h>
+#include <chrono>
 
-namespace traceroute 
+namespace traceroute
 {
-    class IDataSender
-    {
-    public:
-        virtual int sendTo(const std::string && buffer, const SocketAddress & address)= 0;
-        virtual int receiveFrom(char * buffer, size_t size, SocketAddress & address, int & protocol)= 0;   
-        virtual void setTtlOnSendingSocket(int ttl)= 0;
-        virtual ~IDataSender() = default;
-    };
-}
+struct ResponseInfo
+{
+    ssize_t size;
+    SocketAddress client;
+    int protocol;
+};
+
+class IDataSender
+{
+  public:
+    virtual int sendTo(const std::string &&buffer, const SocketAddress &address) = 0;
+    virtual ResponseInfo receiveFrom(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout) = 0;
+    virtual void setTtlOnSendingSocket(int ttl) = 0;
+    virtual ~IDataSender() = default;
+};
+} // namespace traceroute

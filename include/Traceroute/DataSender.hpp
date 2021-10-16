@@ -8,7 +8,7 @@
 #include <poll.h>
 #include <vector>
 #include "IDataSender.hpp"
-
+#include "IProvideSocket.hpp"
 
 namespace traceroute
 {
@@ -16,15 +16,14 @@ namespace traceroute
 class DataSender : public IDataSender
 {
   public:
-    DataSender(std::vector<Socket> sockets, int family, std::chrono::milliseconds pollingTimeout);
+    DataSender(std::vector<Socket> sockets, int family);
     int sendTo(const std::string &&buffer, const SocketAddress &receiver) override;
-    int receiveFrom(char *buffer, size_t size, SocketAddress &sender, int &protocol) override;
+    ResponseInfo receiveFrom(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout) override;
     void setTtlOnSendingSocket(int ttl) override;
 
   private:
-    int getAnySocketReadyToReceive();
+    int getAnySocketReadyToReceive(std::chrono::milliseconds timeout);
 
-    std::chrono::milliseconds mPollingTimeout;
     std::map<int, int> sfdToProtocol;
     std::vector<int> mReceivingSockets;
     int mSendingSocket;

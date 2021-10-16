@@ -20,10 +20,11 @@ void Bind(int sfd, const SocketAddress &address)
 
 Socket createIcmpSocket(const SocketAddress &addressToBind)
 {
-    int protocol = addressToBind.isV4() ? (int)IPPROTO_ICMP : (int)IPPROTO_ICMPV6;
-    int sfd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, protocol);
+    Socket sockt;
+    sockt.protocol = addressToBind.isV4() ? (int)IPPROTO_ICMP : (int)IPPROTO_ICMPV6;
+    sockt.sfd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, sockt.protocol);
 
-    Bind(sfd, addressToBind);
+    Bind(sockt.sfd, addressToBind);
     if (addressToBind.isV6())
     {
         struct icmp6_filter filter;
@@ -31,12 +32,12 @@ Socket createIcmpSocket(const SocketAddress &addressToBind)
         ICMP6_FILTER_SETPASS(ICMP6_ECHO_REPLY, &filter);
         ICMP6_FILTER_SETPASS(ICMP6_TIME_EXCEEDED, &filter);
         ICMP6_FILTER_SETPASS(ICMP6_DST_UNREACH, &filter);
-        if (setsockopt(sfd, IPPROTO_ICMPV6, ICMP6_FILTER, &filter, sizeof(filter)) < 0)
+        if (setsockopt(sockt.sfd, IPPROTO_ICMPV6, ICMP6_FILTER, &filter, sizeof(filter)) < 0)
         {
             throw std::runtime_error("Error occured while setting icmpv6 filter: " + std::string(strerror(errno)));
         }
     }
-    return {sfd, protocol, false, false};
+    return sockt;
 }
 
 Socket createTcpSocket(const SocketAddress &addressToBind)

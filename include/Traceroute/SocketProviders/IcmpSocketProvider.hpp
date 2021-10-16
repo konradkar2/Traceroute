@@ -9,7 +9,7 @@ namespace socketProviders
 class IcmpSocketProvider : public IProvideSocket
 {
   public:
-    std::vector<Socket> getSockets(const traceroute::SocketAddress &addressToBind) override;
+    std::vector<Socket> getSockets(const SocketAddress &addressToBind) override;
 };
 } // namespace socketProviders
 } // namespace traceroute
