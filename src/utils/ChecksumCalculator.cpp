@@ -1,6 +1,6 @@
 #include "ChecksumCalculator.hpp"
 #include <netinet/in.h>
-namespace traceroute
+namespace traceroute::utils
 {
 unsigned short ChecksumCalculator::computeICMPHeaderChecksum(IcmpHeader header)
 {
@@ -86,4 +86,4 @@ unsigned long ChecksumCalculator::computeChecksum(const unsigned short *addr, un
     // one's complement
     return ~sum;
 }
-} // namespace traceroute
+} // namespace traceroute::utils

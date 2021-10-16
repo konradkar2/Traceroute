@@ -1,7 +1,7 @@
 #pragma once
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/SocketAddress.hpp>
-namespace traceroute
+namespace traceroute::utils
 {
     class ChecksumCalculator
     {
@@ -20,4 +20,4 @@ namespace traceroute
         static unsigned long computePseudoheaderChecksum(short protocol,
             short headerlen, const SocketAddress & source, const SocketAddress & destination);   
     };
-}
+} // traceroute::utils

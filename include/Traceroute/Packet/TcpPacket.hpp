@@ -13,7 +13,6 @@ namespace traceroute::packet
                   const SocketAddress &destination, int dport);
         const TcpHeader &getTcpHeader() const;
         std::string serialize() const override;
-        ~TcpPacket() {}
 
     private:
         TcpHeader mTcpHeader;

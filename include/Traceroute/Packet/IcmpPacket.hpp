@@ -12,7 +12,7 @@ namespace traceroute::packet
         static IcmpPacket CreateIcmp6Packet(const SocketAddress &source, const SocketAddress &destination);
         const IcmpHeader &GetIcmpHeader() const;
         std::string serialize() const override;
-        ~IcmpPacket() = default;
+    
     private:
         IcmpPacket(const SocketAddress &source, const SocketAddress &destination);
         IcmpHeader mIcmpHeader;

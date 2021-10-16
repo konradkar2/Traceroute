@@ -1,5 +1,5 @@
-#include "../ChecksumCalculator.hpp"
-#include "../PodSerializer.hpp"
+#include "utils/ChecksumCalculator.hpp"
+#include "utils/Serialize.hpp"
 #include <Traceroute/Packet/TcpPacket.hpp>
 #include <arpa/inet.h>
 #include <stdexcept>
@@ -9,7 +9,7 @@ namespace traceroute::packet
 
 std::string TcpPacket::serialize() const
 {
-    return PodSerializer::serialize<TcpHeader>(mTcpHeader);
+    return utils::serialize<TcpHeader>(mTcpHeader);
 }
 const TcpHeader &TcpPacket::getTcpHeader() const
 {
@@ -29,7 +29,7 @@ TcpPacket::TcpPacket(const SocketAddress &source, const SocketAddress &destinati
     mTcpHeader.check = 0;
     if (source.isV4())
     {
-        mTcpHeader.check = ChecksumCalculator::computeTCPHeaderChecksum(mTcpHeader, source, destination);
+        mTcpHeader.check = utils::ChecksumCalculator::computeTCPHeaderChecksum(mTcpHeader, source, destination);
     }
 }
 } // namespace traceroute::packet

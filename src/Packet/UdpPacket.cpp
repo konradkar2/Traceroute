@@ -1,5 +1,5 @@
-#include "../ChecksumCalculator.hpp"
-#include "../PodSerializer.hpp"
+#include "utils/ChecksumCalculator.hpp"
+#include "utils/Serialize.hpp"
 #include <Traceroute/Packet/UdpPacket.hpp>
 #include <arpa/inet.h>
 #include <stdexcept>
@@ -8,7 +8,7 @@ namespace traceroute::packet
 {
 std::string UdpPacket::serialize() const
 {
-    return PodSerializer::serialize<UdpHeader>(mUdpHeader);
+    return utils::serialize<UdpHeader>(mUdpHeader);
 }
 const UdpHeader &UdpPacket::GetUdpHeader() const
 {
@@ -23,7 +23,7 @@ UdpPacket::UdpPacket(const SocketAddress &source, const SocketAddress &destinati
     mUdpHeader.check = 0;
     if (source.isV4())
     {
-        mUdpHeader.check = ChecksumCalculator::computeUdpHeaderChecksum(mUdpHeader, source, destination);
+        mUdpHeader.check = utils::ChecksumCalculator::computeUdpHeaderChecksum(mUdpHeader, source, destination);
     }
 }
 } // namespace traceroute::packet

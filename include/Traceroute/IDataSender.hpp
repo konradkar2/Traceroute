@@ -10,6 +10,6 @@ namespace traceroute
         virtual int sendTo(const std::string && buffer, const SocketAddress & address)= 0;
         virtual int receiveFrom(char * buffer, size_t size, SocketAddress & address, int & protocol)= 0;   
         virtual void setTtlOnSendingSocket(int ttl)= 0;
-        virtual ~IDataSender(){}
+        virtual ~IDataSender() = default;
     };
 }

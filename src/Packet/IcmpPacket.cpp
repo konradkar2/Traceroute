@@ -1,5 +1,5 @@
-#include "../ChecksumCalculator.hpp"
-#include "../PodSerializer.hpp"
+#include "utils/ChecksumCalculator.hpp"
+#include "utils/Serialize.hpp"
 #include <Traceroute/Packet/IcmpPacket.hpp>
 #include <arpa/inet.h>
 #include <netinet/icmp6.h>
@@ -10,7 +10,7 @@ namespace traceroute::packet
 {
 std::string IcmpPacket::serialize() const
 {
-    return PodSerializer::serialize<IcmpHeader>(mIcmpHeader);
+    return utils::serialize<IcmpHeader>(mIcmpHeader);
 }
 const IcmpHeader &IcmpPacket::GetIcmpHeader() const
 {
@@ -27,7 +27,7 @@ IcmpPacket IcmpPacket::CreateIcmp4Packet(const SocketAddress &source, const Sock
     packet.mIcmpHeader.id = htons(rand() % 65536); // random id
     packet.mIcmpHeader.sequence = 0;
     packet.mIcmpHeader.code = 0;
-    packet.mIcmpHeader.checksum = ChecksumCalculator::computeICMPHeaderChecksum(packet.mIcmpHeader);
+    packet.mIcmpHeader.checksum = utils::ChecksumCalculator::computeICMPHeaderChecksum(packet.mIcmpHeader);
 
     return packet;
 }

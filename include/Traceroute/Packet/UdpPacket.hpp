@@ -12,7 +12,6 @@ namespace traceroute::packet
                   const SocketAddress &destination, int dport);
         const UdpHeader &GetUdpHeader() const;
         std::string serialize() const override;
-        ~UdpPacket() {}
 
     private:
         UdpHeader mUdpHeader;
