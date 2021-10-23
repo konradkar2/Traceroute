@@ -1,4 +1,5 @@
 #include "Poll.hpp"
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <poll.h>
@@ -10,32 +11,20 @@
 namespace traceroute::utils
 {
 
-int Poll(std::vector<int> fds, short int events, std::chrono::milliseconds timeout)
+int Poll(std::vector<pollfd> pollfds, std::chrono::milliseconds timeout)
 {
-    std::vector<pollfd> pollds(fds.size());
-    for (int fd : fds)
-    {
-        pollfd pfd;
-        pfd.fd = fd;
-        pfd.events = events;
-        pollds.push_back(pfd);
-    }
-
-    int success = poll(pollds.data(), pollds.size(), timeout.count());
+    int success = poll(pollfds.data(), pollfds.size(), timeout.count());
     if (success < 0)
     {
         throw std::runtime_error("Exception occurred while polling " + std::string(strerror(errno)));
     }
     if (success > 0)
     {
-        for (const auto &pollfd : pollds)
+        auto pollfd =
+            std::find_if(begin(pollfds), end(pollfds), [](const auto &pollfd) { ; return pollfd.revents != 0; });
+        if (pollfd != end(pollfds))
         {
-            if (pollfd.revents == 0)
-                continue;
-            else
-            {
-                return pollfd.fd;
-            }
+            return pollfd->fd;
         }
     }
     return 0;

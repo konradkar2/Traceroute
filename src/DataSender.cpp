@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <stdexcept>
 #include <string>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <thread>
 namespace traceroute
@@ -50,14 +51,16 @@ ResponseInfo DataSender::receiveFrom(char *buffer, size_t bufferSize, std::chron
     return info;
 }
 
-int DataSender::sendTo(const std::string &&buffer, const SocketAddress &address)
+int DataSender::sendPacket(const Packet &packet)
 {
+    const auto &address = packet.getDestinationAddress();
     if (mFamily != address.family())
     {
         throw std::invalid_argument("Provided address's family doesn't match family of source address");
     }
-
-    int result = sendto(mSendingSocket, buffer.c_str(), buffer.size(), 0, address.sockaddrP(), address.size());
+    auto serializedPacket = packet.serialize();
+    int result = sendto(mSendingSocket, serializedPacket.data(), serializedPacket.size(), 0, address.sockaddrP(),
+                        address.size());
     if (result < 0)
     {
         throw std::runtime_error("Error occured while sending data " + std::string(strerror(errno)));
@@ -77,7 +80,14 @@ void DataSender::setTtlOnSendingSocket(int ttl)
 
 int DataSender::getAnySocketReadyToReceive(std::chrono::milliseconds timeout)
 {
-    return utils::Poll(mReceivingSockets, POLLIN, timeout);
+    std::vector<pollfd> pollfds;
+    std::transform(mReceivingSockets.cbegin(), mReceivingSockets.cend(), back_inserter(pollfds), [](int sfd) {
+        pollfd pollfd;
+        pollfd.events = POLLIN;
+        pollfd.fd = sfd;
+        return pollfd;
+    });
+    return utils::Poll(pollfds, timeout);
 }
 
 } // namespace traceroute

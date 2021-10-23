@@ -20,52 +20,37 @@ struct Ipv6Header
     char content[40];
 };
 
-struct EchoReplyV6 : ResponseValidatorTest
+struct TimeExceededV6 : public ResponseValidatorTest
 {
     const SocketAddress requestSource{"2a0e:1c80:4:1013::1012"};
     const SocketAddress requestDestination{"5a0e:1b80:4:1013::1015"};
-    const SocketAddress invalidResponseAddress{"6b3e:1b30:4:6043::1011"};
+    const SocketAddress transitHost{"6b3e:1b30:4:6043::1011"};
     const IcmpPacket request = IcmpPacket::CreateIcmp6Packet(requestSource, requestDestination);
     ResponseIcmpToIcmp<Ipv6Header> response;
-    EchoReplyV6()
-        : ResponseValidatorTest(std::make_unique<responseValidators::v6::Icmp6ResponseValidator>())
+    TimeExceededV6() : ResponseValidatorTest(std::make_unique<responseValidators::v6::Icmp6ResponseValidator>())
     {
-        response.icmpHeader.type = ICMP6_ECHO_REPLY;
+        response.icmpHeader.type = ICMP6_TIME_EXCEEDED;
     }
 };
-TEST_F(EchoReplyV6, sameIdValid)
+TEST_F(TimeExceededV6, sameIdValid)
 {
-    response.icmpHeader.id = request.GetIcmpHeader().id;
-    
+    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id;
+
     const char *resp = reinterpret_cast<const char *>(&response);
     size_t responseSize = sizeof(response);
     resp += sizeof(Ipv6Header);
-    bool isValid = validator->validate(request, requestDestination, IPPROTO_ICMPV6, resp, responseSize);
+    bool isValid = validator->validate(request, transitHost, IPPROTO_ICMPV6, resp, responseSize);
 
     EXPECT_TRUE(isValid);
 }
-
-TEST_F(EchoReplyV6, InvalidAddressSameIdInvalid)
+TEST_F(TimeExceededV6, differentIdInvalid)
 {
-    response.icmpHeader.id = request.GetIcmpHeader().id;
-   
-    const char *resp = reinterpret_cast<const char *>(&response);
-    size_t responseSize = sizeof(response);
-    resp += sizeof(Ipv6Header);
-    bool isValid = validator->validate(request, invalidResponseAddress, IPPROTO_ICMPV6, resp, responseSize);
-
-    EXPECT_FALSE(isValid);
-}
-
-TEST_F(EchoReplyV6, differentIdInvalid)
-{
-    response.icmpHeader.id = request.GetIcmpHeader().id - 1;
-    response.icmpHeader.type = ICMP6_ECHO_REPLY;
+    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id - 1;
 
     const char *resp = reinterpret_cast<const char *>(&response);
     resp += sizeof(Ipv6Header);
     size_t responseSize = sizeof(response);
-    bool isValid = validator->validate(request, requestDestination, IPPROTO_ICMPV6, resp, responseSize);
+    bool isValid = validator->validate(request, transitHost, IPPROTO_ICMPV6, resp, responseSize);
 
     EXPECT_FALSE(isValid);
 }

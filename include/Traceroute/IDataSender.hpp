@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <sys/types.h>
 #include <chrono>
-
+#include "Packet.hpp"
 namespace traceroute
 {
 struct ResponseInfo
@@ -16,7 +16,7 @@ struct ResponseInfo
 class IDataSender
 {
   public:
-    virtual int sendTo(const std::string &&buffer, const SocketAddress &address) = 0;
+    virtual int sendPacket(const Packet & packet) = 0;
     virtual ResponseInfo receiveFrom(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout) = 0;
     virtual void setTtlOnSendingSocket(int ttl) = 0;
     virtual ~IDataSender() = default;

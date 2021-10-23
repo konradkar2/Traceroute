@@ -17,7 +17,7 @@ class DataSender : public IDataSender
 {
   public:
     DataSender(std::vector<Socket> sockets, int family);
-    int sendTo(const std::string &&buffer, const SocketAddress &receiver) override;
+    int sendPacket(const Packet & packet) override;
     ResponseInfo receiveFrom(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout) override;
     void setTtlOnSendingSocket(int ttl) override;
 

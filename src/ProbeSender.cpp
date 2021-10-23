@@ -31,7 +31,7 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
         for (int i = 0; i < retries; i++)
         {
             auto packet = mPacketFactory->createPacket();
-            mDataSender->sendTo(packet->serialize(), packet->getDestinationAddress());
+            mDataSender->sendPacket(*packet);
             
             auto sendTimestamp = std::chrono::steady_clock::now();
             ResponseInfo respInfo;

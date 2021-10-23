@@ -49,6 +49,7 @@ bool UdpResponseValidator::validate(const Packet &request, const SocketAddress &
     }
 
     return isResponseValid;
+
 }
 
 } // namespace traceroute::responseValidators

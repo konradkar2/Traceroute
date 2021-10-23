@@ -68,12 +68,11 @@ const sockaddr *SocketAddress::sockaddrP() const
 
 bool SocketAddress::operator==(const SocketAddress &rhs) const
 {
-    bool isEqual = false;
+    bool isEqual = true;
     if (isV4())
         isEqual = ((sockaddr_in *)sockaddrP())->sin_addr.s_addr == ((sockaddr_in *)rhs.sockaddrP())->sin_addr.s_addr;
     else
     {
-        isEqual = true;
         for (int i = 0; i < 4; i++)
         {
             uint32_t tempA = ((sockaddr_in6 *)sockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];

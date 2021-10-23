@@ -13,6 +13,7 @@ set(Sources
     ResponseValidatorsTests/V4/IcmpRequest/TimeExceededV4.cpp
     ResponseValidatorsTests/V4/IcmpRequest/EchoReplyV4.cpp
     ResponseValidatorsTests/V6/IcmpRequest/EchoReplyV6.cpp
+    ResponseValidatorsTests/V6/IcmpRequest/TimeExceededV6.cpp
 )
 
 add_executable(${This} ${Sources} ${Header})

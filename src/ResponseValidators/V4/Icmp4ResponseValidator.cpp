@@ -2,20 +2,33 @@
 #include "Utils.hpp"
 #include <Traceroute/Packet/IcmpPacket.hpp>
 #include <cassert>
+#include <netinet/in.h>
 #include <netinet/ip_icmp.h>
+#include "ResponseValidators/common.hpp"
+
 namespace traceroute::responseValidators::v4
 {
 using namespace traceroute::packet;
 namespace
 {
-bool validateEchoReply(const char *icmpHeader, const IcmpPacket &icmpPacket, const SocketAddress &client);
-bool validateTimeExceeded(const char *icmpHeader, const IcmpPacket &icmpPacket);
-bool validateIcmpId(const char *icmpHeader, const IcmpPacket &icmpPacket);
-int getIcmpType(const char *icmpHeader);
+bool validateEchoReply(const char *icmpHeader, const IcmpPacket &icmpPacket, const SocketAddress &client)
+{
+    if (client == icmpPacket.getDestinationAddress())
+        return validateSession(icmpHeader, icmpPacket.GetIcmpHeader());
+    return false;
+}
+bool validateTimeExceeded(const char *icmpHeader, const IcmpPacket &icmpPacket)
+{
+    icmpHeader += sizeof(IcmpHeader);
+    icmpHeader += getIpHeaderSize(icmpHeader);
+    return validateSession(icmpHeader, icmpPacket.GetIcmpHeader());
+}
+
+
 } // namespace
 
-bool Icmp4ResponseValidator::validate(const Packet &request, const SocketAddress &client, int protocol,
-                                      const char *response, size_t responseSize)
+bool Icmp4ResponseValidator::validateFields(const Packet &request, const SocketAddress &client, const char *response,
+                                            size_t responseSize)
 {
     const auto &icmpPacket = dynamic_cast<const IcmpPacket &>(request);
     response += getIpHeaderSize(response);
@@ -30,33 +43,16 @@ bool Icmp4ResponseValidator::validate(const Packet &request, const SocketAddress
     }
 }
 
-namespace
+bool Icmp4ResponseValidator::validateSize(size_t size)
 {
-bool validateEchoReply(const char *icmpHeader, const IcmpPacket &icmpPacket, const SocketAddress &client)
-{
-    if (client == icmpPacket.getDestinationAddress())
-        return validateIcmpId(icmpHeader, icmpPacket);
-    return false;
-}
-bool validateTimeExceeded(const char *icmpHeader, const IcmpPacket &icmpPacket)
-{
-    icmpHeader += sizeof(IcmpHeader);
-    icmpHeader += getIpHeaderSize(icmpHeader);
-    return validateIcmpId(icmpHeader, icmpPacket);
-}
-bool validateIcmpId(const char *icmpHeader, const IcmpPacket &icmpPacket)
-{
-    const IcmpHeader *icmpH = reinterpret_cast<const IcmpHeader *>(icmpHeader);
-    if (icmpH->id == icmpPacket.GetIcmpHeader().id)
-        return true;
-    return false;
-}
-int getIcmpType(const char *icmpHeader)
-{
-    const IcmpHeader *icmpHdr = reinterpret_cast<const IcmpHeader *>(icmpHeader);
-    return icmpHdr->type;
+    return true;
 }
 
-} // namespace
+bool Icmp4ResponseValidator::validateProtocol(int protocol)
+{
+    return protocol == IPPROTO_ICMP;
+}
+
+
 
 } // namespace traceroute::responseValidators::v4

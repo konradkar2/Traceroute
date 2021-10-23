@@ -2,7 +2,7 @@
 
 #include "IDataSender.hpp"
 #include "IPacketFactory.hpp"
-#include "IValidateResponse.hpp"
+#include <Traceroute/IValidateResponse.hpp>
 #include "Packet.hpp"
 #include "Probe.hpp"
 #include <chrono>

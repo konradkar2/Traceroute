@@ -3,33 +3,48 @@
 #include <Traceroute/Packet/IcmpPacket.hpp>
 #include <cassert>
 #include <netinet/icmp6.h>
-
+#include <netinet/in.h>
+#include "ResponseValidators/common.hpp"
 namespace traceroute::responseValidators::v6
 {
 
 using namespace traceroute::packet;
-bool Icmp6ResponseValidator::validate(const Packet &request, const SocketAddress &client, int protocol,
-                                      const char *response, size_t responseSize)
+bool validateEchoReply(const char *icmpHeader, const IcmpPacket &icmpPacket, const SocketAddress &client)
 {
-    bool isResponseValid = false;
+    if (client == icmpPacket.getDestinationAddress())
+        return validateSession(icmpHeader, icmpPacket.GetIcmpHeader());
+    return false;
+}
+bool validateTimeExceeded(const char *icmpHeader, const IcmpPacket &icmpPacket)
+{
+    icmpHeader += sizeof(IcmpHeader);
+    icmpHeader += Ipv6HeaderSize;
+    return validateSession(icmpHeader, icmpPacket.GetIcmpHeader());
+}
+bool Icmp6ResponseValidator::validateFields(const Packet &request, const SocketAddress &client, const char *response,
+                                            size_t responseSize)
+{
     const auto &icmpPacket = dynamic_cast<const IcmpPacket &>(request);
 
-    const IcmpHeader *header = reinterpret_cast<const IcmpHeader *>(response);
-    if (header->type == ICMP6_TIME_EXCEEDED)
+    switch(getIcmpType(response))
     {
-        response += sizeof(IcmpHeader);
-        response += Ipv6HeaderSize;
-        const IcmpHeader *inner_icmp_header = reinterpret_cast<const IcmpHeader *>(response);
-        if (inner_icmp_header->id == icmpPacket.GetIcmpHeader().id)
-        {
-            isResponseValid = true;
-        }
+    case(ICMP6_ECHO_REPLY):
+        return validateEchoReply(response,icmpPacket,client);
+    case(ICMP6_TIME_EXCEEDED):
+        return validateTimeExceeded(response, icmpPacket);
+    default:
+        return false;
     }
-    else if ((header->type == ICMP6_ECHO_REPLY) && header->id == icmpPacket.GetIcmpHeader().id &&
-             icmpPacket.getDestinationAddress() == client)
-    {
-        isResponseValid = true;
-    }
-    return isResponseValid;
 }
+
+bool Icmp6ResponseValidator::validateSize(size_t size)
+{
+    return true;
+}
+
+bool Icmp6ResponseValidator::validateProtocol(int protocol)
+{
+    return protocol == IPPROTO_ICMPV6;
+}
+
 } // namespace traceroute::responseValidators::v6

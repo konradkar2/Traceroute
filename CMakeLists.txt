@@ -22,7 +22,8 @@ set(Headers
     include/Traceroute/PacketFactory/TcpPacketFactory.hpp
     include/Traceroute/PacketFactory/UdpPacketFactory.hpp
     include/Traceroute/SocketAddress.hpp    
-    include/Traceroute/IValidateResponse.hpp
+    include/Traceroute/ResponseValidators/ResponseValidator.hpp 
+    include/Traceroute/IValidateResponse.hpp 
     include/Traceroute/DataSender.hpp
     include/Traceroute/Socket.hpp
 )
@@ -32,6 +33,7 @@ set(Sources
     src/SocketProviders/TcpSocketProvider.cpp
     src/SocketProviders/UdpSocketProvider.cpp
     src/ResponseValidators/IcmpResponseValidator.cpp
+    src/ResponseValidators/ResponseValidator.cpp
     src/ResponseValidators/V4/Icmp4ResponseValidator.hpp
     src/ResponseValidators/V4/Icmp4ResponseValidator.cpp
     src/ResponseValidators/V4/Utils.hpp
@@ -56,6 +58,8 @@ set(Sources
     src/utils/Serialize.hpp
     src/utils/Poll.cpp
     src/utils/CreateSocket.cpp
+    src/ResponseValidators/common.hpp
+    src/ResponseValidators/common.cpp
 )
 
 add_library(${This} STATIC ${Sources} ${Headers})

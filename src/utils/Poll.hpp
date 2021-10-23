@@ -1,8 +1,9 @@
 #pragma once
 #include <chrono>
 #include <vector>
+#include <poll.h>
 
 namespace traceroute::utils
 {
-int Poll(std::vector<int> fds, short int events, std::chrono::milliseconds timeout);
+int Poll(std::vector<pollfd> pollfs, std::chrono::milliseconds timeout);
 } // namespace traceroute::utils
