@@ -3,6 +3,7 @@
 #include <string>
 #include <chrono>
 #include "SocketAddress.hpp"
+#include <memory>
 
 namespace traceroute
 {
@@ -26,7 +27,7 @@ namespace traceroute
 
     private:
         std::vector<ProbeResult> mProbeResults;
-        SocketAddress mResponseSender;
+        std::unique_ptr<SocketAddress> mResponseSender;
         int mTtl;
     };
 

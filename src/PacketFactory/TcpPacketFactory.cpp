@@ -11,6 +11,6 @@ TcpPacketFactory::TcpPacketFactory(const SocketAddress &source, const SocketAddr
 }
 std::unique_ptr<Packet> TcpPacketFactory::createPacket()
 {
-    return make_unique<TcpPacket>(mSource, mDestination, mDport);
+    return std::make_unique<TcpPacket>(mSource, mDestination, mDport);
 }
 } // namespace traceroute

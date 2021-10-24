@@ -28,15 +28,23 @@ struct ResponseIcmpToTcp
 {
     InternetProtocol ipHeader;
     IcmpHeader icmpHeader;
-    TriggerPacket<InternetProtocol, IcmpHeader> triggerPacket;
+    TriggerPacket<InternetProtocol, TcpHeader> triggerPacket;
 };
+
 
 template <typename InternetProtocol>
 struct ResponseIcmpToUdp
 {
     InternetProtocol ipHeader;
     IcmpHeader icmpHeader;
-    TriggerPacket<InternetProtocol, IcmpHeader> triggerPacket;
+    TriggerPacket<InternetProtocol, UdpHeader> triggerPacket;
+};
+
+template <typename InternetProtocol>
+struct ResponseTcpToTcp
+{
+    InternetProtocol ipHeader;
+    TcpHeader tcpHeader;
 };
 
 } // namespace traceroute

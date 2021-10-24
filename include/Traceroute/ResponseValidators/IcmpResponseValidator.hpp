@@ -15,8 +15,7 @@ class IcmpResponseValidator : public IValidateResponse
     bool validate(const Packet &request, const SocketAddress &client, int protocol, const char *response,
                   size_t responseSize) override;
   private:
-    std::unique_ptr<IValidateResponse> mIcmp4ResponseValidator;
-    std::unique_ptr<IValidateResponse> mIcmp6ResponseValidator;
+    std::unique_ptr<IValidateResponse> mIcmpResponseValidator;
 };
 } // namespace responseValidators
 } // namespace traceroute

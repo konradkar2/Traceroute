@@ -10,10 +10,16 @@ set(Headers
 
 set(Sources
     SocketAddressTests.cpp
-    ResponseValidatorsTests/V4/IcmpRequest/TimeExceededV4.cpp
-    ResponseValidatorsTests/V4/IcmpRequest/EchoReplyV4.cpp
-    ResponseValidatorsTests/V6/IcmpRequest/EchoReplyV6.cpp
-    ResponseValidatorsTests/V6/IcmpRequest/TimeExceededV6.cpp
+    ResponseValidatorsTests/IcmpRequest/TimeExceededV4.cpp
+    ResponseValidatorsTests/IcmpRequest/EchoReplyV4.cpp
+    ResponseValidatorsTests/TcpRequest/TcpTimeExceededV4.cpp
+    ResponseValidatorsTests/TcpRequest/TcpTimeExceededV6.cpp
+    ResponseValidatorsTests/TcpRequest/TcpAckV4.cpp
+    ResponseValidatorsTests/TcpRequest/TcpAckV6.cpp
+    ResponseValidatorsTests/TcpRequest/DestUnreachV4.cpp
+    ResponseValidatorsTests/TcpRequest/DestUnreachV6.cpp
+    ResponseValidatorsTests/IcmpRequest/EchoReplyV6.cpp
+    ResponseValidatorsTests/IcmpRequest/TimeExceededV6.cpp
 )
 
 add_executable(${This} ${Sources} ${Header})

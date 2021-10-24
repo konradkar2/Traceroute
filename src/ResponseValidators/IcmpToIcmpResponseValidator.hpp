@@ -1,14 +1,14 @@
+#pragma once
 #include <Traceroute/ResponseValidators/ResponseValidator.hpp>
 
-namespace traceroute::responseValidators::v6
+namespace traceroute::responseValidators
 {
-
-class Icmp6ResponseValidator : public ResponseValidator
+class IcmpToIcmpResponseValidator : public ResponseValidator
 {
   public:
     bool validateFields(const Packet &request, const SocketAddress &client, const char *response,
-                  size_t responseSize) override;
+                        size_t responseSize) override;
     bool validateProtocol(int protocol) override;
     bool validateSize(size_t size) override;
 };
-} // namespace traceroute::responseValidators::v6
+} // namespace traceroute::responseValidators

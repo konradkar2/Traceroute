@@ -1,9 +1,9 @@
 #pragma once
 #include <Traceroute/ResponseValidators/ResponseValidator.hpp>
 
-namespace traceroute::responseValidators::v4
+namespace traceroute::responseValidators
 {
-class Icmp4ResponseValidator : public ResponseValidator
+class IcmpToTcpResponseValidator : public ResponseValidator
 {
   public:
     bool validateFields(const Packet &request, const SocketAddress &client, const char *response,

@@ -32,15 +32,12 @@ set(Sources
     src/SocketProviders/IcmpSocketProvider.cpp
     src/SocketProviders/TcpSocketProvider.cpp
     src/SocketProviders/UdpSocketProvider.cpp
-    src/ResponseValidators/IcmpResponseValidator.cpp
     src/ResponseValidators/ResponseValidator.cpp
-    src/ResponseValidators/V4/Icmp4ResponseValidator.hpp
-    src/ResponseValidators/V4/Icmp4ResponseValidator.cpp
-    src/ResponseValidators/V4/Utils.hpp
-    src/ResponseValidators/V4/Utils.cpp
-    src/ResponseValidators/V6/Icmp6ResponseValidator.hpp
-    src/ResponseValidators/V6/Icmp6ResponseValidator.cpp   
+    src/ResponseValidators/IcmpToIcmpResponseValidator.cpp
+    src/ResponseValidators/IcmpResponseValidator.cpp
     src/ResponseValidators/TcpResponseValidator.cpp
+    src/ResponseValidators/TcpToTcpResponseValidator.cpp
+    src/ResponseValidators/IcmpToTcpResponseValidator.cpp
     src/ResponseValidators/UdpResponseValidator.cpp       
    
     src/DataSender.cpp

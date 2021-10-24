@@ -1,6 +1,7 @@
-#include "ResponseValidators/V4/Icmp4ResponseValidator.hpp"
+#include <Traceroute/ResponseValidators/IcmpResponseValidator.hpp>
+#include "ResponseValidatorsTests/IpHeaderVariants.hpp"
 #include "ResponseValidatorsTests/Responses.hpp"
-#include "ResponseValidatorsTests/V4/IpHeaderVariants.hpp"
+#include <ResponseValidatorsTests/ResponseValidatorTest.hpp>
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet/IcmpPacket.hpp>
 #include <gmock/gmock.h>
@@ -8,21 +9,21 @@
 #include <netinet/ip_icmp.h>
 #include <string>
 #include <vector>
-#include <ResponseValidatorsTests/ResponseValidatorTest.hpp>
 
 using namespace traceroute::packet;
 
 namespace traceroute::responseValidatorsTests::icmpRequest
 {
-struct TimeExceededBase : public ResponseValidatorTest
+struct TimeExceededBase : public ResponseValidatorTestV4
 {
     const int responseProtocol = IPPROTO_ICMP;
-    const SocketAddress ArbitraryDestAddr{"192.51.100.1"};
-    const SocketAddress requestSource{"192.0.2.1"};
-    const SocketAddress validResponseAddr = requestSource;
-    const IcmpPacket request = IcmpPacket::CreateIcmp4Packet(requestSource, ArbitraryDestAddr);
+    const SocketAddress validResponseAddr;
+    const IcmpPacket request;
 
-    TimeExceededBase() : ResponseValidatorTest(std::make_unique<responseValidators::v4::Icmp4ResponseValidator>())
+    TimeExceededBase()
+        : ResponseValidatorTestV4(std::make_unique<responseValidators::IcmpResponseValidator>()),
+          validResponseAddr(requestDestination), request(IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination))
+
     {
     }
 };
@@ -64,7 +65,7 @@ TEST_F(TimeExceededV4, differentId_Invalid)
 {
     response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id - 1;
 
-    auto resp  = reinterpret_cast<const char *>(&response);
+    auto resp = reinterpret_cast<const char *>(&response);
     bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
 
     EXPECT_FALSE(isValid);
@@ -83,7 +84,7 @@ TEST_F(TimeExceededV4CustomIhl, differentId_Invalid)
 {
     response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id - 1;
 
-    auto resp  = reinterpret_cast<const char *>(&response);
+    auto resp = reinterpret_cast<const char *>(&response);
     bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
 
     EXPECT_FALSE(isValid);

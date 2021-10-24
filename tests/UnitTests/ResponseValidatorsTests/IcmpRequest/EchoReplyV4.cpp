@@ -1,7 +1,6 @@
-
-#include "ResponseValidators/V4/Icmp4ResponseValidator.hpp"
+#include <Traceroute/ResponseValidators/IcmpResponseValidator.hpp>
 #include "ResponseValidatorsTests/Responses.hpp"
-#include "ResponseValidatorsTests/V4/IpHeaderVariants.hpp"
+#include "ResponseValidatorsTests/IpHeaderVariants.hpp"
 #include <ResponseValidatorsTests/ResponseValidatorTest.hpp>
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet/IcmpPacket.hpp>
@@ -15,14 +14,12 @@ using namespace traceroute::packet;
 namespace traceroute::responseValidatorsTests::icmpRequest
 {
 
-struct EchoReplyBase : public ResponseValidatorTest
+struct EchoReplyBase : public ResponseValidatorTestV4
 {
     const int responseProtocol = IPPROTO_ICMP;
-    const SocketAddress ArbitrarySrcAddr{"192.0.2.1"};
-    const SocketAddress destAddr{"192.51.100.1"};
-    const SocketAddress validResponseAddr = destAddr;
-    const IcmpPacket request = IcmpPacket::CreateIcmp4Packet(ArbitrarySrcAddr, destAddr);
-    EchoReplyBase() : ResponseValidatorTest(std::make_unique<responseValidators::v4::Icmp4ResponseValidator>())
+    const SocketAddress validResponseAddr = requestDestination;
+    const IcmpPacket request = IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination);
+    EchoReplyBase() : ResponseValidatorTestV4(std::make_unique<responseValidators::IcmpResponseValidator>())
     {
     }
 };
