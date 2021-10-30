@@ -4,17 +4,16 @@
 namespace traceroute::socketProviders
 {
 
-std::vector<Socket> UdpSocketProvider::getSockets(const SocketAddress &addressToBind)
+std::vector<SocketExt> UdpSocketProvider::getSockets(const SocketAddress &addressToBind)
 {
-    auto icmpSocket = utils::createIcmpSocket(addressToBind);
-    icmpSocket.isReceiving = true;
-    icmpSocket.isSending = false;
+    SocketExt icmpSe;
+    icmpSe.socket = utils::createIcmpRawSocket(addressToBind);
+    icmpSe.role = Role::Receive;
 
-    auto udpSocket = utils::createUdpSocket(addressToBind);
-    udpSocket.isSending = true;
-    udpSocket.isReceiving = false;
-    
-    return {icmpSocket,udpSocket};
+    SocketExt udpSe;
+    udpSe.socket = utils::createUdpRawSocket(addressToBind);
+    udpSe.role = Role::Send;
+    return {icmpSe, udpSe};
 }
 
 } // namespace traceroute::socketProviders

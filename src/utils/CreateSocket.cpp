@@ -18,13 +18,12 @@ void Bind(int sfd, const SocketAddress &address)
 }
 } // namespace
 
-Socket createIcmpSocket(const SocketAddress &addressToBind)
+Socket createIcmpRawSocket(const SocketAddress &addressToBind)
 {
-    Socket sockt;
-    sockt.protocol = addressToBind.isV4() ? (int)IPPROTO_ICMP : (int)IPPROTO_ICMPV6;
-    sockt.sfd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, sockt.protocol);
+    const int protocol = addressToBind.isV4() ? static_cast<int>(IPPROTO_ICMP) : static_cast<int>(IPPROTO_ICMPV6);
+    int fd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, protocol);
 
-    Bind(sockt.sfd, addressToBind);
+    Bind(fd, addressToBind);
     if (addressToBind.isV6())
     {
         struct icmp6_filter filter;
@@ -32,41 +31,43 @@ Socket createIcmpSocket(const SocketAddress &addressToBind)
         ICMP6_FILTER_SETPASS(ICMP6_ECHO_REPLY, &filter);
         ICMP6_FILTER_SETPASS(ICMP6_TIME_EXCEEDED, &filter);
         ICMP6_FILTER_SETPASS(ICMP6_DST_UNREACH, &filter);
-        if (setsockopt(sockt.sfd, IPPROTO_ICMPV6, ICMP6_FILTER, &filter, sizeof(filter)) < 0)
+        if (setsockopt(fd, IPPROTO_ICMPV6, ICMP6_FILTER, &filter, sizeof(filter)) < 0)
         {
             throw std::runtime_error("Error occured while setting icmpv6 filter: " + std::string(strerror(errno)));
         }
     }
-    return sockt;
+    return Socket{fd, protocol};
 }
 
-Socket createTcpSocket(const SocketAddress &addressToBind)
+Socket createTcpRawSocket(const SocketAddress &addressToBind)
 {
-    int sfd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, IPPROTO_TCP);
-    Bind(sfd, addressToBind);
+    constexpr int protocol = IPPROTO_TCP;
+    int fd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, protocol);
+    Bind(fd, addressToBind);
     if (addressToBind.isV6())
     {
         const int TCP_CHECKSUM_OFFSET = 16;
-        if ((setsockopt(sfd, IPPROTO_IPV6, IPV6_CHECKSUM, &TCP_CHECKSUM_OFFSET, sizeof(TCP_CHECKSUM_OFFSET))) < 0)
+        if ((setsockopt(fd, IPPROTO_IPV6, IPV6_CHECKSUM, &TCP_CHECKSUM_OFFSET, sizeof(TCP_CHECKSUM_OFFSET))) < 0)
         {
             throw std::runtime_error("Could not set IPV6_CHECKSUM flag");
         }
     }
-    return {sfd, IPPROTO_TCP, false, false};
+    return Socket{fd, protocol};
 }
 
-Socket createUdpSocket(const SocketAddress &addressToBind)
+Socket createUdpRawSocket(const SocketAddress &addressToBind)
 {
-    int sfd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, IPPROTO_UDP);
-    Bind(sfd, addressToBind);
+    constexpr int protocol = IPPROTO_UDP;
+    int fd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, protocol);
+    Bind(fd, addressToBind);
     if (addressToBind.isV6())
     {
         int offset = 6;
-        if ((setsockopt(sfd, IPPROTO_IPV6, IPV6_CHECKSUM, &offset, sizeof(offset))) < 0)
+        if ((setsockopt(fd, IPPROTO_IPV6, IPV6_CHECKSUM, &offset, sizeof(offset))) < 0)
         {
             throw std::runtime_error("Could not set IPV6_CHECKSUM flag");
         }
     }
-    return {sfd, IPPROTO_UDP, false, false};
+    return Socket{fd, protocol};
 }
 } // namespace traceroute::utils

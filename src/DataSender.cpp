@@ -12,26 +12,28 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <thread>
+#include <Traceroute/Socket.hpp>
+
 namespace traceroute
 {
-DataSender::DataSender(std::vector<Socket> sockets, int family)
+DataSender::DataSender(std::vector<SocketExt> socketsExt, int family)
 {
     mFamily = family;
-    for (const auto &socket : sockets)
+    for (const auto &socExt : socketsExt)
     {
-        if (socket.isReceiving)
+        if (socExt.role & Role::Receive)
         {
-            mReceivingSockets.push_back(socket.sfd);
+            mReceivingSockets.push_back(socExt.socket.fd);
         }
-        if (socket.isSending)
+        if (socExt.role & Role::Send)
         {
             if (mSendingSocket != 0)
             {
                 throw std::invalid_argument("There can be only one sending socket in DataSender");
             }
-            mSendingSocket = socket.sfd;
+            mSendingSocket = socExt.socket.fd;
         }
-        sfdToProtocol[socket.sfd] = socket.protocol;
+        sfdToProtocol[socExt.socket.fd] = socExt.socket.protocol;
     }
 }
 

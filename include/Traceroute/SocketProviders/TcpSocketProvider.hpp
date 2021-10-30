@@ -1,15 +1,15 @@
 #pragma once
-#include <Traceroute/IProvideSocket.hpp>
+#include <Traceroute/IProvideSockets.hpp>
 
 namespace traceroute
 {
 namespace socketProviders
 
 {
-class TcpSocketProvider : public IProvideSocket
+class TcpSocketProvider : public IProvideSockets
 {
   public:
-    std::vector<Socket> getSockets(const SocketAddress &addressToBind) override;
+    std::vector<SocketExt> getSockets(const SocketAddress &addressToBind) override;
 };
 } // namespace socketProviders
 } // namespace traceroute

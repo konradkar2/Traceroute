@@ -1,16 +1,16 @@
-#include <Traceroute/SocketProviders/IcmpSocketProvider.hpp>
 #include "utils/CreateSocket.hpp"
+#include <Traceroute/SocketProviders/IcmpSocketProvider.hpp>
 
 namespace traceroute::socketProviders
 {
 
-std::vector<Socket> IcmpSocketProvider::getSockets(const SocketAddress &addressToBind)
+std::vector<SocketExt> IcmpSocketProvider::getSockets(const SocketAddress &addressToBind)
 {
-    auto socket = utils::createIcmpSocket(addressToBind);
-    socket.isReceiving = true;
-    socket.isSending = true;
-    return {socket};
+    SocketExt icmpSe;
+    icmpSe.socket = utils::createIcmpRawSocket(addressToBind);
+    icmpSe.role = Role::Receive | Role::Send;
+    fprintf(stderr,"%d\n",icmpSe.role);
+    return {icmpSe};
 }
-
 
 } // namespace traceroute::socketProviders

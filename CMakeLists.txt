@@ -5,9 +5,9 @@ cmake_minimum_required(VERSION 3.16)
 set(This Traceroute)
 
 set(Headers
-    include/Traceroute/SocketProviders/IcmpSocketProvider.hpp       
-    include/Traceroute/SocketProviders/TcpSocketProvider.hpp       
-    include/Traceroute/SocketProviders/UdpSocketProvider.hpp       
+    include/Traceroute/SocketProviders/IcmpSocketProvider.hpp
+    include/Traceroute/SocketProviders/TcpSocketProvider.hpp
+    include/Traceroute/SocketProviders/UdpSocketProvider.hpp
     include/Traceroute/ResponseValidators/UdpResponseValidator.hpp
     include/Traceroute/ResponseValidators/IcmpResponseValidator.hpp
     include/Traceroute/ResponseValidators/TcpResponseValidator.hpp
@@ -17,13 +17,13 @@ set(Headers
     include/Traceroute/Packet/TcpPacket.hpp
     include/Traceroute/Packet/UdpPacket.hpp
     include/Traceroute/IPacketFactory.hpp
-    include/Traceroute/IProvideSocket.hpp
+    include/Traceroute/IProvideSockets.hpp
     include/Traceroute/PacketFactory/IcmpPacketFactory.hpp
     include/Traceroute/PacketFactory/TcpPacketFactory.hpp
     include/Traceroute/PacketFactory/UdpPacketFactory.hpp
-    include/Traceroute/SocketAddress.hpp    
-    include/Traceroute/ResponseValidators/ResponseValidator.hpp 
-    include/Traceroute/IValidateResponse.hpp 
+    include/Traceroute/SocketAddress.hpp
+    include/Traceroute/ResponseValidators/ResponseValidator.hpp
+    include/Traceroute/IValidateResponse.hpp
     include/Traceroute/DataSender.hpp
     include/Traceroute/Socket.hpp
 )
@@ -38,8 +38,8 @@ set(Sources
     src/ResponseValidators/TcpResponseValidator.cpp
     src/ResponseValidators/TcpToTcpResponseValidator.cpp
     src/ResponseValidators/IcmpToTcpResponseValidator.cpp
-    src/ResponseValidators/UdpResponseValidator.cpp       
-   
+    src/ResponseValidators/UdpResponseValidator.cpp
+
     src/DataSender.cpp
     src/Packet.cpp
     src/Packet/IcmpPacket.cpp
