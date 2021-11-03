@@ -3,11 +3,6 @@
 cmake_minimum_required(VERSION 3.16)
 set(This UnitTests)
 
-set(Headers 
-
-    ResponseValidatorsTests/Responses.hpp
-)
-
 set(Sources
     SocketAddressTests.cpp
     ResponseValidatorsTests/IcmpRequest/TimeExceededV4.cpp
@@ -20,9 +15,11 @@ set(Sources
     ResponseValidatorsTests/TcpRequest/DestUnreachV6.cpp
     ResponseValidatorsTests/IcmpRequest/EchoReplyV6.cpp
     ResponseValidatorsTests/IcmpRequest/TimeExceededV6.cpp
+
+    ProbeSenderTests/ProbeSenderTest.cpp
 )
 
-add_executable(${This} ${Sources} ${Header})
+add_executable(${This} ${Sources} )
 set_target_properties(${This} PROPERTIES
     FOLDER Tests/UnitTests
 )

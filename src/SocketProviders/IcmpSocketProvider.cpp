@@ -9,7 +9,6 @@ std::vector<SocketExt> IcmpSocketProvider::getSockets(const SocketAddress &addre
     SocketExt icmpSe;
     icmpSe.socket = utils::createIcmpRawSocket(addressToBind);
     icmpSe.role = Role::Receive | Role::Send;
-    fprintf(stderr,"%d\n",icmpSe.role);
     return {icmpSe};
 }
 

@@ -4,9 +4,8 @@ namespace traceroute
 {
 using namespace traceroute::packet;
 IcmpPacketFactory::IcmpPacketFactory(const SocketAddress &source, const SocketAddress &destination)
+    : mSource{source}, mDestination{destination}
 {
-    mSource = source;
-    mDestination = destination;
 }
 std::unique_ptr<Packet> IcmpPacketFactory::createPacket()
 {

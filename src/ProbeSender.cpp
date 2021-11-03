@@ -1,3 +1,4 @@
+#include "Traceroute/ResponseInfo.hpp"
 #include <Traceroute/ProbeSender.hpp>
 #include <chrono>
 #include <cstdio>
@@ -31,26 +32,33 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
         for (int i = 0; i < retries; i++)
         {
             auto packet = mPacketFactory->createPacket();
-            mDataSender->sendPacket(*packet);
 
+            mDataSender->sendPacket(*packet);
             auto sendTimestamp = std::chrono::steady_clock::now();
-            ResponseInfo respInfo;
+
             bool isResponseValid = false;
-            auto timeLeft = timeout;
-            do
+            std::optional<ResponseInfo> respInfo;
+            while (true)
             {
+                auto timeLeft = getTimeLeft(sendTimestamp, timeout);
+                if (isResponseValid || timeLeft < MinTimeWaitForResponse)
+                {
+                    break;
+                }
                 respInfo = mDataSender->receiveFrom(mBuffer, BufferSize,
                                                     std::chrono::duration_cast<std::chrono::milliseconds>(timeLeft));
-                isResponseValid =
-                    mResponseValidator->validate(*packet, respInfo.client, respInfo.protocol, mBuffer, respInfo.size);
-                timeLeft = getTimeLeft(sendTimestamp, timeout);
-            } while (not isResponseValid && timeLeft > MinTimeWaitForResponse);
+                if (respInfo)
+                {
+                    isResponseValid = mResponseValidator->validate(*packet, respInfo->client(), respInfo->protocol(),
+                                                                   mBuffer, respInfo->size());
+                }
+            }
 
             if (isResponseValid)
             {
-                probes.setResponseAddr(respInfo.client);
+                probes.setResponseAddr(respInfo->client());
                 probes.addSuccessfulProbe(getTimePassedTillNow(sendTimestamp));
-                if (respInfo.client == packet->getDestinationAddress())
+                if (respInfo->client() == packet->getDestinationAddress())
                     wasDestinationReached = true;
             }
             else
@@ -75,11 +83,10 @@ std::chrono::microseconds getTimeLeft(std::chrono::time_point<std::chrono::stead
                                       std::chrono::microseconds timeout)
 {
     auto timePassed = getTimePassedTillNow(then);
-    if(timePassed > timeout)
+    if (timePassed > timeout)
         return 0us;
     return timeout - timePassed;
 }
-
 
 } // namespace
 } // namespace traceroute

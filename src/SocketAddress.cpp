@@ -6,6 +6,7 @@
 #include <string>
 namespace traceroute
 {
+
 SocketAddress::SocketAddress(const sockaddr_storage &address)
 {
     mAddress = address;
@@ -52,9 +53,9 @@ SocketAddress::SocketAddress(const std::string &address)
 }
 int SocketAddress::family() const
 {
-    return (int)mAddress.ss_family;
+    return static_cast<int>(mAddress.ss_family);
 }
-size_t SocketAddress::size() const
+unsigned SocketAddress::size() const
 {
     if (isV4())
         return sizeof(sockaddr_in);

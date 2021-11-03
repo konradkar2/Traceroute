@@ -1,18 +1,21 @@
+#include "Traceroute/IDataSender.hpp"
 #include "Traceroute/SocketAddress.hpp"
 #include "utils/Poll.hpp"
 #include <Traceroute/DataSender.hpp>
+#include <Traceroute/ResponseInfo.hpp>
+#include <Traceroute/Socket.hpp>
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
-#include <iterator>
+#include <cstring>
 #include <netinet/icmp6.h>
 #include <netinet/in.h>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <sys/poll.h>
 #include <sys/socket.h>
-#include <thread>
-#include <Traceroute/Socket.hpp>
 
 namespace traceroute
 {
@@ -37,20 +40,21 @@ DataSender::DataSender(std::vector<SocketExt> socketsExt, int family)
     }
 }
 
-ResponseInfo DataSender::receiveFrom(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout)
+std::optional<ResponseInfo> DataSender::receiveFrom(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout)
 {
-    ResponseInfo info;
-    info.size = 0;
     int sfd = getAnySocketReadyToReceive(timeout);
     if (sfd > 0)
     {
-        info.protocol = sfdToProtocol.at(sfd);
-        sockaddr_storage temp;
-        socklen_t len = sizeof(temp);
-        info.size = recvfrom(sfd, buffer, bufferSize, 0, (struct sockaddr *)&temp, &len);
-        info.client = SocketAddress{temp};
+        sockaddr_storage sockaddrStorage;
+        socklen_t len = sizeof(sockaddrStorage);
+        ssize_t size = recvfrom(sfd, buffer, bufferSize, 0, (struct sockaddr *)&sockaddrStorage, &len);
+        if (size < 0)
+        {
+            throw std::runtime_error("Error occured on recvfrom: " + std::string(strerror(errno)));
+        }
+        return ResponseInfo(SocketAddress{std::move(sockaddrStorage)}, sfdToProtocol.at(sfd), size);
     }
-    return info;
+    return std::nullopt;
 }
 
 int DataSender::sendPacket(const Packet &packet)

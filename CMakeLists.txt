@@ -16,6 +16,7 @@ set(Headers
     include/Traceroute/Packet/IcmpPacket.hpp
     include/Traceroute/Packet/TcpPacket.hpp
     include/Traceroute/Packet/UdpPacket.hpp
+    include/Traceroute/ResponseInfo.hpp
     include/Traceroute/IPacketFactory.hpp
     include/Traceroute/IProvideSockets.hpp
     include/Traceroute/PacketFactory/IcmpPacketFactory.hpp
@@ -45,6 +46,7 @@ set(Sources
     src/Packet/IcmpPacket.cpp
     src/Packet/TcpPacket.cpp
     src/Packet/UdpPacket.cpp
+    src/ResponseInfo.cpp
     src/PacketFactory/IcmpPacketFactory.cpp
     src/PacketFactory/TcpPacketFactory.cpp
     src/PacketFactory/UdpPacketFactory.cpp
