@@ -12,10 +12,8 @@ std::chrono::microseconds getTimePassedTillNow(std::chrono::time_point<std::chro
 std::chrono::microseconds getTimeLeft(std::chrono::time_point<std::chrono::steady_clock> then,
                                       std::chrono::microseconds timeout);
 } // namespace
-ProbeSender::ProbeSender(std::unique_ptr<IPacketFactory> packetFactory, std::unique_ptr<IDataSender> dataSender,
-                         std::unique_ptr<IValidateResponse> responseValidator)
-    : mPacketFactory{std::move(packetFactory)}, mDataSender{std::move(dataSender)}, mResponseValidator{
-                                                                                        std::move(responseValidator)}
+ProbeSender::ProbeSender(IPacketFactory &packetFactory, IDataSender &dataSender, IValidateResponse &responseValidator)
+    : mPacketFactory{packetFactory}, mDataSender{dataSender}, mResponseValidator{responseValidator}
 {
 }
 
@@ -26,14 +24,14 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
     std::vector<ProbeResultContainer> probesContainer;
     for (int ttl = ttlBegin; ttl <= ttlEnd; ++ttl)
     {
-        mDataSender->setTtlOnSendingSocket(ttl);
+        mDataSender.setTtlOnSendingSocket(ttl);
 
         ProbeResultContainer probes(ttl);
         for (int i = 0; i < retries; i++)
         {
-            auto packet = mPacketFactory->createPacket();
+            auto packet = mPacketFactory.createPacket();
 
-            mDataSender->sendPacket(*packet);
+            mDataSender.sendPacket(*packet);
             auto sendTimestamp = std::chrono::steady_clock::now();
 
             bool isResponseValid = false;
@@ -45,12 +43,12 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
                 {
                     break;
                 }
-                respInfo = mDataSender->receiveFrom(mBuffer, BufferSize,
-                                                    std::chrono::duration_cast<std::chrono::milliseconds>(timeLeft));
+                respInfo = mDataSender.receiveFrom(mBuffer, BufferSize,
+                                                   std::chrono::duration_cast<std::chrono::milliseconds>(timeLeft));
                 if (respInfo)
                 {
-                    isResponseValid = mResponseValidator->validate(*packet, respInfo->client(), respInfo->protocol(),
-                                                                   mBuffer, respInfo->size());
+                    isResponseValid = mResponseValidator.validate(*packet, respInfo->client(), respInfo->protocol(),
+                                                                  mBuffer, respInfo->size());
                 }
             }
 
