@@ -7,6 +7,7 @@
 #include "mocks/DataSenderMock.hpp"
 #include "mocks/PacketFactoryMock.hpp"
 #include "mocks/ResponseValidator.hpp"
+#include "mocks/SystemClockFake.hpp"
 #include <Traceroute/Packet.hpp>
 #include <chrono>
 #include <compare>
@@ -14,16 +15,18 @@
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock-spec-builders.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 #include <memory>
 #include <thread>
 
-namespace traceroute
-{
+namespace traceroute {
 
 using namespace testing;
 using namespace chrono_literals;
 using namespace packet;
+
+static auto systemClockFake = std::make_shared<SystemClockFake>();
 
 ACTION(createArbitraryPacket)
 {
@@ -32,9 +35,9 @@ ACTION(createArbitraryPacket)
     return std::make_unique<IcmpPacket>(IcmpPacket::CreateIcmp4Packet(source, destination));
 }
 
-ACTION_P2(sleepAndReturn, sleepFor, valueToBeReturned)
+ACTION_P2(waitAndReturn, waitDuration, valueToBeReturned)
 {
-    std::this_thread::sleep_for(sleepFor);
+    systemClockFake->advanceBy(waitDuration);
     return valueToBeReturned;
 }
 
@@ -57,25 +60,19 @@ class ProbeSenderTest : public Test
     int ttlStart = 1;
     int ttlStop = 1;
     int retries = 1;
+    const std::chrono::microseconds timeout = 100ms;
 
-    // If this is set to true receiveFrom won't be invoked,
-    /// because of MinTimeWaitForResponse in ProbeSender
-    int shouldTimeOutOnStart = true;
-    std::chrono::microseconds timeout = 9us;
+    const std::chrono::microseconds thisWillNotTimeout = 99ms;
 
     std::vector<ProbeResultContainer> BeginProbing()
     {
-        if (timeout == 9us)
-        {
-            shouldTimeOutOnStart == false ? timeout = 11us : 9us;
-        }
-
         return underTest.beginProbing(ttlStart, ttlStop, retries, timeout);
     }
 
-    ProbeSenderTest() : underTest(packetFactoryMock, dataSenderMock, responseValidatorMock)
+    ProbeSenderTest() : underTest(packetFactoryMock, dataSenderMock, responseValidatorMock, systemClockFake)
     {
-        EXPECT_CALL(packetFactoryMock, createPacket()).WillRepeatedly(createArbitraryPacket());
+        ON_CALL(packetFactoryMock, createPacket()).WillByDefault(createArbitraryPacket());
+        ON_CALL(dataSenderMock, receiveFrom(_, _, _)).WillByDefault(waitAndReturn(timeout, nullopt));
     }
 
     void SetUp() override
@@ -87,50 +84,109 @@ TEST_F(ProbeSenderTest, setsTtlOnSender)
 {
     ttlStop = 2;
 
-    InSequence s;
     EXPECT_CALL(dataSenderMock, setTtlOnSendingSocket(1)).Times(1);
     EXPECT_CALL(dataSenderMock, setTtlOnSendingSocket(2)).Times(1);
 
     BeginProbing();
 }
 
-TEST_F(ProbeSenderTest, onTimeout_waitedFor_IsEqualTo_timeout)
+TEST_F(ProbeSenderTest, onTimeout_waitedFor_isEqualTo_timeout)
 {
-    timeout = 11us;
-
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
-        .WillOnce(sleepAndReturn(timeout,
-                                 ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
+    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
 
     auto probes = BeginProbing();
 
+    ASSERT_THAT(probes.front().getResults().front().success, Eq(false));
     EXPECT_THAT(probes.front().getResults().front().waitedFor, Eq(timeout));
+}
+
+TEST_F(ProbeSenderTest, ttlRangeResultsInProbeCount)
+{
+    ttlStart = 2;
+    ttlStop = 5;
+    const int expectedProbeCount = ttlStop - ttlStart + 1;
+
+    auto probes = BeginProbing();
+
+    EXPECT_THAT(probes.size(), Eq(expectedProbeCount));
+}
+
+TEST_F(ProbeSenderTest, packetfactoryIsInvokedForEachRetry)
+{
+    ttlStart = 1;
+    ttlStop = 1;
+    retries = 3;
+
+    EXPECT_CALL(packetFactoryMock, createPacket()).Times(3);
+
+    auto probes = BeginProbing();
 }
 
 TEST_F(ProbeSenderTest, responseAddressNotAssignedOnTimeout)
 {
-    timeout = 11us;
+    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
 
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(sleepAndReturn(timeout, nullopt));
     auto probes = BeginProbing();
 
-    ASSERT_THAT(probes.size(), Eq(1));
+    ASSERT_THAT(probes.front().getResults().front().success, Eq(false));
     EXPECT_THAT(probes.front().GetResponseAddr().has_value(), Eq(false));
 }
 
-TEST_F(ProbeSenderTest, properResponseIsAssignedToResult)
+TEST_F(ProbeSenderTest, responseAddressAssigned)
 {
-    shouldTimeOutOnStart = false;
-
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
     EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
 
-    auto probes = BeginProbing();
+    auto probe = BeginProbing().front();
 
-    ASSERT_THAT(probes.size(), Eq(1));
-    ASSERT_THAT(probes.front().GetResponseAddr().has_value(), Eq(true));
-    EXPECT_THAT(probes.front().GetResponseAddr(), Eq(destination));
+    ASSERT_THAT(probe.getResults().front().success, Eq(true));
+    ASSERT_THAT(probe.GetResponseAddr().has_value(), Eq(true));
+    EXPECT_THAT(probe.GetResponseAddr(), Eq(destination));
+}
+
+TEST_F(ProbeSenderTest, onTimeLeftSmallerThan_MinTimeWaitForResponse_receiveFromNotInvoked)
+{
+    // 5us are left for polling, which is below MinTimeWaitForResponse
+    auto timeToPass = timeout - 5us;
+
+    InSequence s;
+    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeToPass, nullopt));
+    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).Times(0);
+
+    BeginProbing();
+}
+
+TEST_F(ProbeSenderTest, properResponseIsAssignedToResultWithProper_waitedFor)
+{
+    auto returnAfter = 50ms;
+    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
+        .WillOnce(waitAndReturn(returnAfter,
+                                ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
+    EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
+
+    auto probe = BeginProbing().front();
+
+    EXPECT_THAT(probe.GetResponseAddr(), Eq(destination));
+    EXPECT_THAT(probe.getResults().front().waitedFor, Eq(returnAfter));
+}
+
+TEST_F(ProbeSenderTest, waitedForIsSumOfPreviousInvalidResponses)
+{
+    auto t1 = 10ms, t2 = 30ms, t3 = 40ms;
+
+    InSequence s;
+    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(t1, nullopt));
+    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(t2, nullopt));
+    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
+        .WillOnce(
+            waitAndReturn(t3, ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
+    EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
+
+    auto probe = BeginProbing().back();
+
+    ASSERT_THAT(probe.getResults().front().success, Eq(true));
+    EXPECT_THAT(probe.getResults().front().waitedFor, Eq(t1 + t2 + t3));
 }
 
 TEST_F(ProbeSenderTest, timeoutBetweenTwoSuccessfulProbes)
@@ -139,14 +195,13 @@ TEST_F(ProbeSenderTest, timeoutBetweenTwoSuccessfulProbes)
     // r2 is timeouted
     const SocketAddress r1{"1.2.3.4"};
     const SocketAddress r3{"2.3.4.5"};
-    shouldTimeOutOnStart = false;
 
     InSequence s;
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{r1}, ArbitraryProtocol, ArbitraryResponseSize}));
     EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
 
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(sleepAndReturn(15us, nullopt));
+    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
 
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{r3}, ArbitraryProtocol, ArbitraryResponseSize}));
@@ -154,10 +209,10 @@ TEST_F(ProbeSenderTest, timeoutBetweenTwoSuccessfulProbes)
 
     auto probes = BeginProbing();
 
-    ASSERT_THAT(probes.size(), Eq(3));
     auto probe = probes.begin();
     EXPECT_THAT(probe->GetResponseAddr(), Eq(r1));
     std::advance(probe, 1);
+    EXPECT_THAT(probe->getResults().front().success, Eq(false));
     EXPECT_THAT(probe->GetResponseAddr().has_value(), Eq(false));
     std::advance(probe, 1);
     EXPECT_THAT(probe->GetResponseAddr(), Eq(r3));

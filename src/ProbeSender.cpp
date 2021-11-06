@@ -3,17 +3,11 @@
 #include <chrono>
 #include <cstdio>
 #include <stdexcept>
-namespace traceroute
-{
-using namespace std::chrono_literals;
-namespace
-{
-std::chrono::microseconds getTimePassedTillNow(std::chrono::time_point<std::chrono::steady_clock> then);
-std::chrono::microseconds getTimeLeft(std::chrono::time_point<std::chrono::steady_clock> then,
-                                      std::chrono::microseconds timeout);
-} // namespace
-ProbeSender::ProbeSender(IPacketFactory &packetFactory, IDataSender &dataSender, IValidateResponse &responseValidator)
-    : mPacketFactory{packetFactory}, mDataSender{dataSender}, mResponseValidator{responseValidator}
+namespace traceroute {
+
+ProbeSender::ProbeSender(IPacketFactory &packetFactory, IDataSender &dataSender, IValidateResponse &responseValidator,
+                         std::shared_ptr<ISystemClock> clock)
+    : mPacketFactory{packetFactory}, mDataSender{dataSender}, mResponseValidator{responseValidator}, mSystemClock{clock}
 {
 }
 
@@ -32,7 +26,7 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
             auto packet = mPacketFactory.createPacket();
 
             mDataSender.sendPacket(*packet);
-            auto sendTimestamp = std::chrono::steady_clock::now();
+            auto sendTimestamp = mSystemClock->now();
 
             bool isResponseValid = false;
             std::optional<ResponseInfo> respInfo;
@@ -71,14 +65,12 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
     return probesContainer;
 }
 
-namespace
+std::chrono::microseconds ProbeSender::getTimePassedTillNow(std::chrono::steady_clock::time_point then)
 {
-std::chrono::microseconds getTimePassedTillNow(std::chrono::time_point<std::chrono::steady_clock> then)
-{
-    return chrono::duration_cast<chrono::microseconds>(std::chrono::steady_clock::now() - then);
+    return std::chrono::duration_cast<std::chrono::microseconds>(mSystemClock->now() - then);
 }
-std::chrono::microseconds getTimeLeft(std::chrono::time_point<std::chrono::steady_clock> then,
-                                      std::chrono::microseconds timeout)
+std::chrono::microseconds ProbeSender::getTimeLeft(std::chrono::steady_clock::time_point then,
+                                                   std::chrono::microseconds timeout)
 {
     auto timePassed = getTimePassedTillNow(then);
     if (timePassed > timeout)
@@ -86,5 +78,4 @@ std::chrono::microseconds getTimeLeft(std::chrono::time_point<std::chrono::stead
     return timeout - timePassed;
 }
 
-} // namespace
 } // namespace traceroute
