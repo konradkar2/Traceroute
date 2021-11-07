@@ -11,10 +11,14 @@ set(Sources
     ResponseValidatorsTests/TcpRequest/TcpTimeExceededV6.cpp
     ResponseValidatorsTests/TcpRequest/TcpAckV4.cpp
     ResponseValidatorsTests/TcpRequest/TcpAckV6.cpp
-    ResponseValidatorsTests/TcpRequest/DestUnreachV4.cpp
-    ResponseValidatorsTests/TcpRequest/DestUnreachV6.cpp
+    ResponseValidatorsTests/TcpRequest/TcpDestUnreachV4.cpp
+    ResponseValidatorsTests/TcpRequest/TcpDestUnreachV6.cpp
     ResponseValidatorsTests/IcmpRequest/EchoReplyV6.cpp
     ResponseValidatorsTests/IcmpRequest/TimeExceededV6.cpp
+    ResponseValidatorsTests/UdpRequest/UdpDestUnreachV4.cpp
+    ResponseValidatorsTests/UdpRequest/UdpDestUnreachV6.cpp
+    ResponseValidatorsTests/UdpRequest/UdpTimeExceededV4.cpp
+    ResponseValidatorsTests/UdpRequest/UdpTimeExceededV6.cpp
 
     ProbeSenderTests/ProbeSenderTest.cpp
 )

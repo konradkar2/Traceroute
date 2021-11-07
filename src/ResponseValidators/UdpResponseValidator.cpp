@@ -1,46 +1,48 @@
+#include "common.hpp"
 #include <Traceroute/Packet/UdpPacket.hpp>
 #include <Traceroute/ResponseValidators/UdpResponseValidator.hpp>
 #include <netinet/icmp6.h>
 #include <netinet/ip_icmp.h>
 
-namespace traceroute::responseValidators
-{
+namespace traceroute::responseValidators {
 
 bool UdpResponseValidator::validate(const Packet &request, const SocketAddress &client, int protocol,
                                     const char *response, size_t responseSize)
 {
+    // for now we can't check anything due to UDP header simplicity
+    // TODO: send additional data with UDP header in order to validate TIME_EXCEEDED and DST_UNREACH
     const auto &udpPacket = dynamic_cast<const packet::UdpPacket &>(request);
     bool isResponseValid = false;
-    const char *pResponse = response;
-    const int family = client.family();
 
-    // skip ipv4 header
-    if (family == AF_INET)
+    if (client.isV4())
     {
-        size_t iphdr_size = 0;
-        const Ipv4Header *ip_hdr = reinterpret_cast<const Ipv4Header *>(pResponse);
-        iphdr_size = ip_hdr->ihl << 2;
-        pResponse += iphdr_size;
+        auto ipHeaderSize = getIpHeaderSize(response);
+        response += ipHeaderSize;
+        responseSize -= ipHeaderSize;
     }
+
     switch (protocol)
     {
     case IPPROTO_ICMP: {
-        const IcmpHeader *header = reinterpret_cast<const IcmpHeader *>(pResponse);
-        // we hit transit router
-        // or we hit target with blocked port
-        if ((header->type == ICMP_TIME_EXCEEDED || header->type == ICMP_UNREACH_PORT ||
-             header->type == ICMP_UNREACH_PROTOCOL) &&
-            udpPacket.getDestinationAddress() == client) // we hit target
+        const IcmpHeader *header = reinterpret_cast<const IcmpHeader *>(response);
+        if (header->type == ICMP_TIME_EXCEEDED)
         {
-            // cant really check anything, lets assume its proper
+            isResponseValid = true;
+        }
+        else if (header->type == ICMP_DEST_UNREACH && udpPacket.getDestinationAddress() == client)
+        {
             isResponseValid = true;
         }
         break;
     }
     case IPPROTO_ICMPV6: {
-        const IcmpHeader *header = reinterpret_cast<const IcmpHeader *>(pResponse);
-        if (header->type == ICMP6_TIME_EXCEEDED ||
-            (header->type == ICMP6_DST_UNREACH && udpPacket.getDestinationAddress() == client))
+        const IcmpHeader *header = reinterpret_cast<const IcmpHeader *>(response);
+        if (header->type == ICMP6_TIME_EXCEEDED)
+        {
+
+            isResponseValid = true;
+        }
+        else if (header->type == ICMP6_DST_UNREACH && udpPacket.getDestinationAddress() == client)
         {
             isResponseValid = true;
         }
@@ -49,7 +51,6 @@ bool UdpResponseValidator::validate(const Packet &request, const SocketAddress &
     }
 
     return isResponseValid;
-
 }
 
 } // namespace traceroute::responseValidators

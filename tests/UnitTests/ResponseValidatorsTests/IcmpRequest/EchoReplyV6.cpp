@@ -15,40 +15,40 @@ using namespace traceroute::packet;
 namespace traceroute::responseValidatorsTests::icmpRequest
 {
 
-struct EchoReplyV6 : ResponseValidatorTestV6
+struct IcmpEchoReplyV6 : ResponseValidatorTestV6
 {
     const SocketAddress invalidResponseAddress{"6b3e:1b30:4:6043::1011"};
 
     const IcmpPacket request = IcmpPacket::CreateIcmp6Packet(requestSource, requestDestination);
     ResponseIcmpToIcmp<Ipv6Header> response;
-    EchoReplyV6()
+    IcmpEchoReplyV6()
         : ResponseValidatorTestV6(std::make_unique<responseValidators::IcmpResponseValidator>())
     {
         response.icmpHeader.type = ICMP6_ECHO_REPLY;
         response.triggerPacket.ipHeader.version = 6;
     }
 };
-TEST_F(EchoReplyV6, sameIdValid)
+TEST_F(IcmpEchoReplyV6, sameIdValid)
 {
     response.icmpHeader.id = request.GetIcmpHeader().id;
-    
+
     auto [resp, responseSize ]= responseV6ToPtr(&response);
     bool isValid = validator->validate(request, requestDestination, IPPROTO_ICMPV6, resp, responseSize);
 
     EXPECT_TRUE(isValid);
 }
 
-TEST_F(EchoReplyV6, InvalidAddressSameIdInvalid)
+TEST_F(IcmpEchoReplyV6, InvalidAddressSameIdInvalid)
 {
     response.icmpHeader.id = request.GetIcmpHeader().id;
-   
+
     auto [resp, responseSize ]= responseV6ToPtr(&response);
     bool isValid = validator->validate(request, invalidResponseAddress, IPPROTO_ICMPV6, resp, responseSize);
 
     EXPECT_FALSE(isValid);
 }
 
-TEST_F(EchoReplyV6, differentIdInvalid)
+TEST_F(IcmpEchoReplyV6, differentIdInvalid)
 {
     response.icmpHeader.id = request.GetIcmpHeader().id - 1;
     response.icmpHeader.type = ICMP6_ECHO_REPLY;

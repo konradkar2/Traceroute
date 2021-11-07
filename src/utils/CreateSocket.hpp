@@ -1,11 +1,11 @@
 #pragma once
 #include <Traceroute/Socket.hpp>
 #include <Traceroute/SocketAddress.hpp>
-namespace traceroute::utils
-{
+#include <optional>
+namespace traceroute::utils {
 
-Socket createIcmpRawSocket(const SocketAddress &addressToBind);
-Socket createTcpRawSocket(const SocketAddress &addressToBind);
-Socket createUdpRawSocket(const SocketAddress &addressToBind);
+Socket createIcmpRawSocket(const SocketAddress &addressToBind, std::optional<std::string> ifaceName);
+Socket createTcpRawSocket(const SocketAddress &addressToBind, std::optional<std::string> ifaceName);
+Socket createUdpRawSocket(const SocketAddress &addressToBind, std::optional<std::string> ifaceName);
 
 } // namespace traceroute::utils

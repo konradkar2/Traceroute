@@ -14,21 +14,21 @@ using namespace traceroute::packet;
 namespace traceroute::responseValidatorsTests::icmpRequest
 {
 
-struct EchoReplyBase : public ResponseValidatorTestV4
+struct IcmpEchoReplyBaseV4 : public ResponseValidatorTestV4
 {
     const int responseProtocol = IPPROTO_ICMP;
     const SocketAddress validResponseAddr = requestDestination;
     const IcmpPacket request = IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination);
-    EchoReplyBase() : ResponseValidatorTestV4(std::make_unique<responseValidators::IcmpResponseValidator>())
+    IcmpEchoReplyBaseV4() : ResponseValidatorTestV4(std::make_unique<responseValidators::IcmpResponseValidator>())
     {
     }
 };
 
-struct EchoReplyV4 : public EchoReplyBase
+struct IcmpEchoReplyV4 : public IcmpEchoReplyBaseV4
 {
 
     ResponseIcmpToIcmp<Ipv4Header> response;
-    EchoReplyV4()
+    IcmpEchoReplyV4()
     {
         response.ipHeader = createStandardIpHeader();
         response.icmpHeader.type = ICMP_ECHOREPLY;
@@ -36,7 +36,7 @@ struct EchoReplyV4 : public EchoReplyBase
 };
 
 constexpr int ipHeaderOptionsSize = 12;
-struct EchoReplyV4CustomIhl : public EchoReplyBase
+struct EchoReplyV4CustomIhl : public IcmpEchoReplyBaseV4
 {
     ResponseIcmpToIcmp<Ipv4HeaderCustomSize<ipHeaderOptionsSize>> response;
     EchoReplyV4CustomIhl()
@@ -46,7 +46,7 @@ struct EchoReplyV4CustomIhl : public EchoReplyBase
     }
 };
 
-TEST_F(EchoReplyV4, SameId_Valid)
+TEST_F(IcmpEchoReplyV4, SameId_Valid)
 {
     response.icmpHeader.id = request.GetIcmpHeader().id;
 
@@ -56,7 +56,7 @@ TEST_F(EchoReplyV4, SameId_Valid)
 
     EXPECT_TRUE(isValid);
 }
-TEST_F(EchoReplyV4, differentId_Invalid)
+TEST_F(IcmpEchoReplyV4, differentId_Invalid)
 {
     response.icmpHeader.id = request.GetIcmpHeader().id - 1;
 

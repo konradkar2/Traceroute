@@ -12,8 +12,7 @@
 
 using namespace traceroute::packet;
 
-namespace traceroute::responseValidatorsTests::tcpRequest
-{
+namespace traceroute {
 struct TcpTimeExceededV6 : public ResponseValidatorTestV6
 {
     const int responseProtocol = IPPROTO_ICMPV6;
@@ -31,7 +30,7 @@ TEST_F(TcpTimeExceededV6, valid)
 {
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
 
-    auto [resp, responseSize ]= responseV6ToPtr(&response);
+    auto [resp, responseSize] = responseV6ToPtr(&response);
     bool isValid = validator->validate(request, transitRouter, responseProtocol, resp, sizeof(response));
 
     EXPECT_TRUE(isValid);
@@ -39,11 +38,11 @@ TEST_F(TcpTimeExceededV6, valid)
 TEST_F(TcpTimeExceededV6, invalidSeq)
 {
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq - 1;
-    
-    auto [resp, responseSize ]= responseV6ToPtr(&response);
+
+    auto [resp, responseSize] = responseV6ToPtr(&response);
     bool isValid = validator->validate(request, transitRouter, responseProtocol, resp, sizeof(response));
 
     EXPECT_FALSE(isValid);
 }
 
-} // namespace traceroute::responseValidatorsTests::tcpRequest
+} // namespace traceroute

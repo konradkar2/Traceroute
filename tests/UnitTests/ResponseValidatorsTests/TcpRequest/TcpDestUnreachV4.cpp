@@ -1,36 +1,35 @@
-#include <Traceroute/ResponseValidators/TcpResponseValidator.hpp>
-#include "ResponseValidatorsTests/Responses.hpp"
 #include "ResponseValidatorsTests/IpHeaderVariants.hpp"
+#include "ResponseValidatorsTests/Responses.hpp"
+#include <ResponseValidatorsTests/ResponseValidatorTest.hpp>
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet/TcpPacket.hpp>
+#include <Traceroute/ResponseValidators/TcpResponseValidator.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <netinet/in.h>
-#include <netinet/icmp6.h>
 #include <netinet/ip_icmp.h>
 #include <string>
 #include <vector>
-#include <ResponseValidatorsTests/ResponseValidatorTest.hpp>
 
 using namespace traceroute::packet;
 
-namespace traceroute::responseValidatorsTests::tcpRequest
-{
-struct DestUnreachBase : public ResponseValidatorTestV4
+namespace traceroute {
+
+struct TcpDestUnreachBase : public ResponseValidatorTestV4
 {
     const int responseProtocol = IPPROTO_ICMP;
-    
-    const TcpPacket request = TcpPacket(requestSource,requestDestination,80);
-    DestUnreachBase() : ResponseValidatorTestV4(std::make_unique<responseValidators::TcpResponseValidator>())
+
+    const TcpPacket request = TcpPacket(requestSource, requestDestination, 80);
+    TcpDestUnreachBase() : ResponseValidatorTestV4(std::make_unique<responseValidators::TcpResponseValidator>())
     {
     }
 };
 
-struct DestUnreachV4 : public DestUnreachBase
+struct TcpDestUnreachV4 : public TcpDestUnreachBase
 {
 
     ResponseIcmpToTcp<Ipv4Header> response;
-    DestUnreachV4()
+    TcpDestUnreachV4()
     {
         response.ipHeader = createStandardIpHeader();
         response.triggerPacket.ipHeader = createStandardIpHeader();
@@ -39,10 +38,10 @@ struct DestUnreachV4 : public DestUnreachBase
 };
 
 constexpr int ipHeaderOptionsSize = 12;
-struct DestUnreachV4CustomIhl : public DestUnreachBase
+struct TcpDestUnreachV4CustomIhl : public TcpDestUnreachBase
 {
     ResponseIcmpToTcp<Ipv4HeaderCustomSize<ipHeaderOptionsSize>> response;
-    DestUnreachV4CustomIhl()
+    TcpDestUnreachV4CustomIhl()
     {
         response.ipHeader = createCustomSizeIpHeader<ipHeaderOptionsSize>();
         response.triggerPacket.ipHeader = createCustomSizeIpHeader<ipHeaderOptionsSize>();
@@ -50,7 +49,7 @@ struct DestUnreachV4CustomIhl : public DestUnreachBase
     }
 };
 
-TEST_F(DestUnreachV4, valid)
+TEST_F(TcpDestUnreachV4, valid)
 {
     const SocketAddress validResponseAddr = requestDestination;
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
@@ -61,7 +60,7 @@ TEST_F(DestUnreachV4, valid)
     EXPECT_TRUE(isValid);
 }
 
-TEST_F(DestUnreachV4, invalidClient_invalid)
+TEST_F(TcpDestUnreachV4, invalidClient_invalid)
 {
     const SocketAddress invalidResponseAddr{"1.1.1.1"};
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
@@ -72,8 +71,7 @@ TEST_F(DestUnreachV4, invalidClient_invalid)
     EXPECT_FALSE(isValid);
 }
 
-
-TEST_F(DestUnreachV4CustomIhl, valid)
+TEST_F(TcpDestUnreachV4CustomIhl, valid)
 {
     const SocketAddress validResponseAddr = requestDestination;
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
@@ -84,7 +82,7 @@ TEST_F(DestUnreachV4CustomIhl, valid)
     EXPECT_TRUE(isValid);
 }
 
-TEST_F(DestUnreachV4CustomIhl, invalidClient_invalid)
+TEST_F(TcpDestUnreachV4CustomIhl, invalidClient_invalid)
 {
     const SocketAddress invalidResponseAddr{"1.1.1.1"};
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
@@ -95,4 +93,4 @@ TEST_F(DestUnreachV4CustomIhl, invalidClient_invalid)
     EXPECT_FALSE(isValid);
 }
 
-} // namespace traceroute::responseValidatorsTests::icmpRequest
+} // namespace traceroute

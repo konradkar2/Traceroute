@@ -78,6 +78,7 @@ class ProbeSenderTest : public Test
     void SetUp() override
     {
     }
+     InSequence s;
 };
 
 TEST_F(ProbeSenderTest, setsTtlOnSender)
@@ -111,12 +112,13 @@ TEST_F(ProbeSenderTest, ttlRangeResultsInProbeCount)
     EXPECT_THAT(probes.size(), Eq(expectedProbeCount));
 }
 
-TEST_F(ProbeSenderTest, packetfactoryIsInvokedForEachRetry)
+TEST_F(ProbeSenderTest, forEachRetryTtlIsNotChangedButpacketfactoryIsInvoked)
 {
     ttlStart = 1;
     ttlStop = 1;
     retries = 3;
 
+    EXPECT_CALL(dataSenderMock, setTtlOnSendingSocket(1)).Times(1);
     EXPECT_CALL(packetFactoryMock, createPacket()).Times(3);
 
     auto probes = BeginProbing();
@@ -150,7 +152,6 @@ TEST_F(ProbeSenderTest, onTimeLeftSmallerThan_MinTimeWaitForResponse_receiveFrom
     // 5us are left for polling, which is below MinTimeWaitForResponse
     auto timeToPass = timeout - 5us;
 
-    InSequence s;
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeToPass, nullopt));
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).Times(0);
 
@@ -175,7 +176,7 @@ TEST_F(ProbeSenderTest, waitedForIsSumOfPreviousInvalidResponses)
 {
     auto t1 = 10ms, t2 = 30ms, t3 = 40ms;
 
-    InSequence s;
+
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(t1, nullopt));
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(t2, nullopt));
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
@@ -196,12 +197,12 @@ TEST_F(ProbeSenderTest, timeoutBetweenTwoSuccessfulProbes)
     const SocketAddress r1{"1.2.3.4"};
     const SocketAddress r3{"2.3.4.5"};
 
-    InSequence s;
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{r1}, ArbitraryProtocol, ArbitraryResponseSize}));
     EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
 
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
+    EXPECT_CALL(responseValidatorMock, validate).Times(0);
 
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{r3}, ArbitraryProtocol, ArbitraryResponseSize}));

@@ -1,9 +1,9 @@
-#include <Traceroute/ResponseValidators/IcmpResponseValidator.hpp>
 #include "ResponseValidatorsTests/IpHeaderVariants.hpp"
 #include "ResponseValidatorsTests/Responses.hpp"
 #include <ResponseValidatorsTests/ResponseValidatorTest.hpp>
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet/IcmpPacket.hpp>
+#include <Traceroute/ResponseValidators/IcmpResponseValidator.hpp>
 #include <gmock/gmock.h>
 #include <netinet/in.h>
 #include <netinet/ip_icmp.h>
@@ -12,27 +12,27 @@
 
 using namespace traceroute::packet;
 
-namespace traceroute::responseValidatorsTests::icmpRequest
-{
-struct TimeExceededBase : public ResponseValidatorTestV4
+namespace traceroute {
+struct IcmpTimeExceededBaseV4 : public ResponseValidatorTestV4
 {
     const int responseProtocol = IPPROTO_ICMP;
     const SocketAddress validResponseAddr;
     const IcmpPacket request;
 
-    TimeExceededBase()
+    IcmpTimeExceededBaseV4()
         : ResponseValidatorTestV4(std::make_unique<responseValidators::IcmpResponseValidator>()),
-          validResponseAddr(requestDestination), request(IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination))
+          validResponseAddr(requestDestination),
+          request(IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination))
 
     {
     }
 };
 
-struct TimeExceededV4 : public TimeExceededBase
+struct IcmpTimeExceededV4 : public IcmpTimeExceededBaseV4
 {
 
     ResponseIcmpToIcmp<Ipv4Header> response;
-    TimeExceededV4()
+    IcmpTimeExceededV4()
     {
         response.ipHeader = createStandardIpHeader();
         response.triggerPacket.ipHeader = createStandardIpHeader();
@@ -41,10 +41,10 @@ struct TimeExceededV4 : public TimeExceededBase
 };
 
 constexpr int ipHeaderOptionsSize = 12;
-struct TimeExceededV4CustomIhl : public TimeExceededBase
+struct IcmpTimeExceededV4CustomIhl : public IcmpTimeExceededBaseV4
 {
     ResponseIcmpToIcmp<Ipv4HeaderCustomSize<ipHeaderOptionsSize>> response;
-    TimeExceededV4CustomIhl()
+    IcmpTimeExceededV4CustomIhl()
     {
         response.ipHeader = createCustomSizeIpHeader<ipHeaderOptionsSize>();
         response.triggerPacket.ipHeader = createCustomSizeIpHeader<ipHeaderOptionsSize>();
@@ -52,7 +52,7 @@ struct TimeExceededV4CustomIhl : public TimeExceededBase
     }
 };
 
-TEST_F(TimeExceededV4, sameId_Valid)
+TEST_F(IcmpTimeExceededV4, sameId_Valid)
 {
     response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id;
 
@@ -61,7 +61,7 @@ TEST_F(TimeExceededV4, sameId_Valid)
 
     EXPECT_TRUE(isValid);
 }
-TEST_F(TimeExceededV4, differentId_Invalid)
+TEST_F(IcmpTimeExceededV4, differentId_Invalid)
 {
     response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id - 1;
 
@@ -71,7 +71,7 @@ TEST_F(TimeExceededV4, differentId_Invalid)
     EXPECT_FALSE(isValid);
 }
 
-TEST_F(TimeExceededV4CustomIhl, sameId_Valid)
+TEST_F(IcmpTimeExceededV4CustomIhl, sameId_Valid)
 {
     response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id;
 
@@ -80,7 +80,7 @@ TEST_F(TimeExceededV4CustomIhl, sameId_Valid)
 
     EXPECT_TRUE(isValid);
 }
-TEST_F(TimeExceededV4CustomIhl, differentId_Invalid)
+TEST_F(IcmpTimeExceededV4CustomIhl, differentId_Invalid)
 {
     response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id - 1;
 

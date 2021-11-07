@@ -4,56 +4,55 @@
 using namespace std;
 namespace traceroute
 {
-#define Ipv6HeaderSize 40;
 
 struct Ipv6Header
 {
-    uint8_t pad : 4;
-    uint8_t version : 4;
-    uint8_t content[39];
+    std::uint8_t pad : 4;
+    std::uint8_t version : 4;
+    std::uint8_t content[39];
 };
 
 struct Ipv4Header
 {
-    uint8_t ihl : 4;
-    uint8_t version : 4;
-    uint8_t tos;
-    uint16_t tot_len;
-    uint16_t id;
-    uint16_t frag_off;
-    uint8_t ttl;
-    uint8_t protocol;
-    uint16_t check;
-    uint32_t saddr;
-    uint32_t daddr;
+    std::uint8_t ihl : 4;
+    std::uint8_t version : 4;
+    std::uint8_t tos;
+    std::uint16_t tot_len;
+    std::uint16_t id;
+    std::uint16_t frag_off;
+    std::uint8_t ttl;
+    std::uint8_t protocol;
+    std::uint16_t check;
+    std::uint32_t saddr;
+    std::uint32_t daddr;
 };
 
 struct IcmpHeader
 {
-    uint8_t type; /* message type */
-    uint8_t code; /* type sub-code */
-    uint16_t checksum;
-    uint16_t id;
-    uint16_t sequence;
+    std::uint8_t type; /* message type */
+    std::uint8_t code; /* type sub-code */
+    std::uint16_t checksum;
+    std::uint16_t id;
+    std::uint16_t sequence;
 };
 struct TcpHeader
 {
-    uint16_t source;
-    uint16_t dest;
-    uint32_t seq;
-    uint32_t ack_seq;
-    uint8_t th_x2 : 4;  /* (unused) */
-    uint8_t th_off : 4; /* data offset */
-    uint8_t th_flags;
-    uint16_t window;
-    uint16_t check;
-    uint16_t urg_ptr;
+    std::uint16_t source;
+    std::uint16_t dest;
+    std::uint32_t seq;
+    std::uint32_t ack_seq;
+    std::uint8_t th_x2 : 4;  /* (unused) */
+    std::uint8_t th_off : 4; /* data offset */
+    std::uint8_t th_flags;
+    std::uint16_t window;
+    std::uint16_t check;
+    std::uint16_t urg_ptr;
 };
 struct UdpHeader
 {
-    uint16_t source;
-    uint16_t dest;
-    uint16_t len;
-    uint16_t check;
+    std::uint16_t source;
+    std::uint16_t dest;
+    std::uint16_t len;
+    std::uint16_t check;
 };
 } // namespace traceroute

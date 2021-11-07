@@ -3,8 +3,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace traceroute
-{
+namespace traceroute {
 
 struct Socket
 {

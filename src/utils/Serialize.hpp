@@ -4,16 +4,13 @@
 #include <type_traits>
 #include <typeinfo>
 
-namespace traceroute::utils
-{
+namespace traceroute::utils {
 
-template <typename POD>
-std::string serialize(const POD &pod)
+template <typename T, typename = std::enable_if<std::is_trivially_copyable_v<T>>>
+std::string serialize(const T &pod)
 {
-    static_assert(std::is_pod<POD>::value, "Not a pod");
-
-    auto podP = reinterpret_cast<const char *>(&pod);
-    return std::string{podP, podP + sizeof(pod)};
+    auto p = reinterpret_cast<const char *>(&pod);
+    return std::string{p, p + sizeof(T)};
 }
 
 } // namespace traceroute::utils

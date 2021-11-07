@@ -2,14 +2,15 @@
 
 #include "Socket.hpp"
 #include "SocketAddress.hpp"
+#include <optional>
 #include <vector>
-namespace traceroute
-{
+namespace traceroute {
 
 class IProvideSockets
 {
   public:
-    virtual std::vector<SocketExt> getSockets(const traceroute::SocketAddress &addressToBind) = 0;
+    virtual std::vector<SocketExt> createSockets(const SocketAddress &addressToBind,
+                                                 std::optional<std::string> ifaceNameToBind) = 0;
     virtual ~IProvideSockets() = default;
 };
 } // namespace traceroute
