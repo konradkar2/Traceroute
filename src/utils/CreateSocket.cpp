@@ -1,4 +1,5 @@
 #include "CreateSocket.hpp"
+#include "Bind.hpp"
 #include <netinet/icmp6.h>
 #include <netinet/in.h>
 #include <stdexcept>
@@ -9,31 +10,17 @@
 namespace traceroute::utils {
 namespace {
 
-void bindToInterface(int fd, const std::string &ifaceName)
-{
-    if ((setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, ifaceName.c_str(), ifaceName.size())) < 0)
-    {
-        throw std::runtime_error("Could not bind to an interface: " + ifaceName);
-    }
-}
-void bindToIpAddress(int fd, const SocketAddress &address)
-{
-    if ((bind(fd, address.sockaddrP(), address.size())) < 0)
-    {
-        throw std::runtime_error("Could not bind address: " + address.toString());
-    }
-}
 void bindToIpAddressAndInterface(int fd, const SocketAddress &addressToBind, std::optional<std::string> ifaceName)
 {
     if (ifaceName)
     {
-        bindToInterface(fd, ifaceName.value());
+        bindInterface(fd, ifaceName.value());
     }
-    bindToIpAddress(fd, addressToBind);
+    bindIpAddress(fd, addressToBind);
 }
 } // namespace
 
-Socket createIcmpRawSocket(const SocketAddress &addressToBind, std::optional<std::string> ifaceName)
+Socket setupIcmpRawSocket(const SocketAddress &addressToBind, std::optional<std::string> ifaceName)
 {
     const int protocol = addressToBind.isV4() ? static_cast<int>(IPPROTO_ICMP) : static_cast<int>(IPPROTO_ICMPV6);
     int fd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, protocol);
@@ -54,7 +41,7 @@ Socket createIcmpRawSocket(const SocketAddress &addressToBind, std::optional<std
     return Socket{fd, protocol};
 }
 
-Socket createTcpRawSocket(const SocketAddress &addressToBind, std::optional<std::string> ifaceName)
+Socket setupTcpRawSocket(const SocketAddress &addressToBind, std::optional<std::string> ifaceName)
 {
     constexpr int protocol = IPPROTO_TCP;
     int fd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, protocol);
@@ -71,7 +58,7 @@ Socket createTcpRawSocket(const SocketAddress &addressToBind, std::optional<std:
     return Socket{fd, protocol};
 }
 
-Socket createUdpRawSocket(const SocketAddress &addressToBind, std::optional<std::string> ifaceName)
+Socket setupUdpRawSocket(const SocketAddress &addressToBind, std::optional<std::string> ifaceName)
 {
     constexpr int protocol = IPPROTO_UDP;
     int fd = socket(addressToBind.family(), SOCK_RAW | SOCK_NONBLOCK, protocol);

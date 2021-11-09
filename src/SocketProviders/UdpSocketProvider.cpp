@@ -7,11 +7,11 @@ std::vector<SocketExt> UdpSocketProvider::createSockets(const SocketAddress &add
                                                         std::optional<std::string> ifaceNameToBind)
 {
     SocketExt icmpSe;
-    icmpSe.socket = utils::createIcmpRawSocket(addressToBind, ifaceNameToBind);
+    icmpSe.socket = utils::setupIcmpRawSocket(addressToBind, ifaceNameToBind);
     icmpSe.role = Role::Receive;
 
     SocketExt udpSe;
-    udpSe.socket = utils::createUdpRawSocket(addressToBind, ifaceNameToBind);
+    udpSe.socket = utils::setupUdpRawSocket(addressToBind, ifaceNameToBind);
     udpSe.role = Role::Send;
     return {icmpSe, udpSe};
 }

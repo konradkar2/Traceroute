@@ -22,9 +22,9 @@ class ProbeSender
                                                    std::chrono::microseconds timeout);
 
   private:
-    std::chrono::microseconds getTimePassedTillNow(std::chrono::steady_clock::time_point then);
+    std::chrono::microseconds getTimePassedTillNow(std::chrono::steady_clock::time_point then) const;
     std::chrono::microseconds getTimeLeft(std::chrono::steady_clock::time_point then,
-                                          std::chrono::microseconds timeout);
+                                          std::chrono::microseconds timeout) const ;
 
   private:
     IPacketFactory &mPacketFactory;

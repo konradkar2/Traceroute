@@ -78,7 +78,7 @@ class ProbeSenderTest : public Test
     void SetUp() override
     {
     }
-     InSequence s;
+    InSequence s;
 };
 
 TEST_F(ProbeSenderTest, setsTtlOnSender)
@@ -158,7 +158,7 @@ TEST_F(ProbeSenderTest, onTimeLeftSmallerThan_MinTimeWaitForResponse_receiveFrom
     BeginProbing();
 }
 
-TEST_F(ProbeSenderTest, properResponseIsAssignedToResultWithProper_waitedFor)
+TEST_F(ProbeSenderTest, responseIsAssignedToResultWithValidWaitedFor)
 {
     auto returnAfter = 50ms;
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
@@ -175,7 +175,6 @@ TEST_F(ProbeSenderTest, properResponseIsAssignedToResultWithProper_waitedFor)
 TEST_F(ProbeSenderTest, waitedForIsSumOfPreviousInvalidResponses)
 {
     auto t1 = 10ms, t2 = 30ms, t3 = 40ms;
-
 
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(t1, nullopt));
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(t2, nullopt));

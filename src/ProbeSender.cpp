@@ -51,7 +51,9 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
                 probes.setResponseAddr(respInfo->client());
                 probes.addSuccessfulProbe(getTimePassedTillNow(sendTimestamp));
                 if (respInfo->client() == packet->getDestinationAddress())
+                {
                     wasDestinationReached = true;
+                }
             }
             else
             {
@@ -60,17 +62,19 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
         }
         probesContainer.push_back(std::move(probes));
         if (wasDestinationReached)
+        {
             break;
+        }
     }
     return probesContainer;
 }
 
-std::chrono::microseconds ProbeSender::getTimePassedTillNow(std::chrono::steady_clock::time_point then)
+std::chrono::microseconds ProbeSender::getTimePassedTillNow(std::chrono::steady_clock::time_point then) const
 {
     return std::chrono::duration_cast<std::chrono::microseconds>(mSystemClock->now() - then);
 }
 std::chrono::microseconds ProbeSender::getTimeLeft(std::chrono::steady_clock::time_point then,
-                                                   std::chrono::microseconds timeout)
+                                                   std::chrono::microseconds timeout) const
 {
     auto timePassed = getTimePassedTillNow(then);
     if (timePassed > timeout)

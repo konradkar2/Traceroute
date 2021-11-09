@@ -7,11 +7,11 @@ std::vector<SocketExt> TcpSocketProvider::createSockets(const SocketAddress &add
                                                         std::optional<std::string> ifaceNameToBind)
 {
     SocketExt icmpSe;
-    icmpSe.socket = utils::createIcmpRawSocket(addressToBind, ifaceNameToBind);
+    icmpSe.socket = utils::setupIcmpRawSocket(addressToBind, ifaceNameToBind);
     icmpSe.role = Role::Receive;
 
     SocketExt tcpSe;
-    tcpSe.socket = utils::createTcpRawSocket(addressToBind, ifaceNameToBind);
+    tcpSe.socket = utils::setupTcpRawSocket(addressToBind, ifaceNameToBind);
     tcpSe.role = Role::Receive | Role::Send;
 
     return {icmpSe, tcpSe};

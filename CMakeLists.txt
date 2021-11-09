@@ -31,6 +31,7 @@ set(Sources
     src/utils/Serialize.hpp
     src/utils/Poll.cpp
     src/utils/CreateSocket.cpp
+    src/utils/Bind.cpp
     src/ResponseValidators/common.hpp
     src/ResponseValidators/common.cpp
     src/SystemClock.cpp

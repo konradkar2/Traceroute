@@ -17,9 +17,8 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 
-namespace traceroute
-{
-DataSender::DataSender(std::vector<SocketExt> socketsExt, int family)
+namespace traceroute {
+DataSender::DataSender(std::vector<SocketExt> socketsExt, int family) : mSendingSocket{}
 {
     mFamily = family;
     for (const auto &socExt : socketsExt)
@@ -32,27 +31,27 @@ DataSender::DataSender(std::vector<SocketExt> socketsExt, int family)
         {
             if (mSendingSocket != 0)
             {
-                throw std::invalid_argument("There can be only one sending socket in DataSender");
+                throw std::invalid_argument("There can only be one sending socket in DataSender");
             }
             mSendingSocket = socExt.socket.fd;
         }
-        sfdToProtocol[socExt.socket.fd] = socExt.socket.protocol;
+        fdToProtocol[socExt.socket.fd] = socExt.socket.protocol;
     }
 }
 
 std::optional<ResponseInfo> DataSender::receiveFrom(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout)
 {
-    int sfd = getAnySocketReadyToReceive(timeout);
-    if (sfd > 0)
+    auto fd = getAnySocketReadyToReceive(timeout);
+    if (fd)
     {
         sockaddr_storage sockaddrStorage;
         socklen_t len = sizeof(sockaddrStorage);
-        ssize_t size = recvfrom(sfd, buffer, bufferSize, 0, (struct sockaddr *)&sockaddrStorage, &len);
+        ssize_t size = recvfrom(fd.value(), buffer, bufferSize, 0, (struct sockaddr *)&sockaddrStorage, &len);
         if (size < 0)
         {
             throw std::runtime_error("Error occured on recvfrom: " + std::string(strerror(errno)));
         }
-        return ResponseInfo(SocketAddress{std::move(sockaddrStorage)}, sfdToProtocol.at(sfd), size);
+        return ResponseInfo(SocketAddress{std::move(sockaddrStorage)}, fdToProtocol.at(fd.value()), size);
     }
     return std::nullopt;
 }
@@ -84,7 +83,7 @@ void DataSender::setTtlOnSendingSocket(int ttl)
     }
 }
 
-int DataSender::getAnySocketReadyToReceive(std::chrono::milliseconds timeout)
+std::optional<int> DataSender::getAnySocketReadyToReceive(std::chrono::milliseconds timeout)
 {
     std::vector<pollfd> pollfds;
     std::transform(mReceivingSockets.cbegin(), mReceivingSockets.cend(), back_inserter(pollfds), [](int sfd) {
