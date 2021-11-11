@@ -1,11 +1,11 @@
 #pragma once
-#include "Packet.hpp"
-#include "SocketAddress.hpp"
+#include <Traceroute/ResponseInfo.hpp>
+#include <Traceroute/Packet.hpp>
 #include <chrono>
 #include <cstdint>
 #include <sys/types.h>
 #include <optional>
-#include "ResponseInfo.hpp"
+
 
 namespace traceroute
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Traceroute/IPacketFactory.hpp"
+#include <Traceroute/interface/IPacketFactory.hpp>
 #include <gmock/gmock.h>
 
 namespace traceroute

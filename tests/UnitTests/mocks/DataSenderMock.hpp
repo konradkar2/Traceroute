@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Traceroute/IDataSender.hpp>
+#include <Traceroute/interface/IDataSender.hpp>
 #include <gmock/gmock.h>
 
 namespace traceroute

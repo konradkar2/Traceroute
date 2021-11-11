@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Socket.hpp"
-#include "SocketAddress.hpp"
+#include <Traceroute/Socket.hpp>
+#include <Traceroute/SocketAddress.hpp>
 #include <optional>
 #include <vector>
 namespace traceroute {

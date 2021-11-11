@@ -1,5 +1,9 @@
 #pragma once
-#include "../IPacketFactory.hpp"
+
+#include <Traceroute/interface/IPacketFactory.hpp>
+#include <Traceroute/Packet.hpp>
+#include <Traceroute/SocketAddress.hpp>
+
 namespace traceroute
 {
 class UdpPacketFactory : public IPacketFactory

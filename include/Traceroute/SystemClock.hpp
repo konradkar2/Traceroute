@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Traceroute/ISystemClock.hpp"
+#include <Traceroute/interface/ISystemClock.hpp>
 #include <chrono>
 
 namespace traceroute

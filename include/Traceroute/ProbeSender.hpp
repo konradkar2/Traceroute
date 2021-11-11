@@ -1,12 +1,12 @@
 #pragma once
 
-#include "IDataSender.hpp"
-#include "IPacketFactory.hpp"
 #include "Packet.hpp"
 #include "Probe.hpp"
 #include "SystemClock.hpp"
-#include "Traceroute/ISystemClock.hpp"
-#include <Traceroute/IValidateResponse.hpp>
+#include <Traceroute/interface/IDataSender.hpp>
+#include <Traceroute/interface/IPacketFactory.hpp>
+#include <Traceroute/interface/ISystemClock.hpp>
+#include <Traceroute/interface/IValidateResponse.hpp>
 #include <chrono>
 #include <memory>
 
@@ -24,7 +24,7 @@ class ProbeSender
   private:
     std::chrono::microseconds getTimePassedTillNow(std::chrono::steady_clock::time_point then) const;
     std::chrono::microseconds getTimeLeft(std::chrono::steady_clock::time_point then,
-                                          std::chrono::microseconds timeout) const ;
+                                          std::chrono::microseconds timeout) const;
 
   private:
     IPacketFactory &mPacketFactory;

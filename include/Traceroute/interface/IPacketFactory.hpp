@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "Packet.hpp"
+#include <Traceroute/Packet.hpp>
 
 namespace traceroute
 {

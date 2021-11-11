@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Traceroute/IValidateResponse.hpp"
+#include <Traceroute/interface/IValidateResponse.hpp>
 #include <gmock/gmock.h>
 
 namespace traceroute

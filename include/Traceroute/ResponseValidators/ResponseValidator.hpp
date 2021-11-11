@@ -2,10 +2,11 @@
 #include <Traceroute/Packet.hpp>
 #include <Traceroute/SocketAddress.hpp>
 #include <cstdint>
-#include <Traceroute/IValidateResponse.hpp>
+#include <Traceroute/interface/IValidateResponse.hpp>
+
 namespace traceroute::responseValidators
 {
-class ResponseValidator : public IValidateResponse  
+class ResponseValidator : public IValidateResponse
 {
   public:
     bool validate(const Packet &request, const SocketAddress &client, int protocol, const char *response,

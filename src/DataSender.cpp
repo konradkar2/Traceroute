@@ -1,4 +1,3 @@
-#include "Traceroute/IDataSender.hpp"
 #include "Traceroute/SocketAddress.hpp"
 #include "utils/Poll.hpp"
 #include <Traceroute/DataSender.hpp>

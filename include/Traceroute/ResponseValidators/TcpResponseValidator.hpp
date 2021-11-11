@@ -1,4 +1,4 @@
-#include <Traceroute/IValidateResponse.hpp>
+#include <Traceroute/interface/IValidateResponse.hpp>
 #include <Traceroute/Packet.hpp>
 #include <Traceroute/SocketAddress.hpp>
 #include <cstdint>

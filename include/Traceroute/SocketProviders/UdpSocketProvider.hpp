@@ -1,5 +1,5 @@
 #pragma once
-#include <Traceroute/IProvideSockets.hpp>
+#include <Traceroute/interface/IProvideSockets.hpp>
 
 namespace traceroute {
 namespace socketProviders

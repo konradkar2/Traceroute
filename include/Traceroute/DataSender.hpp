@@ -1,8 +1,8 @@
 #pragma once
 
-#include "IDataSender.hpp"
-#include "IProvideSockets.hpp"
 #include "SocketAddress.hpp"
+#include <Traceroute/interface/IDataSender.hpp>
+#include <Traceroute/interface/IProvideSockets.hpp>
 #include <chrono>
 #include <cstdint>
 #include <map>
