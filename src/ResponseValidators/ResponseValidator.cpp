@@ -1,14 +1,17 @@
+#include "common.hpp"
 #include <Traceroute/ResponseValidators/ResponseValidator.hpp>
+namespace traceroute::responseValidators {
 
-namespace traceroute::responseValidators
+bool ResponseValidator::validate(const ResponseInfo &responseInfo, const char *response)
 {
-
-bool ResponseValidator::validate(const Packet &request, const SocketAddress &client, int protocol, const char *response,
-                                 size_t responseSize)
-{
-    return validateFields(request, client, response, responseSize) && validateProtocol(protocol) &&
-           validateSize(responseSize);
+    if (isIpHeaderPresent(responseInfo, response))
+    {
+        auto [newResponseInfo, newResponse] = skipIpHeader(responseInfo, response);
+        return validateProtocol(newResponseInfo.protocol()) && validateSize(newResponseInfo.size()) &&
+               validateFields(newResponseInfo, newResponse);
+    }
+    return validateProtocol(responseInfo.protocol()) && validateSize(responseInfo.size()) &&
+           validateFields(responseInfo, response);
 }
-
 
 } // namespace traceroute::responseValidators

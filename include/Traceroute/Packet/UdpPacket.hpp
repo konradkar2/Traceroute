@@ -1,20 +1,21 @@
 #pragma once
 #include "../HeaderTypes.hpp"
-#include "../SocketAddress.hpp"
 #include "../Packet.hpp"
+#include "../SocketAddress.hpp"
 
-namespace traceroute::packet
+namespace traceroute::packet {
+class UdpPacket : public Packet
 {
-    class UdpPacket : public Packet
-    {
-    public:
-        UdpPacket(const SocketAddress &source,
-                  const SocketAddress &destination, int dport);
-        const UdpHeader &GetUdpHeader() const;
-        std::string serialize() const override;
+  public:
+    UdpPacket(const SocketAddress &source, const SocketAddress &destination, int dport);
+    const UdpHeader &GetUdpHeader() const;
 
-    private:
-        UdpHeader mUdpHeader;
-    };
+    std::string serialize() const override;
+    bool        validate(const ResponseInfo &responseInfo, const char *response) override;
 
-}
+  private:
+    UdpHeader                          mUdpHeader;
+    std::unique_ptr<IValidateResponse> mResponseValidator;
+};
+
+} // namespace traceroute::packet

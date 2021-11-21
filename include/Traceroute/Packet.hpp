@@ -1,26 +1,25 @@
 #pragma once
 #include "HeaderTypes.hpp"
 #include "SocketAddress.hpp"
+#include "Traceroute/interface/IValidateResponse.hpp"
+#include <memory>
 
-namespace traceroute
+namespace traceroute {
+class Packet : public IValidateResponse
 {
-    class Packet
-    {
-    public:
-        Packet(const SocketAddress &source, const SocketAddress &destination);
-        const SocketAddress &getSourceAddress() const;
-        const SocketAddress &getDestinationAddress() const;
-        int getFamily() const;
-        
-        virtual std::string serialize() const = 0;
-        virtual ~Packet() {}
-    protected:
-        const SocketAddress mSourceAddress;
-        const SocketAddress mDestinationAddress;
-    };
+  public:
+    Packet(const SocketAddress &source, const SocketAddress &destination);
+    virtual ~Packet() = default;
 
-   
+    int                  getFamily() const;
+    const SocketAddress &getSourceAddress() const;
+    const SocketAddress &getDestinationAddress() const;
 
-   
-    
-}
+    virtual std::string serialize() const = 0;
+
+  protected:
+    const SocketAddress mSourceAddress;
+    const SocketAddress mDestinationAddress;
+};
+
+} // namespace traceroute

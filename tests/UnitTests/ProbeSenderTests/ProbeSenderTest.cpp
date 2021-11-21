@@ -6,9 +6,9 @@
 #include "Traceroute/SocketAddress.hpp"
 #include "mocks/DataSenderMock.hpp"
 #include "mocks/PacketFactoryMock.hpp"
+#include "mocks/PacketMock.hpp"
 #include "mocks/ResponseValidator.hpp"
 #include "mocks/SystemClockFake.hpp"
-#include <Traceroute/Packet.hpp>
 #include <chrono>
 #include <compare>
 #include <gmock/gmock-actions.h>
@@ -28,13 +28,6 @@ using namespace packet;
 
 static auto systemClockFake = std::make_shared<SystemClockFake>();
 
-ACTION(createArbitraryPacket)
-{
-    const SocketAddress source{"1.2.3.4"};
-    const SocketAddress destination{"2.3.4.5"};
-    return std::make_unique<IcmpPacket>(IcmpPacket::CreateIcmp4Packet(source, destination));
-}
-
 ACTION_P2(waitAndReturn, waitDuration, valueToBeReturned)
 {
     systemClockFake->advanceBy(waitDuration);
@@ -45,22 +38,22 @@ class ProbeSenderTest : public Test
 {
   public:
     NiceMock<PacketFactoryMock> packetFactoryMock;
-    NiceMock<DataSenderMock> dataSenderMock;
-    NiceMock<ResponseValidatorMock> responseValidatorMock;
+    NiceMock<DataSenderMock>    dataSenderMock;
+    NiceMock<PacketMock>        packetMock;
 
     const SocketAddress source{"192.168.0.1"};
     const SocketAddress destination{"1.1.1.1"};
-    const ssize_t ArbitraryResponseSize = 1234;
-    const int ArbitraryProtocol = 2345;
+    const size_t        ArbitraryResponseSize = 1234;
+    const int           ArbitraryProtocol     = 2345;
 
     ProbeSender underTest;
 
     // default params - by default send 1 packet (which is one retry)
     // with ttl set to 1
-    int ttlStart = 1;
-    int ttlStop = 1;
-    int retries = 1;
-    const std::chrono::microseconds timeout = 100ms;
+    int                             ttlStart = 1;
+    int                             ttlStop  = 1;
+    int                             retries  = 1;
+    const std::chrono::microseconds timeout  = 100ms;
 
     const std::chrono::microseconds thisWillNotTimeout = 99ms;
 
@@ -69,16 +62,25 @@ class ProbeSenderTest : public Test
         return underTest.beginProbing(ttlStart, ttlStop, retries, timeout);
     }
 
-    ProbeSenderTest() : underTest(packetFactoryMock, dataSenderMock, responseValidatorMock, systemClockFake)
+    ProbeSenderTest() : underTest(packetFactoryMock, dataSenderMock, systemClockFake)
     {
-        ON_CALL(packetFactoryMock, createPacket()).WillByDefault(createArbitraryPacket());
+        ON_CALL(packetMock, validate(_, _)).WillByDefault(Return(false));
+        ON_CALL(packetFactoryMock, createPacketProxy()).WillByDefault(Invoke([this]() {
+            return createPacketMockProxy();
+        }));
         ON_CALL(dataSenderMock, receiveFrom(_, _, _)).WillByDefault(waitAndReturn(timeout, nullopt));
+    }
+    PacketMockProxy *createPacketMockProxy()
+    {
+        PacketMockProxy *proxy = new PacketMockProxy();
+        proxy->setMock(&packetMock);
+        return proxy;
     }
 
     void SetUp() override
     {
     }
-    InSequence s;
+    // InSequence s;
 };
 
 TEST_F(ProbeSenderTest, setsTtlOnSender)
@@ -103,8 +105,8 @@ TEST_F(ProbeSenderTest, onTimeout_waitedFor_isEqualTo_timeout)
 
 TEST_F(ProbeSenderTest, ttlRangeResultsInProbeCount)
 {
-    ttlStart = 2;
-    ttlStop = 5;
+    ttlStart                     = 2;
+    ttlStop                      = 5;
     const int expectedProbeCount = ttlStop - ttlStart + 1;
 
     auto probes = BeginProbing();
@@ -115,11 +117,11 @@ TEST_F(ProbeSenderTest, ttlRangeResultsInProbeCount)
 TEST_F(ProbeSenderTest, forEachRetryTtlIsNotChangedButpacketfactoryIsInvoked)
 {
     ttlStart = 1;
-    ttlStop = 1;
-    retries = 3;
+    ttlStop  = 1;
+    retries  = 3;
 
     EXPECT_CALL(dataSenderMock, setTtlOnSendingSocket(1)).Times(1);
-    EXPECT_CALL(packetFactoryMock, createPacket()).Times(3);
+    EXPECT_CALL(packetFactoryMock, createPacketProxy()).Times(3);
 
     auto probes = BeginProbing();
 }
@@ -138,7 +140,7 @@ TEST_F(ProbeSenderTest, responseAddressAssigned)
 {
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
-    EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
+    EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
 
     auto probe = BeginProbing().front();
 
@@ -164,7 +166,7 @@ TEST_F(ProbeSenderTest, responseIsAssignedToResultWithValidWaitedFor)
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(waitAndReturn(returnAfter,
                                 ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
-    EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
+    EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
 
     auto probe = BeginProbing().front();
 
@@ -181,7 +183,7 @@ TEST_F(ProbeSenderTest, waitedForIsSumOfPreviousInvalidResponses)
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(
             waitAndReturn(t3, ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
-    EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
+    EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
 
     auto probe = BeginProbing().back();
 
@@ -198,15 +200,14 @@ TEST_F(ProbeSenderTest, timeoutBetweenTwoSuccessfulProbes)
 
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{r1}, ArbitraryProtocol, ArbitraryResponseSize}));
-    EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
+    EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
 
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
-    EXPECT_CALL(responseValidatorMock, validate).Times(0);
+    EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(false));
 
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{r3}, ArbitraryProtocol, ArbitraryResponseSize}));
-    EXPECT_CALL(responseValidatorMock, validate).WillOnce(Return(true));
-
+    EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
     auto probes = BeginProbing();
 
     auto probe = probes.begin();

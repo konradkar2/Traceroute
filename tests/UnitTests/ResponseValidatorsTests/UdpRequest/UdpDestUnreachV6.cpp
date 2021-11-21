@@ -14,14 +14,15 @@ using namespace traceroute::packet;
 namespace traceroute {
 struct UdpDestUnreachV6 : public ResponseValidatorTestV6
 {
-    const int responseProtocol = IPPROTO_ICMPV6;
+    const int           responseProtocol  = IPPROTO_ICMPV6;
     const SocketAddress validResponseAddr = requestDestination;
 
-    const UdpPacket request = UdpPacket(requestSource, requestDestination, 1234);
+    const UdpPacket               request = UdpPacket(requestSource, requestDestination, 1234);
     ResponseIcmpToTcp<Ipv6Header> response;
-    UdpDestUnreachV6() : ResponseValidatorTestV6(std::make_unique<responseValidators::UdpResponseValidator>())
+    UdpDestUnreachV6()
     {
-        response.icmpHeader.type = ICMP6_DST_UNREACH;
+        setValidator(std::make_unique<responseValidators::UdpResponseValidator>(request));
+        response.icmpHeader.type                = ICMP6_DST_UNREACH;
         response.triggerPacket.ipHeader.version = 6;
     }
 };
@@ -29,7 +30,8 @@ struct UdpDestUnreachV6 : public ResponseValidatorTestV6
 TEST_F(UdpDestUnreachV6, valid)
 {
     auto [resp, responseSize] = responseV6ToPtr(&response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, responseSize);
+    ResponseInfo respInfo{validResponseAddr, responseProtocol, responseSize};
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -39,7 +41,8 @@ TEST_F(UdpDestUnreachV6, invalidClient)
     const SocketAddress invalidResponseAddr{"a:b:c::1"};
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
-    bool isValid = validator->validate(request, invalidResponseAddr, responseProtocol, resp, responseSize);
+    ResponseInfo respInfo{invalidResponseAddr, responseProtocol, responseSize};
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

@@ -20,8 +20,9 @@ struct TcpDestUnreachBase : public ResponseValidatorTestV4
     const int responseProtocol = IPPROTO_ICMP;
 
     const TcpPacket request = TcpPacket(requestSource, requestDestination, 80);
-    TcpDestUnreachBase() : ResponseValidatorTestV4(std::make_unique<responseValidators::TcpResponseValidator>())
+    TcpDestUnreachBase()
     {
+        setValidator(std::make_unique<responseValidators::TcpResponseValidator>(request));
     }
 };
 
@@ -31,9 +32,9 @@ struct TcpDestUnreachV4 : public TcpDestUnreachBase
     ResponseIcmpToTcp<Ipv4Header> response;
     TcpDestUnreachV4()
     {
-        response.ipHeader = createStandardIpHeader();
+        response.ipHeader               = createStandardIpHeader();
         response.triggerPacket.ipHeader = createStandardIpHeader();
-        response.icmpHeader.type = ICMP_DEST_UNREACH;
+        response.icmpHeader.type        = ICMP_DEST_UNREACH;
     }
 };
 
@@ -43,19 +44,20 @@ struct TcpDestUnreachV4CustomIhl : public TcpDestUnreachBase
     ResponseIcmpToTcp<Ipv4HeaderCustomSize<ipHeaderOptionsSize>> response;
     TcpDestUnreachV4CustomIhl()
     {
-        response.ipHeader = createCustomSizeIpHeader<ipHeaderOptionsSize>();
+        response.ipHeader               = createCustomSizeIpHeader<ipHeaderOptionsSize>();
         response.triggerPacket.ipHeader = createCustomSizeIpHeader<ipHeaderOptionsSize>();
-        response.icmpHeader.type = ICMP_DEST_UNREACH;
+        response.icmpHeader.type        = ICMP_DEST_UNREACH;
     }
 };
 
 TEST_F(TcpDestUnreachV4, valid)
 {
-    const SocketAddress validResponseAddr = requestDestination;
+    const SocketAddress validResponseAddr      = requestDestination;
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -65,19 +67,21 @@ TEST_F(TcpDestUnreachV4, invalidClient_invalid)
     const SocketAddress invalidResponseAddr{"1.1.1.1"};
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    bool isValid = validator->validate(request, invalidResponseAddr, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{invalidResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
 
 TEST_F(TcpDestUnreachV4CustomIhl, valid)
 {
-    const SocketAddress validResponseAddr = requestDestination;
+    const SocketAddress validResponseAddr      = requestDestination;
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -87,8 +91,9 @@ TEST_F(TcpDestUnreachV4CustomIhl, invalidClient_invalid)
     const SocketAddress invalidResponseAddr{"1.1.1.1"};
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    bool isValid = validator->validate(request, invalidResponseAddr, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{invalidResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

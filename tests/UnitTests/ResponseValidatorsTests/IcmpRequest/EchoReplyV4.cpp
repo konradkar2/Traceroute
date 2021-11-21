@@ -1,9 +1,9 @@
-#include <Traceroute/ResponseValidators/IcmpResponseValidator.hpp>
-#include "ResponseValidatorsTests/Responses.hpp"
 #include "ResponseValidatorsTests/IpHeaderVariants.hpp"
+#include "ResponseValidatorsTests/Responses.hpp"
 #include <ResponseValidatorsTests/ResponseValidatorTest.hpp>
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet/IcmpPacket.hpp>
+#include <Traceroute/ResponseValidators/IcmpResponseValidator.hpp>
 #include <gtest/gtest.h>
 #include <netinet/in.h>
 #include <netinet/ip_icmp.h>
@@ -11,16 +11,17 @@
 #include <vector>
 
 using namespace traceroute::packet;
-namespace traceroute::responseValidatorsTests::icmpRequest
-{
+namespace traceroute::responseValidatorsTests::icmpRequest {
 
 struct IcmpEchoReplyBaseV4 : public ResponseValidatorTestV4
 {
-    const int responseProtocol = IPPROTO_ICMP;
+    const int           responseProtocol  = IPPROTO_ICMP;
     const SocketAddress validResponseAddr = requestDestination;
-    const IcmpPacket request = IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination);
-    IcmpEchoReplyBaseV4() : ResponseValidatorTestV4(std::make_unique<responseValidators::IcmpResponseValidator>())
+    const IcmpPacket    request           = IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination);
+    IcmpEchoReplyBaseV4()
+        : ResponseValidatorTestV4()
     {
+        setValidator(std::make_unique<responseValidators::IcmpResponseValidator>(request));
     }
 };
 
@@ -30,7 +31,7 @@ struct IcmpEchoReplyV4 : public IcmpEchoReplyBaseV4
     ResponseIcmpToIcmp<Ipv4Header> response;
     IcmpEchoReplyV4()
     {
-        response.ipHeader = createStandardIpHeader();
+        response.ipHeader        = createStandardIpHeader();
         response.icmpHeader.type = ICMP_ECHOREPLY;
     }
 };
@@ -41,7 +42,7 @@ struct EchoReplyV4CustomIhl : public IcmpEchoReplyBaseV4
     ResponseIcmpToIcmp<Ipv4HeaderCustomSize<ipHeaderOptionsSize>> response;
     EchoReplyV4CustomIhl()
     {
-        response.ipHeader = createCustomSizeIpHeader<ipHeaderOptionsSize>();
+        response.ipHeader        = createCustomSizeIpHeader<ipHeaderOptionsSize>();
         response.icmpHeader.type = ICMP_ECHOREPLY;
     }
 };
@@ -50,9 +51,9 @@ TEST_F(IcmpEchoReplyV4, SameId_Valid)
 {
     response.icmpHeader.id = request.GetIcmpHeader().id;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    size_t responseSize = sizeof(response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, responseSize);
+    ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -60,9 +61,9 @@ TEST_F(IcmpEchoReplyV4, differentId_Invalid)
 {
     response.icmpHeader.id = request.GetIcmpHeader().id - 1;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    size_t responseSize = sizeof(response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, responseSize);
+    ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
@@ -71,9 +72,9 @@ TEST_F(EchoReplyV4CustomIhl, sameId_Valid)
 {
     response.icmpHeader.id = request.GetIcmpHeader().id;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    size_t responseSize = sizeof(response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, responseSize);
+    ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -82,9 +83,9 @@ TEST_F(EchoReplyV4CustomIhl, differentId_Invalid)
 {
     response.icmpHeader.id = request.GetIcmpHeader().id - 1;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    size_t responseSize = sizeof(response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, responseSize);
+    ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

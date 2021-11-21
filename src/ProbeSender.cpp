@@ -5,16 +5,19 @@
 #include <stdexcept>
 namespace traceroute {
 
-ProbeSender::ProbeSender(IPacketFactory &packetFactory, IDataSender &dataSender, IValidateResponse &responseValidator,
-                         std::shared_ptr<ISystemClock> clock)
-    : mPacketFactory{packetFactory}, mDataSender{dataSender}, mResponseValidator{responseValidator}, mSystemClock{clock}
+using std::chrono::duration_cast;
+using std::chrono::microseconds;
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
+
+ProbeSender::ProbeSender(IPacketFactory &packetFactory, IDataSender &dataSender, std::shared_ptr<ISystemClock> clock)
+    : mPacketFactory{packetFactory}, mDataSender{dataSender}, mSystemClock{clock}
 {
 }
 
-std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int ttlEnd, int retries,
-                                                            std::chrono::microseconds timeout)
+std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int ttlEnd, int retries, microseconds timeout)
 {
-    bool wasDestinationReached = false;
+    bool                              wasDestinationReached = false;
     std::vector<ProbeResultContainer> probesContainer;
     for (int ttl = ttlBegin; ttl <= ttlEnd; ++ttl)
     {
@@ -28,7 +31,7 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
             mDataSender.sendPacket(*packet);
             auto sendTimestamp = mSystemClock->now();
 
-            bool isResponseValid = false;
+            bool                        isResponseValid = false;
             std::optional<ResponseInfo> respInfo;
             while (true)
             {
@@ -37,12 +40,10 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
                 {
                     break;
                 }
-                respInfo = mDataSender.receiveFrom(mBuffer, BufferSize,
-                                                   std::chrono::duration_cast<std::chrono::milliseconds>(timeLeft));
+                respInfo = mDataSender.receiveFrom(mBuffer, BufferSize, duration_cast<milliseconds>(timeLeft));
                 if (respInfo)
                 {
-                    isResponseValid = mResponseValidator.validate(*packet, respInfo->client(), respInfo->protocol(),
-                                                                  mBuffer, respInfo->size());
+                    isResponseValid = packet->validate(respInfo.value(), mBuffer);
                 }
             }
 
@@ -69,12 +70,11 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
     return probesContainer;
 }
 
-std::chrono::microseconds ProbeSender::getTimePassedTillNow(std::chrono::steady_clock::time_point then) const
+microseconds ProbeSender::getTimePassedTillNow(steady_clock::time_point then) const
 {
-    return std::chrono::duration_cast<std::chrono::microseconds>(mSystemClock->now() - then);
+    return duration_cast<microseconds>(mSystemClock->now() - then);
 }
-std::chrono::microseconds ProbeSender::getTimeLeft(std::chrono::steady_clock::time_point then,
-                                                   std::chrono::microseconds timeout) const
+microseconds ProbeSender::getTimeLeft(steady_clock::time_point then, microseconds timeout) const
 {
     auto timePassed = getTimePassedTillNow(then);
     if (timePassed > timeout)

@@ -1,13 +1,20 @@
 #pragma once
 
+#include "mocks/PacketMock.hpp"
 #include <Traceroute/interface/IPacketFactory.hpp>
+#include <gmock/gmock-nice-strict.h>
 #include <gmock/gmock.h>
 
-namespace traceroute
-{
+using testing::NiceMock;
+
+namespace traceroute {
 class PacketFactoryMock : public IPacketFactory
 {
   public:
-    MOCK_METHOD(std::unique_ptr<Packet>, createPacket, (), (override));
+    std::unique_ptr<Packet> createPacket() override
+    {
+        return std::unique_ptr<PacketMockProxy>(createPacketProxy());
+    }
+    MOCK_METHOD0(createPacketProxy, PacketMockProxy *());
 };
 } // namespace traceroute

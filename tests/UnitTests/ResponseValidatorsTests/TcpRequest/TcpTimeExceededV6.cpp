@@ -15,13 +15,14 @@ using namespace traceroute::packet;
 namespace traceroute {
 struct TcpTimeExceededV6 : public ResponseValidatorTestV6
 {
-    const int responseProtocol = IPPROTO_ICMPV6;
-    const SocketAddress transitRouter{"1:1:1::5"};
-    const TcpPacket request = TcpPacket(requestSource, requestDestination, 80);
+    const int                     responseProtocol = IPPROTO_ICMPV6;
+    const SocketAddress           transitRouter{"1:1:1::5"};
+    const TcpPacket               request = TcpPacket(requestSource, requestDestination, 80);
     ResponseIcmpToTcp<Ipv6Header> response;
-    TcpTimeExceededV6() : ResponseValidatorTestV6(std::make_unique<responseValidators::TcpResponseValidator>())
+    TcpTimeExceededV6()
     {
-        response.icmpHeader.type = ICMP6_TIME_EXCEEDED;
+        setValidator(std::make_unique<responseValidators::TcpResponseValidator>(request));
+        response.icmpHeader.type                = ICMP6_TIME_EXCEEDED;
         response.triggerPacket.ipHeader.version = 6;
     }
 };
@@ -31,7 +32,8 @@ TEST_F(TcpTimeExceededV6, valid)
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
-    bool isValid = validator->validate(request, transitRouter, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{transitRouter, responseProtocol, responseSize};
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -40,7 +42,8 @@ TEST_F(TcpTimeExceededV6, invalidSeq)
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq - 1;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
-    bool isValid = validator->validate(request, transitRouter, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{transitRouter, responseProtocol, responseSize};
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

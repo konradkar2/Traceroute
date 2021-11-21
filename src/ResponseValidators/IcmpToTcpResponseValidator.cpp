@@ -8,11 +8,9 @@
 #include <netinet/in.h>
 #include <netinet/ip_icmp.h>
 
-namespace traceroute::responseValidators
-{
+namespace traceroute::responseValidators {
 using namespace traceroute::packet;
-namespace
-{
+namespace {
 const char *advanceToTcpHeader(const char *icmpHeader)
 {
     icmpHeader += sizeof(IcmpHeader);
@@ -36,20 +34,21 @@ bool validateTimeExceeded(const char *icmpHeader, const TcpPacket &tcpPacket)
 }
 
 } // namespace
-
-bool IcmpToTcpResponseValidator::validateFields(const Packet &request, const SocketAddress &client,
-                                                const char *response, size_t responseSize)
+IcmpToTcpResponseValidator::IcmpToTcpResponseValidator(const packet::TcpPacket &tcpPacket) : mTcpPacket(tcpPacket)
 {
-    const auto &tpcPacket = dynamic_cast<const TcpPacket &>(request);
+}
 
+bool IcmpToTcpResponseValidator::validateFields(const ResponseInfo &responseInfo, const char *response)
+{
+    const auto &client = responseInfo.client();
     if (client.isV4())
     {
         switch (getIcmpType(response))
         {
         case ICMP_DEST_UNREACH:
-            return validateDestUnreach(response, tpcPacket, client);
+            return validateDestUnreach(response, mTcpPacket, client);
         case ICMP_TIME_EXCEEDED:
-            return validateTimeExceeded(response, tpcPacket);
+            return validateTimeExceeded(response, mTcpPacket);
         }
     }
     else
@@ -57,9 +56,9 @@ bool IcmpToTcpResponseValidator::validateFields(const Packet &request, const Soc
         switch (getIcmpType(response))
         {
         case ICMP6_DST_UNREACH:
-            return validateDestUnreach(response, tpcPacket, client);
+            return validateDestUnreach(response, mTcpPacket, client);
         case ICMP6_TIME_EXCEEDED:
-            return validateTimeExceeded(response, tpcPacket);
+            return validateTimeExceeded(response, mTcpPacket);
         }
     }
     return false;

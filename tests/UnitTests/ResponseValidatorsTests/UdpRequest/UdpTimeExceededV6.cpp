@@ -15,13 +15,14 @@ using namespace traceroute::packet;
 namespace traceroute {
 struct UdpTimeExceededV6 : public ResponseValidatorTestV6
 {
-    const int responseProtocol = IPPROTO_ICMPV6;
-    const SocketAddress transitRouter{"1:1:1::5"};
-    const UdpPacket request = UdpPacket(requestSource, requestDestination, 80);
+    const int                     responseProtocol = IPPROTO_ICMPV6;
+    const SocketAddress           transitRouter{"1:1:1::5"};
+    const UdpPacket               request = UdpPacket(requestSource, requestDestination, 80);
     ResponseIcmpToUdp<Ipv6Header> response;
-    UdpTimeExceededV6() : ResponseValidatorTestV6(std::make_unique<responseValidators::UdpResponseValidator>())
+    UdpTimeExceededV6()
     {
-        response.icmpHeader.type = ICMP6_TIME_EXCEEDED;
+        setValidator(std::make_unique<responseValidators::UdpResponseValidator>(request));
+        response.icmpHeader.type                = ICMP6_TIME_EXCEEDED;
         response.triggerPacket.ipHeader.version = 6;
     }
 };
@@ -29,7 +30,8 @@ struct UdpTimeExceededV6 : public ResponseValidatorTestV6
 TEST_F(UdpTimeExceededV6, valid)
 {
     auto [resp, responseSize] = responseV6ToPtr(&response);
-    bool isValid = validator->validate(request, transitRouter, responseProtocol, resp, responseSize);
+    ResponseInfo respInfo{transitRouter, responseProtocol, responseSize};
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }

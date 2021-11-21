@@ -8,30 +8,23 @@
 #include <netinet/in.h>
 #include <netinet/ip_icmp.h>
 #include <sys/socket.h>
-namespace traceroute::responseValidators
-{
+namespace traceroute::responseValidators {
 
-TcpResponseValidator::TcpResponseValidator()
+TcpResponseValidator::TcpResponseValidator(const packet::TcpPacket &tcpPacket) : mTcpPacket(tcpPacket)
 {
-    mIcmpToTcpValidator = std::make_unique<IcmpToTcpResponseValidator>();
-    mTcpToTcpValidator = std::make_unique<TcpToTcpResponseValidator>();
 }
-bool TcpResponseValidator::validate(const Packet &request, const SocketAddress &client, int protocol,
-                                    const char *response, size_t responseSize)
+bool TcpResponseValidator::validate(const ResponseInfo &responseInfo, const char *response)
 {
-    if(client.isV4())
+    auto protocol = responseInfo.protocol();
+    if (protocol == IPPROTO_ICMP or protocol == IPPROTO_ICMPV6)
     {
-        auto ipHeaderSize = getIpHeaderSize(response);
-        response += ipHeaderSize;
-        responseSize -=ipHeaderSize;
+        IcmpToTcpResponseValidator validator{mTcpPacket};
+        return validator.validate(responseInfo, response);
     }
-    switch(protocol)
+    else if (protocol == IPPROTO_TCP)
     {
-        case IPPROTO_ICMP:
-        case IPPROTO_ICMPV6:
-            return mIcmpToTcpValidator->validate(request, client, protocol, response, responseSize);
-        case IPPROTO_TCP:
-            return mTcpToTcpValidator->validate(request, client, protocol, response, responseSize);
+        TcpToTcpResponseValidator validator{mTcpPacket};
+        return validator.validate(responseInfo, response);
     }
     return false;
 }

@@ -2,7 +2,7 @@
 
 namespace traceroute
 {
-ResponseInfo::ResponseInfo(SocketAddress &&client, int protocol, ssize_t size)
+ResponseInfo::ResponseInfo(const SocketAddress &client, int protocol, size_t size)
     : mClient{std::move(client)}, mProtocol{protocol}, mSize(size)
 {
 }

@@ -1,16 +1,23 @@
-#include <Traceroute/interface/IValidateResponse.hpp>
+#include "Traceroute/Packet/UdpPacket.hpp"
+#include "Traceroute/ResponseValidators/ResponseValidator.hpp"
 #include <Traceroute/Packet.hpp>
 #include <Traceroute/SocketAddress.hpp>
+#include <Traceroute/interface/IValidateResponse.hpp>
 #include <cstdint>
-namespace traceroute
-{
-namespace responseValidators
-{
-class UdpResponseValidator : public IValidateResponse
+namespace traceroute {
+namespace responseValidators {
+class UdpResponseValidator : public ResponseValidator
 {
   public:
-     bool validate(const Packet &request, const SocketAddress &client, int protocol, const char *response,
-                  size_t responseSize) override;
+    UdpResponseValidator(const packet::UdpPacket & udpPacket);
+
+  protected:
+    bool validateFields(const ResponseInfo &responseInfo, const char *response) override;
+    bool validateProtocol(int protocol) override;
+    bool validateSize(size_t size) override;
+
+  private:
+    const packet::UdpPacket &mUdpPacket;
 };
 } // namespace responseValidators
 } // namespace traceroute

@@ -9,7 +9,6 @@ set(Sources
     src/SocketProviders/TcpSocketProvider.cpp
     src/SocketProviders/UdpSocketProvider.cpp
     src/ResponseValidators/ResponseValidator.cpp
-    src/ResponseValidators/IcmpToIcmpResponseValidator.cpp
     src/ResponseValidators/IcmpResponseValidator.cpp
     src/ResponseValidators/TcpResponseValidator.cpp
     src/ResponseValidators/TcpToTcpResponseValidator.cpp

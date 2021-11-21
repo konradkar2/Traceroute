@@ -19,8 +19,9 @@ struct TcpDestUnreachV6 : public ResponseValidatorTestV6
 
     const TcpPacket request = TcpPacket(requestSource, requestDestination, 80);
     ResponseIcmpToTcp<Ipv6Header> response;
-    TcpDestUnreachV6() : ResponseValidatorTestV6(std::make_unique<responseValidators::TcpResponseValidator>())
+    TcpDestUnreachV6()
     {
+        setValidator(std::make_unique<responseValidators::TcpResponseValidator>(request));
         response.icmpHeader.type = ICMP6_DST_UNREACH;
         response.triggerPacket.ipHeader.version = 6;
     }
@@ -31,7 +32,8 @@ TEST_F(TcpDestUnreachV6, valid)
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
+   ResponseInfo respInfo{validResponseAddr, responseProtocol, responseSize};
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -42,7 +44,8 @@ TEST_F(TcpDestUnreachV6, invalidClient)
     response.triggerPacket.transportHeader.seq = request.getTcpHeader().seq;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
-    bool isValid = validator->validate(request, invalidResponseAddr, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{invalidResponseAddr, responseProtocol, responseSize};
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
@@ -52,7 +55,8 @@ TEST_F(TcpDestUnreachV6, invalidSeq)
     response.triggerPacket.transportHeader.seq = 0;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{validResponseAddr, responseProtocol, responseSize};
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

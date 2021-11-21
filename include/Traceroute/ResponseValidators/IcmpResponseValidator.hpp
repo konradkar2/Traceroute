@@ -1,21 +1,25 @@
-#include <Traceroute/interface/IValidateResponse.hpp>
+#include "Traceroute/Packet/IcmpPacket.hpp"
+#include "Traceroute/ResponseInfo.hpp"
+#include "Traceroute/ResponseValidators/ResponseValidator.hpp"
 #include <Traceroute/Packet.hpp>
 #include <Traceroute/SocketAddress.hpp>
 #include <cstdint>
 #include <memory>
 
-namespace traceroute
-{
-namespace responseValidators
-{
-class IcmpResponseValidator : public IValidateResponse
+namespace traceroute {
+namespace responseValidators {
+class IcmpResponseValidator : public ResponseValidator
 {
   public:
-    IcmpResponseValidator();
-    bool validate(const Packet &request, const SocketAddress &client, int protocol, const char *response,
-                  size_t responseSize) override;
+    IcmpResponseValidator(const packet::IcmpPacket &icmpPacket);
+
+  protected:
+    bool validateFields(const ResponseInfo &responseInfo, const char *response) override;
+    bool validateProtocol(int protocol) override;
+    bool validateSize(size_t size) override;
+
   private:
-    std::unique_ptr<IValidateResponse> mIcmpResponseValidator;
+    const packet::IcmpPacket &mIcmpPacket;
 };
 } // namespace responseValidators
 } // namespace traceroute

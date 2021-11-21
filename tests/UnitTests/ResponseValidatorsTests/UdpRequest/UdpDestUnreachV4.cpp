@@ -19,8 +19,9 @@ struct UdpDestUnreachBase : public ResponseValidatorTestV4
     const int responseProtocol = IPPROTO_ICMP;
 
     const UdpPacket request = UdpPacket(requestSource, requestDestination, 2223);
-    UdpDestUnreachBase() : ResponseValidatorTestV4(std::make_unique<responseValidators::UdpResponseValidator>())
+    UdpDestUnreachBase()
     {
+        setValidator(std::make_unique<responseValidators::UdpResponseValidator>(request));
     }
 };
 
@@ -30,9 +31,9 @@ struct UdpDestUnreachV4 : public UdpDestUnreachBase
     ResponseIcmpToUdp<Ipv4Header> response;
     UdpDestUnreachV4()
     {
-        response.ipHeader = createStandardIpHeader();
+        response.ipHeader               = createStandardIpHeader();
         response.triggerPacket.ipHeader = createStandardIpHeader();
-        response.icmpHeader.type = ICMP_DEST_UNREACH;
+        response.icmpHeader.type        = ICMP_DEST_UNREACH;
     }
 };
 
@@ -42,9 +43,9 @@ struct UdpDestUnreachV4CustomIhl : public UdpDestUnreachBase
     ResponseIcmpToTcp<Ipv4HeaderCustomSize<ipHeaderOptionsSize>> response;
     UdpDestUnreachV4CustomIhl()
     {
-        response.ipHeader = createCustomSizeIpHeader<ipHeaderOptionsSize>();
+        response.ipHeader               = createCustomSizeIpHeader<ipHeaderOptionsSize>();
         response.triggerPacket.ipHeader = createCustomSizeIpHeader<ipHeaderOptionsSize>();
-        response.icmpHeader.type = ICMP_DEST_UNREACH;
+        response.icmpHeader.type        = ICMP_DEST_UNREACH;
     }
 };
 
@@ -52,8 +53,9 @@ TEST_F(UdpDestUnreachV4, valid)
 {
     const SocketAddress validResponseAddr = requestDestination;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -62,8 +64,9 @@ TEST_F(UdpDestUnreachV4, invalidClient_invalid)
 {
     const SocketAddress invalidResponseAddr{"1.1.1.1"};
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    bool isValid = validator->validate(request, invalidResponseAddr, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{invalidResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
@@ -72,8 +75,9 @@ TEST_F(UdpDestUnreachV4CustomIhl, valid)
 {
     const SocketAddress validResponseAddr = requestDestination;
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    bool isValid = validator->validate(request, validResponseAddr, responseProtocol, resp, sizeof(response));
+   ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -82,8 +86,9 @@ TEST_F(UdpDestUnreachV4CustomIhl, invalidClient_invalid)
 {
     const SocketAddress invalidResponseAddr{"1.1.1.1"};
 
-    auto resp = reinterpret_cast<const char *>(&response);
-    bool isValid = validator->validate(request, invalidResponseAddr, responseProtocol, resp, sizeof(response));
+    ResponseInfo respInfo{invalidResponseAddr, responseProtocol, sizeof(response)};
+    auto         resp    = reinterpret_cast<const char *>(&response);
+    bool         isValid = validator->validate(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

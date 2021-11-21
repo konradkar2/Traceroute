@@ -2,13 +2,11 @@
 #include <memory>
 #include <sstream>
 
-namespace traceroute
-{
-namespace
-{
+namespace traceroute {
+namespace {
 void removeTrailingZeros(std::string &str)
 {
-    str.erase(str.find_last_not_of('0') + 1, std::string::npos); // remove trailing zeroes
+    str.erase(str.find_last_not_of('0') + 1, std::string::npos);
 }
 } // namespace
 
@@ -20,7 +18,7 @@ ProbeResultContainer::ProbeResultContainer(int ttl)
 void ProbeResultContainer::addFailedProbe(std::chrono::microseconds waitedFor)
 {
     ProbeResult p;
-    p.success = false;
+    p.success   = false;
     p.waitedFor = waitedFor;
     mProbeResults.push_back(p);
 }
@@ -28,7 +26,7 @@ void ProbeResultContainer::addFailedProbe(std::chrono::microseconds waitedFor)
 void ProbeResultContainer::addSuccessfulProbe(std::chrono::microseconds waitedFor)
 {
     ProbeResult p;
-    p.success = true;
+    p.success   = true;
     p.waitedFor = waitedFor;
     mProbeResults.push_back(p);
 }
@@ -50,7 +48,7 @@ const std::vector<ProbeResultContainer::ProbeResult> &ProbeResultContainer::getR
 std::string ProbeResultContainer::toString() const
 {
     std::stringstream result;
-    std::string client = mResponseSender.has_value() ? mResponseSender->toString() : "";
+    std::string       client = mResponseSender.has_value() ? mResponseSender->toString() : "";
     result << std::to_string(mTtl) << "  " << client;
     for (size_t i = 0; i < mProbeResults.size(); i++)
     {
