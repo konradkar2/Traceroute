@@ -1,7 +1,8 @@
 #pragma once
-#include "../HeaderTypes.hpp"
-#include "../Packet.hpp"
-#include "../SocketAddress.hpp"
+#include "Traceroute/HeaderTypes.hpp"
+#include "Traceroute/Packet.hpp"
+#include "Traceroute/ResponseValidators/UdpResponseValidator.hpp"
+#include "Traceroute/SocketAddress.hpp"
 
 namespace traceroute::packet {
 class UdpPacket : public Packet
@@ -14,8 +15,8 @@ class UdpPacket : public Packet
     bool        validate(const ResponseInfo &responseInfo, const char *response) override;
 
   private:
-    UdpHeader                          mUdpHeader;
-    std::unique_ptr<IValidateResponse> mResponseValidator;
+    UdpHeader                                mUdpHeader;
+    responseValidators::UdpResponseValidator mResponseValidator;
 };
 
 } // namespace traceroute::packet

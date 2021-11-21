@@ -2,8 +2,8 @@
 
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet.hpp>
+#include <Traceroute/ResponseValidators/IcmpResponseValidator.hpp>
 #include <Traceroute/SocketAddress.hpp>
-#include <Traceroute/interface/IValidateResponse.hpp>
 #include <memory>
 
 namespace traceroute::packet {
@@ -20,7 +20,7 @@ class IcmpPacket : public Packet
 
   private:
     IcmpPacket(const SocketAddress &source, const SocketAddress &destination);
-    std::unique_ptr<IValidateResponse> mResponseValidator;
-    IcmpHeader                         mIcmpHeader;
+    responseValidators::IcmpResponseValidator mResponseValidator;
+    IcmpHeader                                mIcmpHeader;
 };
 } // namespace traceroute::packet

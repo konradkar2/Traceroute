@@ -30,6 +30,7 @@ IcmpResponseValidator::IcmpResponseValidator(const packet::IcmpPacket &icmpPacke
 
 bool IcmpResponseValidator::validateFields(const ResponseInfo &responseInfo, const char *response)
 {
+    fprintf(stderr, "Client: %s\n", responseInfo.client().toString().c_str());
     switch (getIcmpType(response))
     {
     case ICMP_ECHOREPLY:
@@ -39,13 +40,14 @@ bool IcmpResponseValidator::validateFields(const ResponseInfo &responseInfo, con
     case ICMP6_TIME_EXCEEDED:
         return validateTimeExceeded(response, mIcmpPacket);
     default:
+        fprintf(stderr, "Not valid code: \n");
         return false;
     }
 }
 
 bool IcmpResponseValidator::validateSize(size_t size)
 {
-    return true;
+    return size >= sizeof(IcmpHeader);
 }
 
 bool IcmpResponseValidator::validateProtocol(int protocol)

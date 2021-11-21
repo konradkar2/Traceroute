@@ -34,8 +34,10 @@ size_t getIpHeaderSize(const char *ipHdr)
 
     if (ipHeaderFb->version == 4)
     {
+        fprintf(stderr,"Its version 4\n");
         const Ipv4Header *ip4header  = reinterpret_cast<const Ipv4Header *>(ipHdr);
         auto              iphdr_size = ip4header->ihl << 2;
+        fprintf(stderr,"Ip header size: %d \n",iphdr_size);
         return iphdr_size;
     }
     if (ipHeaderFb->version == 6)
@@ -43,7 +45,6 @@ size_t getIpHeaderSize(const char *ipHdr)
         return sizeof(Ipv6Header);
     }
     throw std::runtime_error("Response does not contain valid ipHeader");
-    ;
 }
 bool isIpHeaderPresent(const ResponseInfo &responseInfo, const char *response)
 {
@@ -72,6 +73,7 @@ bool validateSameSequence(const char *tcpReply, const TcpHeader &tcpEcho)
 
 bool validateSession(const char *icmpReply, const IcmpHeader &icmpEcho)
 {
+    fprintf(stderr,"reply id: %d, request id: %d\n", (int)toIcmpHeaderT(icmpReply)->id,(int)icmpEcho.id);
     return toIcmpHeaderT(icmpReply)->id == icmpEcho.id;
 }
 

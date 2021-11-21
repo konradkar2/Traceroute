@@ -22,7 +22,7 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
     for (int ttl = ttlBegin; ttl <= ttlEnd; ++ttl)
     {
         mDataSender.setTtlOnSendingSocket(ttl);
-        
+
         ProbeResultContainer probes(ttl);
         for (int i = 0; i < retries; i++)
         {
@@ -43,6 +43,7 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
                 respInfo = mDataSender.receiveFrom(mBuffer, BufferSize, duration_cast<milliseconds>(timeLeft));
                 if (respInfo)
                 {
+                    fprintf(stderr,"Got response of size %lu \n",respInfo->size());
                     isResponseValid = packet->validate(respInfo.value(), mBuffer);
                 }
             }

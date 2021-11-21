@@ -8,11 +8,6 @@
 #include <netinet/ip_icmp.h>
 
 namespace traceroute::responseValidators {
-namespace {
-bool validate(int codeA, int codeB)
-{
-}
-} // namespace
 
 UdpResponseValidator::UdpResponseValidator(const packet::UdpPacket &udpPacket) : mUdpPacket(udpPacket)
 {

@@ -10,7 +10,10 @@
 #include <sys/socket.h>
 namespace traceroute::responseValidators {
 
-TcpResponseValidator::TcpResponseValidator(const packet::TcpPacket &tcpPacket) : mTcpPacket(tcpPacket)
+TcpResponseValidator::TcpResponseValidator(const packet::TcpPacket &tcpPacket)
+    : mTcpToTcpValidator(std::make_unique<TcpToTcpResponseValidator>(tcpPacket)),
+      mIcmpToTcpValidator(std::make_unique<IcmpToTcpResponseValidator>(tcpPacket))
+
 {
 }
 bool TcpResponseValidator::validate(const ResponseInfo &responseInfo, const char *response)
@@ -18,13 +21,11 @@ bool TcpResponseValidator::validate(const ResponseInfo &responseInfo, const char
     auto protocol = responseInfo.protocol();
     if (protocol == IPPROTO_ICMP or protocol == IPPROTO_ICMPV6)
     {
-        IcmpToTcpResponseValidator validator{mTcpPacket};
-        return validator.validate(responseInfo, response);
+        return mIcmpToTcpValidator->validate(responseInfo, response);
     }
     else if (protocol == IPPROTO_TCP)
     {
-        TcpToTcpResponseValidator validator{mTcpPacket};
-        return validator.validate(responseInfo, response);
+        return mTcpToTcpValidator->validate(responseInfo, response);
     }
     return false;
 }

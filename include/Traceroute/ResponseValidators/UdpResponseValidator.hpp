@@ -1,10 +1,16 @@
-#include "Traceroute/Packet/UdpPacket.hpp"
+#pragma once
+
 #include "Traceroute/ResponseValidators/ResponseValidator.hpp"
 #include <Traceroute/Packet.hpp>
 #include <Traceroute/SocketAddress.hpp>
 #include <Traceroute/interface/IValidateResponse.hpp>
 #include <cstdint>
 namespace traceroute {
+
+namespace packet {
+class UdpPacket;
+}
+
 namespace responseValidators {
 class UdpResponseValidator : public ResponseValidator
 {

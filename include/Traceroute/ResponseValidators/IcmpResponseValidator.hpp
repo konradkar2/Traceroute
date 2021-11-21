@@ -1,4 +1,5 @@
-#include "Traceroute/Packet/IcmpPacket.hpp"
+#pragma once
+
 #include "Traceroute/ResponseInfo.hpp"
 #include "Traceroute/ResponseValidators/ResponseValidator.hpp"
 #include <Traceroute/Packet.hpp>
@@ -7,6 +8,11 @@
 #include <memory>
 
 namespace traceroute {
+
+namespace packet {
+class IcmpPacket;
+}
+
 namespace responseValidators {
 class IcmpResponseValidator : public ResponseValidator
 {

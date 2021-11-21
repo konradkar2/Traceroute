@@ -18,7 +18,7 @@ const TcpHeader &TcpPacket::getTcpHeader() const
 }
 
 TcpPacket::TcpPacket(const SocketAddress &source, const SocketAddress &destination, int dport)
-    : Packet(source, destination), mResponseValidator{std::make_unique<responseValidators::TcpResponseValidator>(*this)}
+    : Packet(source, destination), mResponseValidator(*this)
 {
     mTcpHeader.source   = htons(50000 + rand() % 15001);
     mTcpHeader.dest     = htons(dport);
@@ -37,7 +37,7 @@ TcpPacket::TcpPacket(const SocketAddress &source, const SocketAddress &destinati
 
 bool TcpPacket::validate(const ResponseInfo &responseInfo, const char *response)
 {
-    return mResponseValidator->validate(responseInfo, response);
+    return mResponseValidator.validate(responseInfo, response);
 }
 
 } // namespace traceroute::packet
