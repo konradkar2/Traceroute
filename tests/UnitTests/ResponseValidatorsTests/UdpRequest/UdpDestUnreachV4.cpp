@@ -60,7 +60,7 @@ TEST_F(UdpDestUnreachV4, valid)
     EXPECT_TRUE(isValid);
 }
 
-TEST_F(UdpDestUnreachV4, invalidClient_invalid)
+TEST_F(UdpDestUnreachV4, invalidClient)
 {
     const SocketAddress invalidResponseAddr{"1.1.1.1"};
 
@@ -82,7 +82,7 @@ TEST_F(UdpDestUnreachV4CustomIhl, valid)
     EXPECT_TRUE(isValid);
 }
 
-TEST_F(UdpDestUnreachV4CustomIhl, invalidClient_invalid)
+TEST_F(UdpDestUnreachV4CustomIhl, invalidClient)
 {
     const SocketAddress invalidResponseAddr{"1.1.1.1"};
 

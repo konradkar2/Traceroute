@@ -1,5 +1,6 @@
 #include "IcmpToTcpResponseValidator.hpp"
 #include "ResponseValidators/common.hpp"
+#include "Traceroute/HeaderTypes.hpp"
 #include "Traceroute/Packet/TcpPacket.hpp"
 #include "common.hpp"
 #include <Traceroute/Packet/IcmpPacket.hpp>
@@ -66,7 +67,7 @@ bool IcmpToTcpResponseValidator::validateFields(const ResponseInfo &responseInfo
 
 bool IcmpToTcpResponseValidator::validateSize(size_t size)
 {
-    return true;
+    return size >= sizeof(IcmpHeader) + sizeof(TcpHeader);
 }
 
 bool IcmpToTcpResponseValidator::validateProtocol(int protocol)

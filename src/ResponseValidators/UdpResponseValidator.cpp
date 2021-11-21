@@ -8,6 +8,11 @@
 #include <netinet/ip_icmp.h>
 
 namespace traceroute::responseValidators {
+namespace {
+bool validate(int codeA, int codeB)
+{
+}
+} // namespace
 
 UdpResponseValidator::UdpResponseValidator(const packet::UdpPacket &udpPacket) : mUdpPacket(udpPacket)
 {
@@ -19,15 +24,28 @@ bool UdpResponseValidator::validateFields(const ResponseInfo &responseInfo, cons
     const auto       &client     = responseInfo.client();
     const IcmpHeader *header     = reinterpret_cast<const IcmpHeader *>(response);
     const auto        headerType = header->type;
-    if (mUdpPacket.getDestinationAddress() == client)
+    if (client.isV4())
     {
-        return headerType == ICMP_DEST_UNREACH or headerType == ICMP6_DST_UNREACH;
+        if (mUdpPacket.getDestinationAddress() == client)
+        {
+            return headerType == ICMP_DEST_UNREACH;
+        }
+        else
+        {
+            return headerType == ICMP_TIME_EXCEEDED;
+        }
     }
-    else if (headerType == ICMP_TIME_EXCEEDED or headerType == ICMP6_TIME_EXCEEDED)
+    else
     {
-        return true;
+        if (mUdpPacket.getDestinationAddress() == client)
+        {
+            return headerType == ICMP6_DST_UNREACH;
+        }
+        else
+        {
+            return headerType == ICMP6_TIME_EXCEEDED;
+        }
     }
-    return false;
 }
 bool UdpResponseValidator::validateProtocol(int protocol)
 {
@@ -35,7 +53,7 @@ bool UdpResponseValidator::validateProtocol(int protocol)
 }
 bool UdpResponseValidator::validateSize(size_t size)
 {
-    return size >= sizeof(IcmpHeader);
+    return size >= sizeof(IcmpHeader) + sizeof(UdpHeader);
 }
 
 } // namespace traceroute::responseValidators

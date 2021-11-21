@@ -30,7 +30,7 @@ bool TcpToTcpResponseValidator::validateFields(const ResponseInfo &responseInfo,
 
 bool TcpToTcpResponseValidator::validateSize(size_t size)
 {
-    return true;
+    return size >= sizeof(TcpHeader);
 }
 
 bool TcpToTcpResponseValidator::validateProtocol(int protocol)

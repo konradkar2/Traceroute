@@ -80,7 +80,7 @@ class ProbeSenderTest : public Test
     void SetUp() override
     {
     }
-    // InSequence s;
+    InSequence s;
 };
 
 TEST_F(ProbeSenderTest, setsTtlOnSender)
@@ -203,11 +203,12 @@ TEST_F(ProbeSenderTest, timeoutBetweenTwoSuccessfulProbes)
     EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
 
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
-    EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(false));
+    EXPECT_CALL(packetMock, validate(_, _)).Times(0);
 
     EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{r3}, ArbitraryProtocol, ArbitraryResponseSize}));
     EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
+
     auto probes = BeginProbing();
 
     auto probe = probes.begin();
