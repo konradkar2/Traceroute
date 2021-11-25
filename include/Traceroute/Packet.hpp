@@ -10,16 +10,14 @@ class Packet : public IValidateResponse
   public:
     Packet(const SocketAddress &source, const SocketAddress &destination);
     virtual ~Packet() = default;
-
     int                  getFamily() const;
     const SocketAddress &getSourceAddress() const;
     const SocketAddress &getDestinationAddress() const;
-
-    virtual std::string serialize() const = 0;
+    virtual std::string  serialize() const = 0;
 
   protected:
-    const SocketAddress mSourceAddress;
-    const SocketAddress mDestinationAddress;
+    SocketAddress mSourceAddress;
+    SocketAddress mDestinationAddress;
 };
 
 } // namespace traceroute

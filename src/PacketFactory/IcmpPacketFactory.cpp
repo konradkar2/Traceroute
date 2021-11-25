@@ -10,9 +10,9 @@ IcmpPacketFactory::IcmpPacketFactory(const SocketAddress &source, const SocketAd
 std::unique_ptr<Packet> IcmpPacketFactory::createPacket()
 {
     if (mSource.isV4())
-        return make_unique<IcmpPacket>(IcmpPacket::CreateIcmp4Packet(mSource, mDestination));
+        return IcmpPacket::CreateIcmp4Packet(mSource, mDestination);
     else
-        return make_unique<IcmpPacket>(IcmpPacket::CreateIcmp6Packet(mSource, mDestination));
+        return IcmpPacket::CreateIcmp6Packet(mSource, mDestination);
 }
 
 } // namespace traceroute

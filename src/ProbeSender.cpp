@@ -43,7 +43,6 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
                 respInfo = mDataSender.receiveFrom(mBuffer, BufferSize, duration_cast<milliseconds>(timeLeft));
                 if (respInfo)
                 {
-                    fprintf(stderr,"Got response of size %lu \n",respInfo->size());
                     isResponseValid = packet->validate(respInfo.value(), mBuffer);
                 }
             }
