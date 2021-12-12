@@ -15,13 +15,12 @@ namespace traceroute::responseValidatorsTests::icmpRequest {
 
 struct IcmpEchoReplyBaseV4 : public ResponseValidatorTestV4
 {
-    const int           responseProtocol  = IPPROTO_ICMP;
-    const SocketAddress validResponseAddr = requestDestination;
-    const IcmpPacket    request           = IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination);
-    IcmpEchoReplyBaseV4()
-        : ResponseValidatorTestV4()
+    const int                    responseProtocol  = IPPROTO_ICMP;
+    const SocketAddress          validResponseAddr = requestDestination;
+    const unique_ptr<IcmpPacket> request           = IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination);
+    IcmpEchoReplyBaseV4() : ResponseValidatorTestV4()
     {
-        setValidator(std::make_unique<responseValidators::IcmpResponseValidator>(request));
+        setValidator(std::make_unique<responseValidators::IcmpResponseValidator>(*request));
     }
 };
 
@@ -49,7 +48,7 @@ struct EchoReplyV4CustomIhl : public IcmpEchoReplyBaseV4
 
 TEST_F(IcmpEchoReplyV4, SameId_Valid)
 {
-    response.icmpHeader.id = request.GetIcmpHeader().id;
+    response.icmpHeader.id = request->GetIcmpHeader().id;
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
@@ -59,7 +58,7 @@ TEST_F(IcmpEchoReplyV4, SameId_Valid)
 }
 TEST_F(IcmpEchoReplyV4, differentId_Invalid)
 {
-    response.icmpHeader.id = request.GetIcmpHeader().id - 1;
+    response.icmpHeader.id = request->GetIcmpHeader().id - 1;
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
@@ -70,7 +69,7 @@ TEST_F(IcmpEchoReplyV4, differentId_Invalid)
 
 TEST_F(EchoReplyV4CustomIhl, sameId_Valid)
 {
-    response.icmpHeader.id = request.GetIcmpHeader().id;
+    response.icmpHeader.id = request->GetIcmpHeader().id;
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
@@ -81,7 +80,7 @@ TEST_F(EchoReplyV4CustomIhl, sameId_Valid)
 
 TEST_F(EchoReplyV4CustomIhl, differentId_Invalid)
 {
-    response.icmpHeader.id = request.GetIcmpHeader().id - 1;
+    response.icmpHeader.id = request->GetIcmpHeader().id - 1;
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);

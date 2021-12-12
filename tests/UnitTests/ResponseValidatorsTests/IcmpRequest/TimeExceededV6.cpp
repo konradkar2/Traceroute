@@ -18,19 +18,19 @@ struct IcmpTimeExceededV6 : public ResponseValidatorTestV6
 {
     const SocketAddress transitHost{"6b3e:1b30:4:6043::1011"};
 
-    const IcmpPacket               request          = IcmpPacket::CreateIcmp6Packet(requestSource, requestDestination);
+    const unique_ptr<IcmpPacket>   request          = IcmpPacket::CreateIcmp6Packet(requestSource, requestDestination);
     const int                      responseProtocol = IPPROTO_ICMPV6;
     ResponseIcmpToIcmp<Ipv6Header> response;
     IcmpTimeExceededV6()
     {
-        setValidator(std::make_unique<responseValidators::IcmpResponseValidator>(request));
+        setValidator(std::make_unique<responseValidators::IcmpResponseValidator>(*request));
         response.icmpHeader.type                = ICMP6_TIME_EXCEEDED;
         response.triggerPacket.ipHeader.version = 6;
     }
 };
 TEST_F(IcmpTimeExceededV6, sameIdValid)
 {
-    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id;
+    response.triggerPacket.transportHeader.id = request->GetIcmpHeader().id;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{transitHost, responseProtocol, responseSize};
@@ -40,7 +40,7 @@ TEST_F(IcmpTimeExceededV6, sameIdValid)
 }
 TEST_F(IcmpTimeExceededV6, differentIdInvalid)
 {
-    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id - 1;
+    response.triggerPacket.transportHeader.id = request->GetIcmpHeader().id - 1;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{transitHost, responseProtocol, responseSize};

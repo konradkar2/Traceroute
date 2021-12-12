@@ -3,6 +3,7 @@
 #include "Packet.hpp"
 #include "Probe.hpp"
 #include "SystemClock.hpp"
+#include "Traceroute/ResponseInfo.hpp"
 #include <Traceroute/interface/IDataSender.hpp>
 #include <Traceroute/interface/IPacketFactory.hpp>
 #include <Traceroute/interface/ISystemClock.hpp>
@@ -12,6 +13,7 @@
 namespace traceroute {
 const constexpr int                       BufferSize             = 4096;
 const constexpr std::chrono::microseconds MinTimeWaitForResponse = 10us;
+
 class ProbeSender
 {
   public:
@@ -21,6 +23,7 @@ class ProbeSender
                                                    std::chrono::microseconds timeout);
 
   private:
+
     std::chrono::microseconds getTimePassedTillNow(std::chrono::steady_clock::time_point then) const;
     std::chrono::microseconds getTimeLeft(std::chrono::steady_clock::time_point then,
                                           std::chrono::microseconds             timeout) const;

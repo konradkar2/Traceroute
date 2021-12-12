@@ -18,19 +18,19 @@ struct IcmpEchoReplyV6 : ResponseValidatorTestV6
 {
     const SocketAddress invalidResponseAddress{"6b3e:1b30:4:6043::1011"};
 
-    const IcmpPacket               request          = IcmpPacket::CreateIcmp6Packet(requestSource, requestDestination);
+    const unique_ptr<IcmpPacket>   request          = IcmpPacket::CreateIcmp6Packet(requestSource, requestDestination);
     const int                      responseProtocol = IPPROTO_ICMPV6;
     ResponseIcmpToIcmp<Ipv6Header> response;
     IcmpEchoReplyV6() : ResponseValidatorTestV6()
     {
-        setValidator(std::make_unique<responseValidators::IcmpResponseValidator>(request));
+        setValidator(std::make_unique<responseValidators::IcmpResponseValidator>(*request));
         response.icmpHeader.type                = ICMP6_ECHO_REPLY;
         response.triggerPacket.ipHeader.version = 6;
     }
 };
 TEST_F(IcmpEchoReplyV6, sameIdValid)
 {
-    response.icmpHeader.id = request.GetIcmpHeader().id;
+    response.icmpHeader.id = request->GetIcmpHeader().id;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{requestDestination, responseProtocol, responseSize};
@@ -41,7 +41,7 @@ TEST_F(IcmpEchoReplyV6, sameIdValid)
 
 TEST_F(IcmpEchoReplyV6, InvalidAddressSameIdInvalid)
 {
-    response.icmpHeader.id = request.GetIcmpHeader().id;
+    response.icmpHeader.id = request->GetIcmpHeader().id;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{invalidResponseAddress, responseProtocol, responseSize};
@@ -52,7 +52,7 @@ TEST_F(IcmpEchoReplyV6, InvalidAddressSameIdInvalid)
 
 TEST_F(IcmpEchoReplyV6, differentIdInvalid)
 {
-    response.icmpHeader.id   = request.GetIcmpHeader().id - 1;
+    response.icmpHeader.id   = request->GetIcmpHeader().id - 1;
     response.icmpHeader.type = ICMP6_ECHO_REPLY;
 
     auto [resp, responseSize] = responseV6ToPtr(&response);

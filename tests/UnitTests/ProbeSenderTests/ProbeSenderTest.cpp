@@ -68,7 +68,8 @@ class ProbeSenderTest : public Test
         ON_CALL(packetFactoryMock, createPacketProxy()).WillByDefault(Invoke([this]() {
             return createPacketMockProxy();
         }));
-        ON_CALL(dataSenderMock, receiveFrom(_, _, _)).WillByDefault(waitAndReturn(timeout, nullopt));
+        ON_CALL(dataSenderMock, tryReceiving(_, _, _)).WillByDefault(waitAndReturn(timeout, nullopt));
+        ON_CALL(dataSenderMock, trySending(_, _, _)).WillByDefault(Return(true));
     }
     PacketMockProxy *createPacketMockProxy()
     {
@@ -83,22 +84,14 @@ class ProbeSenderTest : public Test
     InSequence s;
 };
 
-TEST_F(ProbeSenderTest, setsTtlOnSender)
-{
-    ttlStop = 2;
-
-    EXPECT_CALL(dataSenderMock, setTtlOnSendingSocket(1)).Times(1);
-    EXPECT_CALL(dataSenderMock, setTtlOnSendingSocket(2)).Times(1);
-
-    BeginProbing();
-}
-
 TEST_F(ProbeSenderTest, onTimeout_waitedFor_isEqualTo_timeout)
 {
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
 
     auto probes = BeginProbing();
 
+    ASSERT_THAT(probes,SizeIs(1));
+    ASSERT_THAT(probes.front().getResults(),SizeIs(1));
     ASSERT_THAT(probes.front().getResults().front().success, Eq(false));
     EXPECT_THAT(probes.front().getResults().front().waitedFor, Eq(timeout));
 }
@@ -114,21 +107,25 @@ TEST_F(ProbeSenderTest, ttlRangeResultsInProbeCount)
     EXPECT_THAT(probes.size(), Eq(expectedProbeCount));
 }
 
-TEST_F(ProbeSenderTest, forEachRetryTtlIsNotChangedButpacketfactoryIsInvoked)
+TEST_F(ProbeSenderTest, forEachRetryTtlIsNotChangedButPacketfactoryIsInvoked)
 {
     ttlStart = 1;
     ttlStop  = 1;
     retries  = 3;
 
-    EXPECT_CALL(dataSenderMock, setTtlOnSendingSocket(1)).Times(1);
-    EXPECT_CALL(packetFactoryMock, createPacketProxy()).Times(3);
+    EXPECT_CALL(packetFactoryMock, createPacketProxy()).Times(1);
+    EXPECT_CALL(dataSenderMock, trySending(_, 1, _)).Times(1);
+    EXPECT_CALL(packetFactoryMock, createPacketProxy()).Times(1);
+    EXPECT_CALL(dataSenderMock, trySending(_, 1, _)).Times(1);
+    EXPECT_CALL(packetFactoryMock, createPacketProxy()).Times(1);
+    EXPECT_CALL(dataSenderMock, trySending(_, 1, _)).Times(1);
 
     auto probes = BeginProbing();
 }
 
 TEST_F(ProbeSenderTest, responseAddressNotAssignedOnTimeout)
 {
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
 
     auto probes = BeginProbing();
 
@@ -138,7 +135,7 @@ TEST_F(ProbeSenderTest, responseAddressNotAssignedOnTimeout)
 
 TEST_F(ProbeSenderTest, responseAddressAssigned)
 {
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
     EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
 
@@ -154,8 +151,8 @@ TEST_F(ProbeSenderTest, onTimeLeftSmallerThan_MinTimeWaitForResponse_receiveFrom
     // 5us are left for polling, which is below MinTimeWaitForResponse
     auto timeToPass = timeout - 5us;
 
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeToPass, nullopt));
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).Times(0);
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).WillOnce(waitAndReturn(timeToPass, nullopt));
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).Times(0);
 
     BeginProbing();
 }
@@ -163,7 +160,7 @@ TEST_F(ProbeSenderTest, onTimeLeftSmallerThan_MinTimeWaitForResponse_receiveFrom
 TEST_F(ProbeSenderTest, responseIsAssignedToResultWithValidWaitedFor)
 {
     auto returnAfter = 50ms;
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _))
         .WillOnce(waitAndReturn(returnAfter,
                                 ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
     EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
@@ -178,9 +175,9 @@ TEST_F(ProbeSenderTest, waitedForIsSumOfPreviousInvalidResponses)
 {
     auto t1 = 10ms, t2 = 30ms, t3 = 40ms;
 
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(t1, nullopt));
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(t2, nullopt));
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).WillOnce(waitAndReturn(t1, nullopt));
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).WillOnce(waitAndReturn(t2, nullopt));
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _))
         .WillOnce(
             waitAndReturn(t3, ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
     EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
@@ -198,14 +195,14 @@ TEST_F(ProbeSenderTest, timeoutBetweenTwoSuccessfulProbes)
     const SocketAddress r1{"1.2.3.4"};
     const SocketAddress r3{"2.3.4.5"};
 
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{r1}, ArbitraryProtocol, ArbitraryResponseSize}));
     EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
 
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
     EXPECT_CALL(packetMock, validate(_, _)).Times(0);
 
-    EXPECT_CALL(dataSenderMock, receiveFrom(_, _, _))
+    EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{r3}, ArbitraryProtocol, ArbitraryResponseSize}));
     EXPECT_CALL(packetMock, validate(_, _)).WillOnce(Return(true));
 

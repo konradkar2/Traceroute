@@ -9,7 +9,7 @@ namespace traceroute::packet {
 
 std::string TcpPacket::serialize() const
 {
-    return utils::serialize<TcpHeader>(mTcpHeader);
+    return utils::serialize(mTcpHeader);
 }
 
 const TcpHeader &TcpPacket::getTcpHeader() const
@@ -18,7 +18,7 @@ const TcpHeader &TcpPacket::getTcpHeader() const
 }
 
 TcpPacket::TcpPacket(const SocketAddress &source, const SocketAddress &destination, int dport)
-    : Packet(source, destination), mResponseValidator(*this)
+    : Packet(source, destination)
 {
     mTcpHeader.source   = htons(50000 + rand() % 15001);
     mTcpHeader.dest     = htons(dport);
@@ -37,7 +37,8 @@ TcpPacket::TcpPacket(const SocketAddress &source, const SocketAddress &destinati
 
 bool TcpPacket::validate(const ResponseInfo &responseInfo, const char *response)
 {
-    return mResponseValidator.validate(responseInfo, response);
+    responseValidators::TcpResponseValidator validator(*this);
+    return validator.validate(responseInfo, response);
 }
 
 } // namespace traceroute::packet

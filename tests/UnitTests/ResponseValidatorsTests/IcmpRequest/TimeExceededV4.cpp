@@ -15,16 +15,16 @@ using namespace traceroute::packet;
 namespace traceroute {
 struct IcmpTimeExceededBaseV4 : public ResponseValidatorTestV4
 {
-    const int           responseProtocol = IPPROTO_ICMP;
-    const SocketAddress validResponseAddr;
-    const IcmpPacket    request;
+    const int                    responseProtocol = IPPROTO_ICMP;
+    const SocketAddress          validResponseAddr;
+    const unique_ptr<IcmpPacket> request;
 
-    IcmpTimeExceededBaseV4() :
-          validResponseAddr(requestDestination),
+    IcmpTimeExceededBaseV4()
+        : validResponseAddr(requestDestination),
           request(IcmpPacket::CreateIcmp4Packet(requestSource, requestDestination))
 
     {
-        setValidator(std::make_unique<responseValidators::IcmpResponseValidator>(request));
+        setValidator(std::make_unique<responseValidators::IcmpResponseValidator>(*request));
     }
 };
 
@@ -54,7 +54,7 @@ struct IcmpTimeExceededV4CustomIhl : public IcmpTimeExceededBaseV4
 
 TEST_F(IcmpTimeExceededV4, sameId_Valid)
 {
-    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id;
+    response.triggerPacket.transportHeader.id = request->GetIcmpHeader().id;
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
@@ -64,7 +64,7 @@ TEST_F(IcmpTimeExceededV4, sameId_Valid)
 }
 TEST_F(IcmpTimeExceededV4, differentId_Invalid)
 {
-    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id - 1;
+    response.triggerPacket.transportHeader.id = request->GetIcmpHeader().id - 1;
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
@@ -75,7 +75,7 @@ TEST_F(IcmpTimeExceededV4, differentId_Invalid)
 
 TEST_F(IcmpTimeExceededV4CustomIhl, sameId_Valid)
 {
-    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id;
+    response.triggerPacket.transportHeader.id = request->GetIcmpHeader().id;
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
@@ -85,7 +85,7 @@ TEST_F(IcmpTimeExceededV4CustomIhl, sameId_Valid)
 }
 TEST_F(IcmpTimeExceededV4CustomIhl, differentId_Invalid)
 {
-    response.triggerPacket.transportHeader.id = request.GetIcmpHeader().id - 1;
+    response.triggerPacket.transportHeader.id = request->GetIcmpHeader().id - 1;
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);

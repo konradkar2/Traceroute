@@ -2,7 +2,6 @@
 
 #include <Traceroute/HeaderTypes.hpp>
 #include <Traceroute/Packet.hpp>
-#include <Traceroute/ResponseValidators/IcmpResponseValidator.hpp>
 #include <Traceroute/SocketAddress.hpp>
 #include <memory>
 
@@ -20,7 +19,6 @@ class IcmpPacket : public Packet
 
   private:
     IcmpPacket(const SocketAddress &source, const SocketAddress &destination);
-    responseValidators::IcmpResponseValidator mResponseValidator;
     IcmpHeader                                mIcmpHeader;
 };
 } // namespace traceroute::packet

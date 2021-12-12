@@ -38,14 +38,14 @@ DataSender::DataSender(std::vector<SocketExt> socketsExt, int family) : mSending
     }
 }
 
-std::optional<ResponseInfo> DataSender::receiveFrom(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout)
+std::optional<ResponseInfo> DataSender::tryReceiving(char *buffer, size_t bufferSize, std::chrono::milliseconds timeout)
 {
     auto fd = getAnySocketReadyToReceive(timeout);
     if (fd)
     {
         sockaddr_storage sockaddrStorage;
-        socklen_t len = sizeof(sockaddrStorage);
-        ssize_t size = recvfrom(fd.value(), buffer, bufferSize, 0, (struct sockaddr *)&sockaddrStorage, &len);
+        socklen_t        len = sizeof(sockaddrStorage);
+        ssize_t size         = ::recvfrom(fd.value(), buffer, bufferSize, 0, (struct sockaddr *)&sockaddrStorage, &len);
         if (size < 0)
         {
             throw std::runtime_error("Error occured on recvfrom: " + std::string(strerror(errno)));
@@ -55,26 +55,32 @@ std::optional<ResponseInfo> DataSender::receiveFrom(char *buffer, size_t bufferS
     return std::nullopt;
 }
 
-int DataSender::sendPacket(const Packet &packet)
+bool DataSender::trySending(const std::unique_ptr<Packet> &packet, int ttl, std::chrono::milliseconds timeout)
 {
-    const auto &address = packet.getDestinationAddress();
+    setTtl(ttl);
+    const auto &address = packet->getDestinationAddress();
     if (mFamily != address.family())
     {
         throw std::invalid_argument("Provided address's family doesn't match family of source address");
     }
-    auto serializedPacket = packet.serialize();
-    int result = sendto(mSendingSocket, serializedPacket.data(), serializedPacket.size(), 0, address.sockaddrP(),
-                        address.size());
-    if (result < 0)
+    const std::string serializedPacket = packet->serialize();
+
+    if (utils::Poll(mSendingSocket, POLLOUT, timeout))
     {
-        throw std::runtime_error("Error occured while sending data " + std::string(strerror(errno)));
+        ssize_t result = ::sendto(mSendingSocket, serializedPacket.data(), serializedPacket.size(), 0,
+                                  address.sockaddrP(), address.size());
+        if (result < 0)
+        {
+            throw std::runtime_error("Error occured while sending data " + std::string(strerror(errno)));
+        }
+        return static_cast<bool>(result);
     }
-    return result;
+    return false;
 }
 
-void DataSender::setTtlOnSendingSocket(int ttl)
+void DataSender::setTtl(int ttl)
 {
-    int level = (mFamily == AF_INET) ? (int)IPPROTO_IP : (int)IPPROTO_IPV6;
+    int level  = (mFamily == AF_INET) ? (int)IPPROTO_IP : (int)IPPROTO_IPV6;
     int option = (mFamily == AF_INET) ? (int)IP_TTL : (int)IPV6_UNICAST_HOPS;
     if (setsockopt(mSendingSocket, level, option, &ttl, sizeof(ttl)) < 0)
     {
@@ -84,14 +90,7 @@ void DataSender::setTtlOnSendingSocket(int ttl)
 
 std::optional<int> DataSender::getAnySocketReadyToReceive(std::chrono::milliseconds timeout)
 {
-    std::vector<pollfd> pollfds;
-    std::transform(mReceivingSockets.cbegin(), mReceivingSockets.cend(), back_inserter(pollfds), [](int sfd) {
-        pollfd pollfd;
-        pollfd.events = POLLIN;
-        pollfd.fd = sfd;
-        return pollfd;
-    });
-    return utils::Poll(pollfds, timeout);
+    return utils::Poll(mReceivingSockets, POLLIN, timeout);
 }
 
 } // namespace traceroute

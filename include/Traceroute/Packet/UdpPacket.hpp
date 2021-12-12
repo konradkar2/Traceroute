@@ -1,7 +1,6 @@
 #pragma once
 #include "Traceroute/HeaderTypes.hpp"
 #include "Traceroute/Packet.hpp"
-#include "Traceroute/ResponseValidators/UdpResponseValidator.hpp"
 #include "Traceroute/SocketAddress.hpp"
 
 namespace traceroute::packet {
@@ -16,7 +15,6 @@ class UdpPacket : public Packet
 
   private:
     UdpHeader                                mUdpHeader;
-    responseValidators::UdpResponseValidator mResponseValidator;
 };
 
 } // namespace traceroute::packet

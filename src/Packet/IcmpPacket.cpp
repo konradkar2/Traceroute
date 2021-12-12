@@ -18,8 +18,7 @@ const IcmpHeader &IcmpPacket::GetIcmpHeader() const
     return mIcmpHeader;
 }
 
-IcmpPacket::IcmpPacket(const SocketAddress &source, const SocketAddress &destination)
-    : Packet(source, destination), mResponseValidator(*this)
+IcmpPacket::IcmpPacket(const SocketAddress &source, const SocketAddress &destination) : Packet(source, destination)
 {
 }
 
@@ -48,7 +47,8 @@ std::unique_ptr<IcmpPacket> IcmpPacket::CreateIcmp6Packet(const SocketAddress &s
 
 bool IcmpPacket::validate(const ResponseInfo &responseInfo, const char *response)
 {
-    return mResponseValidator.validate(responseInfo, response);
+    responseValidators::IcmpResponseValidator validator(*this);
+    return validator.validate(responseInfo, response);
 }
 
 } // namespace traceroute::packet

@@ -6,7 +6,8 @@
 
 namespace traceroute::utils {
 
-///poll wrapper, returns a fd within given timeout
-std::optional<int> Poll(std::vector<pollfd> pollfs, std::chrono::milliseconds timeout);
+/// poll wrapper, returns a fd within given timeout
+std::optional<int> Poll(const std::vector<int> &fds, short events, std::chrono::milliseconds timeout);
+bool               Poll(int fd, short events, std::chrono::milliseconds timeout);
 
 } // namespace traceroute::utils
