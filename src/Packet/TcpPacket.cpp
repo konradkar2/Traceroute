@@ -35,10 +35,10 @@ TcpPacket::TcpPacket(const SocketAddress &source, const SocketAddress &destinati
     }
 }
 
-bool TcpPacket::validate(const ResponseInfo &responseInfo, const char *response)
+bool TcpPacket::isValid(const ResponseInfo &responseInfo, const char *response)
 {
     responseValidators::TcpResponseValidator validator(*this);
-    return validator.validate(responseInfo, response);
+    return validator.isValid(responseInfo, response);
 }
 
 } // namespace traceroute::packet

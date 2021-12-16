@@ -19,7 +19,7 @@ class ProbeSender
   public:
     ProbeSender(IPacketFactory &packetFactory, IDataSender &dataSender,
                 std::shared_ptr<ISystemClock> clock = std::make_shared<SystemClock>());
-    std::vector<ProbeResultContainer> beginProbing(int ttlBegin, int ttlEnd, int retries,
+    std::vector<TracerouteResult> beginProbing(int ttlBegin, int ttlEnd, int retries,
                                                    std::chrono::microseconds timeout);
 
   private:

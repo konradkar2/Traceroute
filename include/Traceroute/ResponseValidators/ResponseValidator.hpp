@@ -9,7 +9,7 @@ namespace traceroute::responseValidators
 class ResponseValidator : public IValidateResponse
 {
   public:
-    bool validate(const ResponseInfo & responseInfo, const char * response) override;
+    bool isValid(const ResponseInfo & responseInfo, const char * response) override;
 
   protected:
     virtual bool validateFields(const ResponseInfo & responseInfo, const char * response) = 0;

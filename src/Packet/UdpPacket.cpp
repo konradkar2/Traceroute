@@ -26,10 +26,10 @@ UdpPacket::UdpPacket(const SocketAddress &source, const SocketAddress &destinati
         mUdpHeader.check = utils::ChecksumCalculator::computeUdpHeaderChecksum(mUdpHeader, source, destination);
     }
 }
-bool UdpPacket::validate(const ResponseInfo &responseInfo, const char *response)
+bool UdpPacket::isValid(const ResponseInfo &responseInfo, const char *response)
 {
     responseValidators::UdpResponseValidator validator(*this);
-    return validator.validate(responseInfo, response);
+    return validator.isValid(responseInfo, response);
 }
 
 } // namespace traceroute::packet

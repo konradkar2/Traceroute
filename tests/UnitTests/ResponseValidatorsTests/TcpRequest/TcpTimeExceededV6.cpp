@@ -33,7 +33,7 @@ TEST_F(TcpTimeExceededV6, valid)
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{transitRouter, responseProtocol, responseSize};
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -43,7 +43,7 @@ TEST_F(TcpTimeExceededV6, invalidSeq)
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{transitRouter, responseProtocol, responseSize};
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

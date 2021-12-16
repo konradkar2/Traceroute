@@ -55,7 +55,7 @@ TEST_F(UdpDestUnreachV4, valid)
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -66,7 +66,7 @@ TEST_F(UdpDestUnreachV4, invalidClient)
 
     ResponseInfo respInfo{invalidResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
@@ -77,7 +77,7 @@ TEST_F(UdpDestUnreachV4CustomIhl, valid)
 
    ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -88,7 +88,7 @@ TEST_F(UdpDestUnreachV4CustomIhl, invalidClient)
 
     ResponseInfo respInfo{invalidResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

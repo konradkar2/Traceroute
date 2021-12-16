@@ -1,37 +1,30 @@
 #pragma once
+
 #include "SocketAddress.hpp"
 #include <chrono>
-#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 
-namespace traceroute
+namespace traceroute {
+
+struct ProbeResult
 {
-
-class ProbeResultContainer
-{
-  public:
-    struct ProbeResult
-    {
-        bool success;
-        std::chrono::microseconds waitedFor;
-    };
-    explicit ProbeResultContainer(int ttl);
-
-    void addFailedProbe(std::chrono::microseconds waitedFor);
-    void addSuccessfulProbe(std::chrono::microseconds waitedFor);
-
-    void setResponseAddr(const SocketAddress &responseSender);
-    std::optional<SocketAddress> GetResponseAddr() const;
-
-    std::string toString() const;
-    const std::vector<ProbeResult> &getResults() const;
-
-  private:
-    std::vector<ProbeResult> mProbeResults;
-    std::optional<SocketAddress> mResponseSender;
-    int mTtl;
+    const bool                         success;
+    const std::chrono::microseconds    waitedFor;
+    const std::optional<SocketAddress> responseSender;
 };
+
+struct TracerouteResult
+{
+    const int                      ttl;
+    const std::vector<ProbeResult> probeResults;
+};
+
+ProbeResult failedProbe(std::chrono::microseconds waitedFor);
+ProbeResult successProbe(std::chrono::microseconds waitedFor, const SocketAddress &responseSender);
+
+std::string toString(const TracerouteResult &probe);
+std::string toString(const std::vector<TracerouteResult> &probes);
 
 } // namespace traceroute

@@ -45,10 +45,10 @@ std::unique_ptr<IcmpPacket> IcmpPacket::CreateIcmp6Packet(const SocketAddress &s
     return packet;
 }
 
-bool IcmpPacket::validate(const ResponseInfo &responseInfo, const char *response)
+bool IcmpPacket::isValid(const ResponseInfo &responseInfo, const char *response)
 {
     responseValidators::IcmpResponseValidator validator(*this);
-    return validator.validate(responseInfo, response);
+    return validator.isValid(responseInfo, response);
 }
 
 } // namespace traceroute::packet

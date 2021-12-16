@@ -12,7 +12,7 @@ class TcpPacket : public Packet
     const TcpHeader &getTcpHeader() const;
 
     std::string serialize() const override;
-    bool        validate(const ResponseInfo &responseInfo, const char *response) override;
+    bool        isValid(const ResponseInfo &responseInfo, const char *response) override;
 
   private:
     TcpHeader                                mTcpHeader;

@@ -5,7 +5,7 @@ namespace traceroute {
 class IValidateResponse
 {
   public:
-    virtual bool validate(const ResponseInfo &responseInfo, const char *response) = 0;
-    virtual ~IValidateResponse()                                                  = default;
+    virtual bool isValid(const ResponseInfo &responseInfo, const char *response) = 0;
+    virtual ~IValidateResponse()                                                 = default;
 };
 } // namespace traceroute

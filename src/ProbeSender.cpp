@@ -1,3 +1,4 @@
+#include "Traceroute/Probe.hpp"
 #include "Traceroute/ResponseInfo.hpp"
 #include <Traceroute/ProbeSender.hpp>
 #include <chrono>
@@ -12,23 +13,18 @@ using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::steady_clock;
 
-namespace {
-void handleValidResponse(const ResponseInfo &responseInfo, microseconds receivedAfter, ProbeResultContainer &output);
-bool wasDestinationReached(const std::unique_ptr<Packet> &request, const ResponseInfo &responseInfo);
-} // namespace
-
 ProbeSender::ProbeSender(IPacketFactory &packetFactory, IDataSender &dataSender, std::shared_ptr<ISystemClock> clock)
     : mPacketFactory{packetFactory}, mDataSender{dataSender}, mSystemClock{clock}
 {
 }
 
-std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int ttlEnd, int retries, microseconds timeout)
+std::vector<TracerouteResult> ProbeSender::beginProbing(int ttlBegin, int ttlEnd, int retries, microseconds timeout)
 {
-    bool                              destinationReached = false;
-    std::vector<ProbeResultContainer> probesContainer;
+    bool               destinationReached = false;
+    std::vector<TracerouteResult> probes;
     for (int ttl = ttlBegin; ttl <= ttlEnd; ++ttl)
     {
-        ProbeResultContainer probes(ttl);
+        std::vector<ProbeResult> probeResults;
         for (int i = 0; i < retries; i++)
         {
             auto packet = mPacketFactory.createPacket();
@@ -50,13 +46,12 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
                 respInfo = mDataSender.tryReceiving(mBuffer, BufferSize, duration_cast<milliseconds>(timeLeft));
                 if (respInfo)
                 {
-                    isResponseValid = packet->validate(respInfo.value(), mBuffer);
+                    isResponseValid = packet->isValid(respInfo.value(), mBuffer);
                 }
             }
             if (isResponseValid)
             {
-                probes.setResponseAddr(respInfo->client());
-                probes.addSuccessfulProbe(getTimePassedTillNow(sentAt));
+                probeResults.push_back(successProbe(getTimePassedTillNow(sentAt), respInfo->client()));
                 if (respInfo->client() == packet->getDestinationAddress())
                 {
                     destinationReached = true;
@@ -64,17 +59,16 @@ std::vector<ProbeResultContainer> ProbeSender::beginProbing(int ttlBegin, int tt
             }
             else
             {
-                probes.addFailedProbe(timeout);
+                probeResults.push_back(failedProbe(timeout));
             }
         }
-
-        probesContainer.push_back(std::move(probes));
+        probes.push_back(TracerouteResult{ttl,std::move(probeResults)});
         if (destinationReached)
         {
             break;
         }
     }
-    return probesContainer;
+    return probes;
 }
 
 microseconds ProbeSender::getTimePassedTillNow(steady_clock::time_point then) const
@@ -88,18 +82,5 @@ microseconds ProbeSender::getTimeLeft(steady_clock::time_point then, microsecond
         return 0us;
     return timeout - timePassed;
 }
-
-namespace {
-void handleValidResponse(const ResponseInfo &responseInfo, microseconds receivedAfter, ProbeResultContainer &output)
-{
-    output.setResponseAddr(responseInfo.client());
-    output.addSuccessfulProbe(receivedAfter);
-}
-bool wasDestinationReached(const std::unique_ptr<Packet> &request, const ResponseInfo &responseInfo)
-{
-    return request->getDestinationAddress() == responseInfo.client();
-}
-
-} // namespace
 
 } // namespace traceroute

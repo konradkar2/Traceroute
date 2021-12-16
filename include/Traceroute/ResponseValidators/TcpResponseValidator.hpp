@@ -17,7 +17,7 @@ class TcpResponseValidator : public IValidateResponse
 {
   public:
     TcpResponseValidator(const packet::TcpPacket &tcpPacket);
-    bool validate(const ResponseInfo &responseInfo, const char *response) override;
+    bool isValid(const ResponseInfo &responseInfo, const char *response) override;
 
   private:
     std::unique_ptr<IValidateResponse> mTcpToTcpValidator;

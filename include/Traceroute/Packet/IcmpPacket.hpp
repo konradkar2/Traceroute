@@ -15,7 +15,7 @@ class IcmpPacket : public Packet
     const IcmpHeader                  &GetIcmpHeader() const;
 
     std::string serialize() const override;
-    bool        validate(const ResponseInfo &responseInfo, const char *response) override;
+    bool        isValid(const ResponseInfo &responseInfo, const char *response) override;
 
   private:
     IcmpPacket(const SocketAddress &source, const SocketAddress &destination);

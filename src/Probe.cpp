@@ -10,60 +10,36 @@ void removeTrailingZeros(std::string &str)
 }
 } // namespace
 
-ProbeResultContainer::ProbeResultContainer(int ttl)
+
+ProbeResult failedProbe(std::chrono::microseconds waitedFor)
 {
-    mTtl = ttl;
+    return ProbeResult{false,waitedFor,std::nullopt};
 }
 
-void ProbeResultContainer::addFailedProbe(std::chrono::microseconds waitedFor)
+ProbeResult successProbe(std::chrono::microseconds waitedFor,const SocketAddress &responseSender )
 {
-    ProbeResult p;
-    p.success   = false;
-    p.waitedFor = waitedFor;
-    mProbeResults.push_back(p);
+    return ProbeResult{true,waitedFor, responseSender};
 }
 
-void ProbeResultContainer::addSuccessfulProbe(std::chrono::microseconds waitedFor)
-{
-    ProbeResult p;
-    p.success   = true;
-    p.waitedFor = waitedFor;
-    mProbeResults.push_back(p);
-}
-void ProbeResultContainer::setResponseAddr(const SocketAddress &responseSender)
-{
-    mResponseSender = responseSender;
-}
-
-std::optional<SocketAddress> ProbeResultContainer::GetResponseAddr() const
-{
-    return mResponseSender;
-}
-
-const std::vector<ProbeResultContainer::ProbeResult> &ProbeResultContainer::getResults() const
-{
-    return mProbeResults;
-}
-
-std::string ProbeResultContainer::toString() const
+std::string toString(const TracerouteResult & tracerouteResult)
 {
     std::stringstream result;
-    std::string       client = mResponseSender.has_value() ? mResponseSender->toString() : "";
-    result << std::to_string(mTtl) << "  " << client;
-    for (size_t i = 0; i < mProbeResults.size(); i++)
+    result << std::to_string(tracerouteResult.ttl) << "  ";
+    for(const ProbeResult & pr : tracerouteResult.probeResults)
     {
-        ProbeResult pr = mProbeResults[i];
         if (pr.success)
         {
-            std::string time = std::to_string(pr.waitedFor.count() / 1000.0);
-            removeTrailingZeros(time);
-            result << "  " + time << " "
+            result << (pr.responseSender.has_value() ? pr.responseSender->toString() : "");
+            std::string waitedForStr = std::to_string(pr.waitedFor.count() / 1000.0);
+            removeTrailingZeros(waitedForStr);
+            result << "  " + waitedForStr << " "
                    << "ms";
         }
         else
         {
             result << " *";
         }
+        result << "\n";
     }
     return result.str();
 }

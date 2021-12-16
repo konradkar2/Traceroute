@@ -31,7 +31,7 @@ TEST_F(UdpDestUnreachV6, valid)
 {
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{validResponseAddr, responseProtocol, responseSize};
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -42,7 +42,7 @@ TEST_F(UdpDestUnreachV6, invalidClient)
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{invalidResponseAddr, responseProtocol, responseSize};
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

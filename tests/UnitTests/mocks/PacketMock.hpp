@@ -16,7 +16,7 @@ class PacketMock : public Packet
     {
     }
     MOCK_METHOD(std::string, serialize, (), (const, override));
-    MOCK_METHOD(bool, validate, (const ResponseInfo &, const char *), (override));
+    MOCK_METHOD(bool, isValid, (const ResponseInfo &, const char *), (override));
     virtual ~PacketMock() = default;
 };
 
@@ -34,9 +34,9 @@ class PacketMockProxy : public Packet
     {
         return mMock->serialize();
     }
-    bool validate(const ResponseInfo &responseInfo, const char *response) override
+    bool isValid(const ResponseInfo &responseInfo, const char *response) override
     {
-        return mMock->validate(responseInfo, response);
+        return mMock->isValid(responseInfo, response);
     }
 
   private:

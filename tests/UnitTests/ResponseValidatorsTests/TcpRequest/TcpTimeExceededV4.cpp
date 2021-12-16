@@ -55,7 +55,7 @@ TEST_F(TcpTimeExceededV4, sameSeq_Valid)
 
     ResponseInfo respInfo{transitRouter, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -65,7 +65,7 @@ TEST_F(TcpTimeExceededV4, differentSeq_Invalid)
 
     ResponseInfo respInfo{transitRouter, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
@@ -76,7 +76,7 @@ TEST_F(TcpTimeExceededV4CustomIhl, sameId_Valid)
 
     ResponseInfo respInfo{transitRouter, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -86,7 +86,7 @@ TEST_F(TcpTimeExceededV4CustomIhl, differentId_Invalid)
 
     ResponseInfo respInfo{transitRouter, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

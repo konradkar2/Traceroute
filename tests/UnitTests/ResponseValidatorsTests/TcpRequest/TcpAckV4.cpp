@@ -62,7 +62,7 @@ TEST_F(TcpAckV4, sameAckSeq_Valid)
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -71,7 +71,7 @@ TEST_F(TcpAckV4, differenAckSeq_Invalid)
     response.tcpHeader.ack_seq = 0;
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
@@ -83,7 +83,7 @@ TEST_F(TcpAckV4, differentClient_Invalid)
 
     ResponseInfo respInfo{invalidResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
@@ -94,7 +94,7 @@ TEST_F(TcpAckV4CustomIhl, sameAckSeq_Valid)
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -104,7 +104,7 @@ TEST_F(TcpAckV4CustomIhl, differenAcktSeq_Invalid)
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

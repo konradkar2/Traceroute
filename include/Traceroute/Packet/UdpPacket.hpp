@@ -11,10 +11,10 @@ class UdpPacket : public Packet
     const UdpHeader &GetUdpHeader() const;
 
     std::string serialize() const override;
-    bool        validate(const ResponseInfo &responseInfo, const char *response) override;
+    bool        isValid(const ResponseInfo &responseInfo, const char *response) override;
 
   private:
-    UdpHeader                                mUdpHeader;
+    UdpHeader mUdpHeader;
 };
 
 } // namespace traceroute::packet

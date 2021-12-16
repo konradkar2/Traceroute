@@ -16,16 +16,16 @@ TcpResponseValidator::TcpResponseValidator(const packet::TcpPacket &tcpPacket)
 
 {
 }
-bool TcpResponseValidator::validate(const ResponseInfo &responseInfo, const char *response)
+bool TcpResponseValidator::isValid(const ResponseInfo &responseInfo, const char *response)
 {
     auto protocol = responseInfo.protocol();
     if (protocol == IPPROTO_ICMP or protocol == IPPROTO_ICMPV6)
     {
-        return mIcmpToTcpValidator->validate(responseInfo, response);
+        return mIcmpToTcpValidator->isValid(responseInfo, response);
     }
     else if (protocol == IPPROTO_TCP)
     {
-        return mTcpToTcpValidator->validate(responseInfo, response);
+        return mTcpToTcpValidator->isValid(responseInfo, response);
     }
     return false;
 }

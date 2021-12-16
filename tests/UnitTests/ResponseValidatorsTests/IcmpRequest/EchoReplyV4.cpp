@@ -52,7 +52,7 @@ TEST_F(IcmpEchoReplyV4, SameId_Valid)
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -62,7 +62,7 @@ TEST_F(IcmpEchoReplyV4, differentId_Invalid)
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
@@ -73,7 +73,7 @@ TEST_F(EchoReplyV4CustomIhl, sameId_Valid)
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -84,7 +84,7 @@ TEST_F(EchoReplyV4CustomIhl, differentId_Invalid)
 
     ResponseInfo respInfo{validResponseAddr, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

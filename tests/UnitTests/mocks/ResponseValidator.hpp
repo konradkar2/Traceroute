@@ -7,6 +7,6 @@ namespace traceroute {
 class ResponseValidatorMock : public IValidateResponse
 {
   public:
-    MOCK_METHOD(bool, validate, (const ResponseInfo &, const char *), (override));
+    MOCK_METHOD(bool, isValid, (const ResponseInfo &, const char *), (override));
 };
 } // namespace traceroute

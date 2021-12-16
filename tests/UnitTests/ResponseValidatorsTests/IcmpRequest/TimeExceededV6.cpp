@@ -34,7 +34,7 @@ TEST_F(IcmpTimeExceededV6, sameIdValid)
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{transitHost, responseProtocol, responseSize};
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -44,7 +44,7 @@ TEST_F(IcmpTimeExceededV6, differentIdInvalid)
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{transitHost, responseProtocol, responseSize};
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }

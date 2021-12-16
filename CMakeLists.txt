@@ -14,6 +14,7 @@ set(Sources
     src/ResponseValidators/TcpToTcpResponseValidator.cpp
     src/ResponseValidators/IcmpToTcpResponseValidator.cpp
     src/ResponseValidators/UdpResponseValidator.cpp
+    src/ResolveSourceAddress.cpp
     src/DataSender.cpp
     src/Packet.cpp
     src/Packet/IcmpPacket.cpp

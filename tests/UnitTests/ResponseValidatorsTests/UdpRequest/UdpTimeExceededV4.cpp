@@ -52,7 +52,7 @@ TEST_F(UdpTimeExceededV4, valid)
 {
     ResponseInfo respInfo{transitRouter, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -61,7 +61,7 @@ TEST_F(UdpTimeExceededV4CustomIhl, valid)
 {
     ResponseInfo respInfo{transitRouter, responseProtocol, sizeof(response)};
     auto         resp    = reinterpret_cast<const char *>(&response);
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }

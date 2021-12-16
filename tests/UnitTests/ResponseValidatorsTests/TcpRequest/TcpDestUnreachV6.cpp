@@ -33,7 +33,7 @@ TEST_F(TcpDestUnreachV6, valid)
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
    ResponseInfo respInfo{validResponseAddr, responseProtocol, responseSize};
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_TRUE(isValid);
 }
@@ -45,7 +45,7 @@ TEST_F(TcpDestUnreachV6, invalidClient)
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{invalidResponseAddr, responseProtocol, responseSize};
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
@@ -56,7 +56,7 @@ TEST_F(TcpDestUnreachV6, invalidSeq)
 
     auto [resp, responseSize] = responseV6ToPtr(&response);
     ResponseInfo respInfo{validResponseAddr, responseProtocol, responseSize};
-    bool         isValid = validator->validate(respInfo, resp);
+    bool         isValid = validator->isValid(respInfo, resp);
 
     EXPECT_FALSE(isValid);
 }
