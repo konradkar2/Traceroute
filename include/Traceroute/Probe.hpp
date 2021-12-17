@@ -17,7 +17,7 @@ struct ProbeResult
 
 struct TracerouteResult
 {
-    const int                      ttl;
+    const unsigned                 ttl;
     const std::vector<ProbeResult> probeResults;
 };
 

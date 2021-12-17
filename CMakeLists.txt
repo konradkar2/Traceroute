@@ -25,7 +25,8 @@ set(Sources
     src/PacketFactory/TcpPacketFactory.cpp
     src/PacketFactory/UdpPacketFactory.cpp
     src/Probe.cpp
-    src/ProbeSender.cpp
+    src/Traceroute.cpp
+    src/SequentialTraceroute.cpp
     src/SocketAddress.cpp
     src/utils/ChecksumCalculator.cpp
     src/utils/Serialize.hpp

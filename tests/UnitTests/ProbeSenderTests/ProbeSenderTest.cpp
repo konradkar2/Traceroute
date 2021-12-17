@@ -1,5 +1,5 @@
 
-#include "Traceroute/ProbeSender.hpp"
+#include "Traceroute/SequentialTraceroute.hpp"
 #include "Traceroute/DataSender.hpp"
 #include "Traceroute/Packet/IcmpPacket.hpp"
 #include "Traceroute/PacketFactory/IcmpPacketFactory.hpp"
@@ -12,11 +12,7 @@
 #include "mocks/SystemClockFake.hpp"
 #include <chrono>
 #include <compare>
-#include <gmock/gmock-actions.h>
-#include <gmock/gmock-matchers.h>
-#include <gmock/gmock-spec-builders.h>
 #include <gmock/gmock.h>
-#include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 #include <memory>
 #include <thread>
@@ -47,7 +43,7 @@ class ProbeSenderTest : public Test
     const size_t        ArbitraryResponseSize = 1234;
     const int           ArbitraryProtocol     = 2345;
 
-    ProbeSender underTest;
+    SequentialTraceroute underTest;
 
     // default params - by default send 1 packet (which is one retry)
     // with ttl set to 1
