@@ -34,6 +34,7 @@ struct TcpAckV6 : public ResponseValidatorTestV6
     TcpAckV6() : request(TcpPacket(requestSource, requestDestination, 80))
     {
         setValidator(std::make_unique<responseValidators::TcpResponseValidator>(request));
+        response.ipHeader.version = 6;
     }
     const TcpPacket              request;
     ResponseTcpToTcp<Ipv6Header> response;

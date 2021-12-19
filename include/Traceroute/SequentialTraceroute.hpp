@@ -21,7 +21,7 @@ class SequentialTraceroute : public Traceroute
                          std::shared_ptr<ISystemClock> clock = std::make_shared<SystemClock>());
     ~SequentialTraceroute() = default;
 
-    virtual std::vector<TracerouteResult> beginProbing(unsigned ttlBegin, unsigned ttlEnd, unsigned retries,
+    std::vector<TracerouteResult> beginProbing(unsigned ttlBegin, unsigned ttlEnd, unsigned retries,
                                                        std::chrono::microseconds timeout) override;
 };
 

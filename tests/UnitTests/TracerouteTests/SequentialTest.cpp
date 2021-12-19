@@ -1,9 +1,9 @@
 
-#include "Traceroute/SequentialTraceroute.hpp"
 #include "Traceroute/DataSender.hpp"
 #include "Traceroute/Packet/IcmpPacket.hpp"
 #include "Traceroute/PacketFactory/IcmpPacketFactory.hpp"
 #include "Traceroute/Probe.hpp"
+#include "Traceroute/SequentialTraceroute.hpp"
 #include "Traceroute/SocketAddress.hpp"
 #include "mocks/DataSenderMock.hpp"
 #include "mocks/PacketFactoryMock.hpp"
@@ -31,7 +31,7 @@ ACTION_P2(waitAndReturn, waitDuration, valueToBeReturned)
     return valueToBeReturned;
 }
 
-class ProbeSenderTest : public Test
+class SequentialTest : public Test
 {
   public:
     NiceMock<PacketFactoryMock> packetFactoryMock;
@@ -52,14 +52,12 @@ class ProbeSenderTest : public Test
     int                             retries  = 1;
     const std::chrono::microseconds timeout  = 100ms;
 
-    const std::chrono::microseconds thisWillNotTimeout = 99ms;
-
     std::vector<TracerouteResult> BeginProbing()
     {
         return underTest.beginProbing(ttlStart, ttlStop, retries, timeout);
     }
 
-    ProbeSenderTest() : underTest(packetFactoryMock, dataSenderMock, systemClockFake)
+    SequentialTest() : underTest(packetFactoryMock, dataSenderMock, systemClockFake)
     {
         ON_CALL(packetMock, isValid(_, _)).WillByDefault(Return(false));
         ON_CALL(packetFactoryMock, createPacketProxy()).WillByDefault(Invoke([this]() {
@@ -81,20 +79,20 @@ class ProbeSenderTest : public Test
     InSequence s;
 };
 
-TEST_F(ProbeSenderTest, onTimeout_waitedFor_isEqualTo_timeout)
+TEST_F(SequentialTest, onTimeout_waitedFor_isEqualTo_timeout)
 {
     EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
 
     const auto probes = BeginProbing();
 
     ASSERT_THAT(probes, SizeIs(1));
-    ASSERT_THAT(probes.front().probeResults, SizeIs(1));
-    const auto &probeResult = probes.front().probeResults.front();
-    ASSERT_THAT(probeResult.success, Eq(false));
-    EXPECT_THAT(probeResult.waitedFor, Eq(timeout));
+    ASSERT_THAT(probes.front().probeResults(), SizeIs(1));
+    const auto &probeResult = probes.front().probeResults().front();
+    ASSERT_THAT(probeResult.success(), Eq(false));
+    EXPECT_THAT(probeResult.waitedFor(), Eq(timeout));
 }
 
-TEST_F(ProbeSenderTest, ttlRangeResultsInProbeCount)
+TEST_F(SequentialTest, ttlRangeResultsInProbeCount)
 {
     ttlStart                     = 2;
     ttlStop                      = 5;
@@ -105,7 +103,7 @@ TEST_F(ProbeSenderTest, ttlRangeResultsInProbeCount)
     EXPECT_THAT(probes.size(), Eq(expectedProbeCount));
 }
 
-TEST_F(ProbeSenderTest, forEachRetryTtlIsNotChangedButPacketfactoryIsInvoked)
+TEST_F(SequentialTest, forEachRetryTtlIsNotChangedButPacketfactoryIsInvoked)
 {
     ttlStart = 1;
     ttlStop  = 1;
@@ -121,20 +119,20 @@ TEST_F(ProbeSenderTest, forEachRetryTtlIsNotChangedButPacketfactoryIsInvoked)
     auto probes = BeginProbing();
 }
 
-TEST_F(ProbeSenderTest, responseAddressNotAssignedOnTimeout)
+TEST_F(SequentialTest, responseAddressNotAssignedOnTimeout)
 {
     EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
 
     const auto probes = BeginProbing();
 
     ASSERT_THAT(probes, SizeIs(1));
-    ASSERT_THAT(probes.front().probeResults, SizeIs(1));
-    const auto &probeResult = probes.front().probeResults.front();
-    ASSERT_THAT(probeResult.success, Eq(false));
-    EXPECT_THAT(probeResult.responseSender.has_value(), Eq(false));
+    ASSERT_THAT(probes.front().probeResults(), SizeIs(1));
+    const auto &probeResult = probes.front().probeResults().front();
+    ASSERT_THAT(probeResult.success(), Eq(false));
+    EXPECT_THAT(probeResult.responseSender().has_value(), Eq(false));
 }
 
-TEST_F(ProbeSenderTest, responseAddressAssigned)
+TEST_F(SequentialTest, responseAddressAssigned)
 {
     EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _))
         .WillOnce(Return(ResponseInfo{SocketAddress{destination}, ArbitraryProtocol, ArbitraryResponseSize}));
@@ -143,14 +141,14 @@ TEST_F(ProbeSenderTest, responseAddressAssigned)
     const auto probes = BeginProbing();
 
     ASSERT_THAT(probes, SizeIs(1));
-    ASSERT_THAT(probes.front().probeResults, SizeIs(1));
-    const auto &probeResult = probes.front().probeResults.front();
-    EXPECT_THAT(probeResult.success, Eq(true));
-    ASSERT_TRUE(probeResult.responseSender.has_value());
-    EXPECT_THAT(probeResult.responseSender, Eq(destination));
+    ASSERT_THAT(probes.front().probeResults(), SizeIs(1));
+    const auto &probeResult = probes.front().probeResults().front();
+    EXPECT_THAT(probeResult.success(), Eq(true));
+    ASSERT_TRUE(probeResult.responseSender().has_value());
+    EXPECT_THAT(probeResult.responseSender(), Eq(destination));
 }
 
-TEST_F(ProbeSenderTest, onTimeLeftSmallerThan_MinTimeWaitForResponse_receiveFromNotInvoked)
+TEST_F(SequentialTest, onTimeLeftSmallerThan_MinTimeWaitForResponse_receiveFromNotInvoked)
 {
     // 5us are left for polling, which is below MinTimeWaitForResponse
     auto timeToPass = timeout - 5us;
@@ -161,7 +159,7 @@ TEST_F(ProbeSenderTest, onTimeLeftSmallerThan_MinTimeWaitForResponse_receiveFrom
     BeginProbing();
 }
 
-TEST_F(ProbeSenderTest, responseIsAssignedToResultWithValidWaitedFor)
+TEST_F(SequentialTest, responseIsAssignedToResultWithValidWaitedFor)
 {
     auto returnAfter = 50ms;
     EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _))
@@ -172,14 +170,14 @@ TEST_F(ProbeSenderTest, responseIsAssignedToResultWithValidWaitedFor)
     const auto probes = BeginProbing();
 
     ASSERT_THAT(probes, SizeIs(1));
-    ASSERT_THAT(probes.front().probeResults, SizeIs(1));
-    const auto &probeResult = probes.front().probeResults.front();
-    ASSERT_TRUE(probeResult.responseSender.has_value());
-    EXPECT_THAT(probeResult.responseSender, Eq(destination));
-    EXPECT_THAT(probeResult.waitedFor, Eq(returnAfter));
+    ASSERT_THAT(probes.front().probeResults(), SizeIs(1));
+    const auto &probeResult = probes.front().probeResults().front();
+    ASSERT_TRUE(probeResult.responseSender().has_value());
+    EXPECT_THAT(probeResult.responseSender(), Eq(destination));
+    EXPECT_THAT(probeResult.waitedFor(), Eq(returnAfter));
 }
 
-TEST_F(ProbeSenderTest, waitedForIsSumOfPreviousInvalidResponses)
+TEST_F(SequentialTest, waitedForIsSumOfPreviousInvalidResponses)
 {
     auto t1 = 10ms, t2 = 30ms, t3 = 40ms;
 
@@ -193,13 +191,13 @@ TEST_F(ProbeSenderTest, waitedForIsSumOfPreviousInvalidResponses)
     const auto probes = BeginProbing();
 
     ASSERT_THAT(probes, SizeIs(1));
-    ASSERT_THAT(probes.front().probeResults, SizeIs(1));
-    const auto &probeResult = probes.front().probeResults.back();
-    EXPECT_THAT(probeResult.success, Eq(true));
-    EXPECT_THAT(probeResult.waitedFor, Eq(t1 + t2 + t3));
+    ASSERT_THAT(probes.front().probeResults(), SizeIs(1));
+    const auto &probeResult = probes.front().probeResults().back();
+    EXPECT_THAT(probeResult.success(), Eq(true));
+    EXPECT_THAT(probeResult.waitedFor(), Eq(t1 + t2 + t3));
 }
 
-TEST_F(ProbeSenderTest, timeoutBetweenTwoSuccessfulProbes)
+TEST_F(SequentialTest, timeoutBetweenTwoSuccessfulProbes)
 {
     ttlStop = 3;
     // r2 is timeouted
@@ -222,23 +220,23 @@ TEST_F(ProbeSenderTest, timeoutBetweenTwoSuccessfulProbes)
     ASSERT_THAT(probes, SizeIs(3));
     auto probe = probes.begin();
 
-    ASSERT_THAT(probe->probeResults, SizeIs(1));
-    auto probeResult = probe->probeResults.begin();
-    EXPECT_THAT(probeResult->success, Eq(true));
-    EXPECT_THAT(probeResult->responseSender, Eq(r1));
+    ASSERT_THAT(probe->probeResults(), SizeIs(1));
+    auto probeResult = probe->probeResults().begin();
+    EXPECT_THAT(probeResult->success(), Eq(true));
+    EXPECT_THAT(probeResult->responseSender(), Eq(r1));
 
     std::advance(probe, 1);
-    ASSERT_THAT(probe->probeResults, SizeIs(1));
-    probeResult = probe->probeResults.begin();
-    EXPECT_THAT(probeResult->success, Eq(false));
-    EXPECT_THAT(probeResult->responseSender.has_value(), Eq(false));
+    ASSERT_THAT(probe->probeResults(), SizeIs(1));
+    probeResult = probe->probeResults().begin();
+    EXPECT_THAT(probeResult->success(), Eq(false));
+    EXPECT_THAT(probeResult->responseSender().has_value(), Eq(false));
 
     std::advance(probe, 1);
-    ASSERT_THAT(probe->probeResults, SizeIs(1));
-    probeResult = probe->probeResults.begin();
-    EXPECT_THAT(probeResult->success, Eq(true));
-    EXPECT_THAT(probeResult->responseSender.has_value(), Eq(true));
-    EXPECT_THAT(probeResult->responseSender, Eq(r3));
+    ASSERT_THAT(probe->probeResults(), SizeIs(1));
+    probeResult = probe->probeResults().begin();
+    EXPECT_THAT(probeResult->success(), Eq(true));
+    EXPECT_THAT(probeResult->responseSender().has_value(), Eq(true));
+    EXPECT_THAT(probeResult->responseSender(), Eq(r3));
 }
 
 } // namespace traceroute

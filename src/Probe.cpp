@@ -24,13 +24,13 @@ ProbeResult successProbe(std::chrono::microseconds waitedFor,const SocketAddress
 std::string toString(const TracerouteResult & tracerouteResult)
 {
     std::stringstream result;
-    result << std::to_string(tracerouteResult.ttl) << "  ";
-    for(const ProbeResult & pr : tracerouteResult.probeResults)
+    result << std::to_string(tracerouteResult.ttl()) << "  ";
+    for(const ProbeResult & pr : tracerouteResult.probeResults())
     {
-        if (pr.success)
+        if (pr.success())
         {
-            result << (pr.responseSender.has_value() ? pr.responseSender->toString() : "");
-            std::string waitedForStr = std::to_string(pr.waitedFor.count() / 1000.0);
+            result << (pr.responseSender().has_value() ? pr.responseSender()->toString() : "");
+            std::string waitedForStr = std::to_string(pr.waitedFor().count() / 1000.0);
             removeTrailingZeros(waitedForStr);
             result << "  " + waitedForStr << " "
                    << "ms";

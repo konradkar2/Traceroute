@@ -20,7 +20,8 @@ set(Sources
     ResponseValidatorsTests/UdpRequest/UdpTimeExceededV4.cpp
     ResponseValidatorsTests/UdpRequest/UdpTimeExceededV6.cpp
 
-    ProbeSenderTests/ProbeSenderTest.cpp
+    TracerouteTests/SequentialTest.cpp
+    TracerouteTests/GreedyTest.cpp
 )
 
 add_executable(${This} ${Sources} )
