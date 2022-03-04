@@ -10,26 +10,27 @@
 
 namespace traceroute {
 
-SocketAddress resolveSourceAddress(const SocketAddress &destination,  const std::optional<std::string> & ifaceName)
+SocketAddress resolveSourceAddress(const SocketAddress &destination, const std::optional<std::string> &ifaceName)
 {
-    int sfd = socket(destination.family(), SOCK_DGRAM, IPPROTO_UDP);
+    int sfd = ::socket(destination.family(), SOCK_DGRAM, IPPROTO_UDP);
     if (ifaceName)
     {
         utils::bindInterface(sfd, ifaceName.value());
     }
-    if (connect(sfd, destination.sockaddrP(), destination.size()) < 0)
+    if (::connect(sfd, destination.sockaddrP(), destination.size()) < 0)
     {
         throw std::runtime_error("Failed to resolve source address. Error: connect() failed");
     };
 
-    sockaddr_storage sockaddrStorage;
-    socklen_t        len;
-    if (getsockname(sfd, (sockaddr *)&sockaddrStorage, &len) < 0)
+    ::sockaddr_storage sockaddrStorage;
+    socklen_t          len;
+    if (::getsockname(sfd, (sockaddr *)&sockaddrStorage, &len) < 0)
     {
-        throw std::runtime_error("Failed to resolve source address. Error: getsockname() failed: " + std::to_string(errno));
+        throw std::runtime_error("Failed to resolve source address. Error: getsockname() failed: " +
+                                 std::to_string(errno));
     }
     close(sfd);
-    return SocketAddress{sockaddrStorage};
+    return SocketAddress(sockaddrStorage);
 }
 
 } // namespace traceroute

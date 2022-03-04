@@ -1,6 +1,6 @@
 
 #include "Traceroute/DataSender.hpp"
-#include "Traceroute/GreedyTraceroute.hpp"
+#include "Traceroute/FastTraceroute.hpp"
 #include "Traceroute/Packet/IcmpPacket.hpp"
 #include "Traceroute/PacketFactory/IcmpPacketFactory.hpp"
 #include "Traceroute/Probe.hpp"
@@ -18,7 +18,7 @@
 #include <thread>
 
 namespace traceroute {
-namespace greedy {
+namespace fast {
 
 using namespace testing;
 using namespace chrono_literals;
@@ -32,7 +32,7 @@ ACTION_P2(waitAndReturn, waitDuration, valueToBeReturned)
     return valueToBeReturned;
 }
 
-class GreedyTest : public Test
+class FastTest : public Test
 {
   public:
     NiceMock<PacketFactoryMock> packetFactoryMock;
@@ -44,7 +44,7 @@ class GreedyTest : public Test
     const size_t        ArbitraryResponseSize = 1234;
     const int           ArbitraryProtocol     = 2345;
 
-    GreedyTraceroute underTest;
+    FastTraceroute underTest;
 
     // default params - by default send 1 packet (which is one retry)
     // with ttl set to 1
@@ -58,7 +58,7 @@ class GreedyTest : public Test
         return underTest.beginProbing(ttlStart, ttlStop, retries, timeout);
     }
 
-    GreedyTest() : underTest(packetFactoryMock, dataSenderMock, systemClockFake)
+    FastTest() : underTest(packetFactoryMock, dataSenderMock, systemClockFake)
     {
         ON_CALL(packetMock, isValid(_, _)).WillByDefault(Return(false));
         ON_CALL(packetFactoryMock, createPacketProxy()).WillByDefault(Invoke([this]() {
@@ -80,7 +80,7 @@ class GreedyTest : public Test
     InSequence s;
 };
 
-TEST_F(GreedyTest, onTimeout_waitedFor_isEqualTo_timeout)
+TEST_F(FastTest, onTimeout_waitedFor_isEqualTo_timeout)
 {
     EXPECT_CALL(dataSenderMock, tryReceiving(_, _, _)).WillOnce(waitAndReturn(timeout, nullopt));
 
@@ -93,5 +93,5 @@ TEST_F(GreedyTest, onTimeout_waitedFor_isEqualTo_timeout)
     EXPECT_THAT(probeResult.waitedFor(), Eq(timeout));
 }
 
-} // namespace greedy
+} // namespace fast
 } // namespace traceroute

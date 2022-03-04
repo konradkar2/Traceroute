@@ -27,7 +27,7 @@ set(Sources
     src/Probe.cpp
     src/Traceroute.cpp
     src/SequentialTraceroute.cpp
-    src/GreedyTraceroute.cpp
+    src/FastTraceroute.cpp
     src/SocketAddress.cpp
     src/utils/ChecksumCalculator.cpp
     src/utils/Serialize.hpp

@@ -1,0 +1,8 @@
+/home/konrad/Workspace/tracerouteApp/Traceroute/build/CMakeFiles/rebuild_cache.dir
+/home/konrad/Workspace/tracerouteApp/Traceroute/build/CMakeFiles/edit_cache.dir
+/home/konrad/Workspace/tracerouteApp/Traceroute/build/CMakeFiles/Traceroute.dir
+/home/konrad/Workspace/tracerouteApp/Traceroute/build/tests/CMakeFiles/rebuild_cache.dir
+/home/konrad/Workspace/tracerouteApp/Traceroute/build/tests/CMakeFiles/edit_cache.dir
+/home/konrad/Workspace/tracerouteApp/Traceroute/build/tests/UnitTests/CMakeFiles/edit_cache.dir
+/home/konrad/Workspace/tracerouteApp/Traceroute/build/tests/UnitTests/CMakeFiles/rebuild_cache.dir
+/home/konrad/Workspace/tracerouteApp/Traceroute/build/tests/UnitTests/CMakeFiles/UnitTests.dir

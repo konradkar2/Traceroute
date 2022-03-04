@@ -16,12 +16,12 @@
 
 namespace traceroute {
 
-class GreedyTraceroute : public Traceroute
+class FastTraceroute : public Traceroute
 {
   public:
-    GreedyTraceroute(IPacketFactory &packetFactory, IDataSender &dataSender,
+    FastTraceroute(IPacketFactory &packetFactory, IDataSender &dataSender,
                      std::shared_ptr<ISystemClock> clock = std::make_shared<SystemClock>());
-    ~GreedyTraceroute() = default;
+    ~FastTraceroute() = default;
 
     virtual std::vector<TracerouteResult> beginProbing(unsigned ttlBegin, unsigned ttlEnd, unsigned retries,
                                                        std::chrono::microseconds timeout) override;
@@ -36,7 +36,7 @@ class GreedyTraceroute : public Traceroute
         unsigned                              ttl;
         unsigned                              retry;
     };
-    std::vector<PacketToValidate> mPacketsToBeValidate;
+    std::vector<PacketToValidate> mPacketsToBeValidated;
     std::optional<SocketAddress>  mTarget;
     std::mutex                    mMutex;
 };

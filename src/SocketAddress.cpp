@@ -76,8 +76,8 @@ bool SocketAddress::operator==(const SocketAddress &rhs) const
     {
         for (int i = 0; i < 4; i++)
         {
-            uint32_t tempA = ((sockaddr_in6 *)sockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];
-            uint32_t tempB = ((sockaddr_in6 *)rhs.sockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];
+            const uint32_t tempA = ((sockaddr_in6 *)sockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];
+            const uint32_t tempB = ((sockaddr_in6 *)rhs.sockaddrP())->sin6_addr.__in6_u.__u6_addr32[i];
             if (tempA != tempB)
             {
                 isEqual = false;
